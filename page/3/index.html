@@ -1,0 +1,3412 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="YnL0N0ZuAJD3WW5aP8cJ6cGLs2iiLdHGsnzmmUHNPEY">
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="xzxZrDkrj5">
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=6.7.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.7.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.7.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.7.0">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.7.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+  <meta name="description" content="好记性比不过烂笔头">
+<meta property="og:type" content="website">
+<meta property="og:title" content="运维烂笔头">
+<meta property="og:url" content="https://ming.theyan.gs/page/3/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="好记性比不过烂笔头">
+<meta property="og:locale" content="zh-Hans">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="运维烂笔头">
+<meta name="twitter:description" content="好记性比不过烂笔头">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://ming.theyan.gs/page/3/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>运维烂笔头</title>
+  
+
+
+
+
+  <script async src="//www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-106574959-2');
+  </script>
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left 
+  page-home">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">运维烂笔头</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">一个 SA 老兵的工作日志</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-projects">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/projects" rel="section"><i class="menu-item-icon fa fa-fw fa-code"></i> <br>projects</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-sitemap">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/sitemap.xml" rel="section"><i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br>Sitemap</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-commonweal">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/404.html" rel="section"><i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>Commonweal 404</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+  <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2019/03/Linux 下 wireguard 问题的解决/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="老杨">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/03/Linux 下 wireguard 问题的解决/index.html" class="post-title-link" itemprop="url">Linux 下 wireguard 出问题的解决</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-03-11 18:51:20" itemprop="dateCreated datePublished" datetime="2019-03-11T18:51:20+08:00">2019-03-11</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-03-12 18:55:20" itemprop="dateModified" datetime="2019-03-12T18:55:20+08:00">2019-03-12</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h1><p>办公室某台跑 wireguard 打洞的机器挂了，重启之后发现 wireguard 设备起不来，</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wg-quick up wg_ofc;</span><br><span class="line"><span class="comment"># 配置文件为：/etc/wireguard/wg_ofc.conf</span></span><br></pre></td></tr></table></figure>
+<p>会报错：</p>
+<blockquote>
+<p>Cannot find device “wg_ofc”</p>
+</blockquote>
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2019/03/Linux 下 wireguard 问题的解决/index.html#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2019/02/xx公司面试总结（查漏补缺）/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="老杨">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/02/xx公司面试总结（查漏补缺）/index.html" class="post-title-link" itemprop="url">xx公司面试总结（查漏补缺）</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-02-21 15:12:23 / Modified: 15:13:23" itemprop="dateCreated datePublished" datetime="2019-02-21T15:12:23+08:00">2019-02-21</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h1><p>今天下午面了一家特别想去的公司，结果聊很多，但是……折了，不要问我为什么知道的，面试完本来说别的同事（一般会是 HR）再聊一下但结果是前台来直接送走这不是凉了是什么？</p>
+<p>主要原因我想是：</p>
+<ul>
+<li>人家本来要求就高</li>
+<li>我有几个技术点答的不好</li>
+</ul>
+<p>我想，折了就折了吧，我只能看能不能变废为宝，从中学到点什么，吸取什么教训什么的，于是就有了本篇面试总结。</p>
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2019/02/xx公司面试总结（查漏补缺）/index.html#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2019/01/ec2-mount-root-duplicate-uuid-error/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="老杨">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/01/ec2-mount-root-duplicate-uuid-error/index.html" class="post-title-link" itemprop="url">EC2 上挂载别的机器的根分区时"duplicate uuid" 问题</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-01-14 15:47:07" itemprop="dateCreated datePublished" datetime="2019-01-14T15:47:07+08:00">2019-01-14</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2021-04-08 14:31:57" itemprop="dateModified" datetime="2021-04-08T14:31:57+08:00">2021-04-08</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h1><p>最近要登某一台 ec2，结果其私钥丢了，于是根据文档，将这台 ec2 的机器 stop 掉，然后将根区先 detach 掉，然后再将其 attach 到同 subnet 的另外一台 ec2 上。</p>
+<p>按照正常的流程，在另外一台好的 ec2 的机器上将刚 attach 过来的分区 mount 上以后再修改好其 authorized_keys 文件即可完成任务的。</p>
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2019/01/ec2-mount-root-duplicate-uuid-error/index.html#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2018/12/eliza_sorensen/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="老杨">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/12/eliza_sorensen/index.html" class="post-title-link" itemprop="url">Eliza Sorensen 的访谈</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-12-16 18:32:32" itemprop="dateCreated datePublished" datetime="2018-12-16T18:32:32+08:00">2018-12-16</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-12-19 20:13:26" itemprop="dateModified" datetime="2018-12-19T20:13:26+08:00">2018-12-19</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/UsesThis/" itemprop="url" rel="index"><span itemprop="name">UsesThis</span></a></span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/UsesThis/Engineer/" itemprop="url" rel="index"><span itemprop="name">Engineer</span></a></span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/UsesThis/Engineer/Developer/" itemprop="url" rel="index"><span itemprop="name">Developer</span></a></span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/UsesThis/Engineer/Developer/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/UsesThis/Engineer/Developer/Linux/Security/" itemprop="url" rel="index"><span itemprop="name">Security</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Eliza-Sorensen-的访谈"><a href="#Eliza-Sorensen-的访谈" class="headerlink" title="Eliza Sorensen 的访谈"></a>Eliza Sorensen 的访谈</h1><blockquote>
+<p><strong><em>NOTE</em></strong>:</p>
+</blockquote>
+<ul>
+<li>原文来自于 <a href="https://www.usesthis.com/interviews/eliza.sorensen/" target="_blank" rel="noopener">Eliza Sorensen</a></li>
+<li>我 HOST 的版本在 <a href="https://usesthis.theyan.gs/interviews/eliza.sorensen/" target="_blank" rel="noopener">Eliza Sorensen</a></li>
+</ul>
+<h2 id="你是谁，你做什么工作"><a href="#你是谁，你做什么工作" class="headerlink" title="你是谁，你做什么工作"></a>你是谁，你做什么工作</h2><p>我是 Eliza Sorensen 或其他任何地方的 <a href="https://twitter.com/zemmiph0bia" title="Eliza 的 Twitter 帐户" target="_blank" rel="noopener">@zemmiph0bia</a>。我是澳大利亚墨尔本市的一名基础设施和安全工程师，也是创建了性工作友好社交空间 <a href="https://switter.at/" title="对性工作者友好的Mastodon服务（可能是NSFW）" target="_blank" rel="noopener">Switter.at</a> 和现代广告平台 <a href="https://tryst.link/" title="护送广告平台（可能是NSFW）" target="_blank" rel="noopener">Tryst.link</a> 的 <a href="https://assemblyfour.com/" title="性工作者和技术专家的集体" target="_blank" rel="noopener">Assembly Four</a> 的共同创始人。</p>
+<h2 id="您使用什么硬件"><a href="#您使用什么硬件" class="headerlink" title="您使用什么硬件"></a>您使用什么硬件</h2><p>看来这些天我一直在移动，所以我严重依赖我的 <a href="http://shop.lenovo.com/us/en/laptops/thinkpad/x-series/x1-carbon/" title="14 英寸的轻便笔记本电脑" target="_blank" rel="noopener">X1 Carbon</a>, Google <a href="https://en.wikipedia.org/wiki/Pixel_3" title="6.3 英寸 android 智能手机，Google 亲儿子第三代" target="_blank" rel="noopener">Pixel 3 XL</a>, Audio Technica <a href="http://sea.audio-technica.com/products/headphones/lifestyle/all-earphones/ath-ar5bt" title="头戴式式无线耳机" target="_blank" rel="noopener">ATH-AR5BT headphones</a>，powerpack（很大的背包？），笔记本和 Lamy（凌美，一种笔）<a href="https://www.lamy.com/eng/b2c/safari" title="一种笔" target="_blank" rel="noopener">Safari</a>。</p>
+<p>当我在办公桌前时，可以使用两台 Dell 27 英寸显示器，一个 <a href="https://www.duckychannel.com.tw/page-en/ducky-one/" title="一种机械键盘" target="_blank" rel="noopener">Ducky One</a> 机械键盘（樱桃棕色轴）和一个Logitech <a href="https://support.logitech.com/en_us/product/wireless-gaming-mouse-g700" title="一种无线游戏鼠标" target="_blank" rel="noopener">G700</a> 鼠标。</p>
+<h2 id="您用什么软件"><a href="#您用什么软件" class="headerlink" title="您用什么软件"></a>您用什么软件</h2><p>我只想在台式机上使用 Linux，我的操作系统是<a href="https://www.ubuntu.com/" title="一种 Unix（其实应该是 Linux） 发布" target="_blank" rel="noopener">Ubuntu</a>，我的 shell 是 <a href="http://www.zsh.org/" title="一种交互式 shell 和脚本语言" target="_blank" rel="noopener">zsh</a>，我用 <a href="https://en.wikipedia.org/wiki/ProtonVPN" title="VPN 提供商" target="_blank" rel="noopener">ProtonVPN</a> 连接，我用 <a href="https://www.mozilla.org/en-US/firefox/new/" title="一种跨平台开源的 web 浏览器" target="_blank" rel="noopener">Firefox</a> （上网）冲浪，我用 <a href="https://1password.com" title="Mac OS X 上的一种密码管理软件。" target="_blank" rel="noopener">1Password</a> 保存密码，我用 <a href="https://www.spotify.com/us/" title="一种音乐流服务" target="_blank" rel="noopener">Spotify</a> 听音乐，我用 <a href="https://toggl.com/" title="一种时间跟踪服务" target="_blank" rel="noopener">Toggl</a> 管理时间、用 <a href="https://clubhouse.io/" title="一种项目管理的软件服务" target="_blank" rel="noopener">Clubhouse</a> 管理任务，用 <a href="https://www.vim.org/" title="一种命令行文本编辑器" target="_blank" rel="noopener">vim</a> 写作，用 <a href="http://www.sublimetext.com/" title="一种程序员的文本编辑器" target="_blank" rel="noopener">Sublime Text 3</a> 写代码，使用 <a href="https://zealdocs.org/" title="一种开发者的离线文档阅读器" target="_blank" rel="noopener">Zeal</a> 保留我的文档。</p>
+<h2 id="您的理想设置是什么"><a href="#您的理想设置是什么" class="headerlink" title="您的理想设置是什么"></a>您的理想设置是什么</h2><p>我对当前设置非常满意，但是我不介意回到带有樱桃蓝色轴的键盘……但是我不想赶走我的伴侣。</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2018/10/How-to-enable-BBR-in-OpenVZ/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="老杨">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/10/How-to-enable-BBR-in-OpenVZ/index.html" class="post-title-link" itemprop="url">How to enable BBR in OpenVZ</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-10-02 10:41:12" itemprop="dateCreated datePublished" datetime="2018-10-02T10:41:12+08:00">2018-10-02</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-10-03 18:43:35" itemprop="dateModified" datetime="2018-10-03T18:43:35+08:00">2018-10-03</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h1><p>以前有个贪便宜（一年 5 刀）而入手但目前在吃灰中的小鸡，当然是 <strong>OpenVZ</strong>，网络条件很差，用起来很鸡肋，后来看到 <a href="https://github.com/google/bbr" target="_blank" rel="noopener">Google 的 BBR</a> 也有能用在 OpenVZ 的案例，于是也想尝试下，看是否能将其起死回生。<br>
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2018/10/How-to-enable-BBR-in-OpenVZ/index.html#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </p></div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2018/08/一个从 Phabricator 中抓出任务生成周报的东西/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="老杨">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/08/一个从 Phabricator 中抓出任务生成周报的东西/index.html" class="post-title-link" itemprop="url">一个从 Phabricator 中抓出任务生成周报的东西</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-08-27 19:06:10" itemprop="dateCreated datePublished" datetime="2018-08-27T19:06:10+08:00">2018-08-27</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-08-29 20:31:22" itemprop="dateModified" datetime="2018-08-29T20:31:22+08:00">2018-08-29</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h1><p>自然是我司每周都要完成的周报。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>我司重度依赖“不存在网站”：<a href="https://www.facebook.com" target="_blank" rel="noopener">Facebook</a> 开源出来的项目：<a href="https://www.phacility.com/phabricator/" target="_blank" rel="noopener">Phabricator</a>，我们的每项工作也来自于其中的 Maniphest（不知道是什么语言，不像英语，反正应该就是 task 的意思），每周的工作周报里提到的事情如果有 task 的（一般都有），都还要附上其 task id。</p>
+<p>同时，<a href="https://www.phacility.com/phabricator/" target="_blank" rel="noopener">Phabricator</a> 目前的运营公司： <a href="https://www.phacility.com/" target="_blank" rel="noopener">Phacility</a> 同时也放出了一套 php 的类似于 SDK 的东西：<a href="https://github.com/phacility/libphutil" target="_blank" rel="noopener">libphutil</a>，所以我就开始尝试着用 php 来撸一个自动生成、发布周报的东西。</p>
+<h1 id="about-Pha-WR-SRE"><a href="#about-Pha-WR-SRE" class="headerlink" title="about Pha_WR_SRE"></a>about Pha_WR_SRE</h1><p><a href="https://github.com/haw-haw/Pha_WR_SRE" target="_blank" rel="noopener">Pha_WR_SRE</a>，<br>不许说项目名称起的很雷人。:(</p>
+<p>这个东西怎么做的就不说了，这里主要说下大概实现了哪些功能。</p>
+<h2 id="输出的信息"><a href="#输出的信息" class="headerlink" title="输出的信息"></a>输出的信息</h2><p>输出的信息分三种：“completed”、”ongoing” 和 “other”，分别对应着“已完成”、“未完成”和“其他”。</p>
+<h2 id="输出的目标"><a href="#输出的目标" class="headerlink" title="输出的目标"></a>输出的目标</h2><p>已实现的是四种：</p>
+<ol>
+<li>Console</li>
+<li>OneNote</li>
+<li>Evernote</li>
+<li>Phabircator’s Phame</li>
+</ol>
+<p>第一种就不用说了，如果在控制台运行，运行结果会被直接输出到控制台的；  </p>
+<p>第二种也简单，OneNote 支持用 Email 的方式发布 Note，不过需要先在 OneNote 里设置下发邮件的地址白名单（具体见 <a href="https://github.com/haw-haw/Pha_WR_SRE/blob/master/README.md" target="_blank" rel="noopener">README 文件</a>）；  </p>
+<p>第三种跟 OneNote 差不多，不过 Evernote 需要一定级别的帐号才支持这种功能，而且他的目标 email 地址是隐藏的，需要自己去找，而且不建议让别人知道；  </p>
+<p>第四种是我自己想的，反正 Phabricator 也支持 blog 功能（Phame），不过这个需要先在 Phabricator 中新建一个 blog 获得其的 phid 并配置在 config.ini 中；</p>
+<h1 id="macOS"><a href="#macOS" class="headerlink" title="macOS"></a>macOS</h1><p>对于用 macOS 的用户，这里还有个特殊的新功能：可以直接设置定时运行这个任务。具体方法就是把项目里那个 .plist.example 文件稍稍修改下（也可以不修改），改名去掉“.example”，放到 ~/Library/LaunchAgents 目录下，然后可以用命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># load .plist file if U have not change it's name</span></span><br><span class="line">launchctl load gs.theyan.phawrsre.plist;</span><br><span class="line"><span class="comment"># start job manually</span></span><br><span class="line">launchctl launchctl start GenerateReport.job;</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2018/07/分享一些自己DIY的task的profile/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="老杨">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/07/分享一些自己DIY的task的profile/index.html" class="post-title-link" itemprop="url">分享一些自己DIY的Tasker的profile</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-07-25 19:29:55" itemprop="dateCreated datePublished" datetime="2018-07-25T19:29:55+08:00">2018-07-25</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-07-26 07:22:45" itemprop="dateModified" datetime="2018-07-26T07:22:45+08:00">2018-07-26</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h1><h2 id="about-Tasker"><a href="#about-Tasker" class="headerlink" title="about Tasker"></a>about Tasker</h2><p>早先通过 <strong>Google Opinion Rewards</strong> 做调查挣了小几美刀，于是就购买了 <strong>Google Play Store</strong> 下的第一个收费软件：<a href="https://play.google.com/store/apps/details?id=net.dinglisch.android.taskerm&amp;hl=en_US" target="_blank" rel="noopener">Tasker</a>。但后来由于种种原因，<strong>Tasker</strong> 一直没有真正用起来（我最看重的几个功能都实现的不好）。</p>
+<h2 id="about-IFTTT"><a href="#about-IFTTT" class="headerlink" title="about IFTTT"></a>about IFTTT</h2><p>一直在用 <strong>IFTTT</strong> 的一个功能：每日抓取 <strong>NASA</strong> 的图回来做 Android 手机的 Wallpaper，但最近同时用两个 Android 手机，不希望两个手机同时一样的 Wallpaper，但这个需求如果用 <strong>IFTTT</strong> 来做只能每台 Android 手机用单独的账号来实现，这个实现显然太丑陋了。</p>
+<h1 id="最终方案"><a href="#最终方案" class="headerlink" title="最终方案"></a>最终方案</h1><p><strong>Tasker</strong> 官方其实有一个放出来的 profile，是来抓 <strong>reddit</strong> 的图的，但那是几年前的东西了，现在几乎没法用，但作为例子，这个 profile 处理这种问题的思路是可以借鉴的。于是我就修改了下这个 profile，实现了抓 reddit.com/r/wallpaper 和 reddit.com/r/pic 以及 <a href="https://www.nasa.gov/multimedia/imagegallery/iotd.html" target="_blank" rel="noopener">NASA iotd(Image of the Day)</a> 的功能。</p>
+<h1 id="about-tasker-profile"><a href="#about-tasker-profile" class="headerlink" title="about tasker_profile"></a>about tasker_profile</h1><p>上面提到的这个 profile，我放到了 <a href="https://github.com/haw-haw/tasker_profile" target="_blank" rel="noopener">github</a> 下面了，这里远期还会放一些 <strong>Tasker</strong> 可用的、实现了一些实用好玩儿功能的 profile，但是暂时，就这么一个 profile，叫“Wallpaper”，意思是更系统 Wallpaper 相关的一个 profile。使用起来也不难，<a href="https://github.com/haw-haw/tasker_profile/blob/master/README.md" target="_blank" rel="noopener">README.md</a> 里都有提到。</p>
+<h1 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h1><p>如果我辛苦折腾的这个东西真能帮上你的忙，请帮我给项目点赞吧，谢谢！</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2018/06/在Ubuntu16-04上部署Zabbix-proxy3-4的流水账/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="老杨">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/06/在Ubuntu16-04上部署Zabbix-proxy3-4的流水账/index.html" class="post-title-link" itemprop="url">在Ubuntu16.04上部署Zabbix-proxy3.4的流水账</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-06-09 13:42:53" itemprop="dateCreated datePublished" datetime="2018-06-09T13:42:53+08:00">2018-06-09</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-06-15 17:48:02" itemprop="dateModified" datetime="2018-06-15T17:48:02+08:00">2018-06-15</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="WHY"><a href="#WHY" class="headerlink" title="WHY"></a>WHY</h1><p>这里的为什么不是说为什么要装 <strong>zabbix-proxy</strong> 的问题，而是说为什么要写这篇文章。<br>为什么要写这篇文章呢？答案很简单，官方文档太碎了，东一榔头西一棒子，一个简单实际直接的问题：怎样在 <strong>ubuntu</strong> 上安装部署 <strong>zabbix-proxy</strong>，翻官方文档得翻四五篇文档，而且这四五篇文档中还有很多干扰信息，需要仔细分辨，否则会对部署造成负面影响。<br>所以，就有了这篇“流水账”。</p>
+<h1 id="HOWTO"><a href="#HOWTO" class="headerlink" title="HOWTO"></a>HOWTO</h1><h2 id="INSTALLATION"><a href="#INSTALLATION" class="headerlink" title="INSTALLATION"></a>INSTALLATION</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 zabbix 官方的 ubuntu 16.04(版本号 xenial) 的软件仓</span></span><br><span class="line">wget \</span><br><span class="line">    https://repo.zabbix.com/zabbix/3.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_3.4-1+xenial_all.deb;</span><br><span class="line">dpkg -i zabbix-release_3.4-1+xenial_all.deb;</span><br><span class="line">apt-get update;</span><br><span class="line"><span class="comment"># 安装 zabbix-proxy 所需之 mysql 数据库服务器软件</span></span><br><span class="line"><span class="comment"># 注意这一步会让设置 mysql 服务器的 root 密码（不是系统密码！）</span></span><br><span class="line"><span class="comment"># 这个要记住，在执行下一步操作的时候要输入的</span></span><br><span class="line">apt-get install mysql-server-5.7;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 用 root 身份连入 mysql 数据库系统并进入交互式模式</span></span><br><span class="line"><span class="comment"># 注意：这里需要输入上一步设置的 root 的密码</span></span><br><span class="line">mysql -uroot -p</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 创建 zabbix-proxy 系统所用数据库：zabbix</span><br><span class="line">create database zabbix character set utf8 collate utf8_bin;</span><br><span class="line"># 创建 zabbix-proxy 应用所用数据库账号：zabbix 并其密码以及响应权限</span><br><span class="line">grant all privileges on zabbix.* to zabbix@localhost identified by &apos;zabbix&apos;;</span><br><span class="line"># 使权限及时生效</span><br><span class="line">flush privileges;</span><br><span class="line"># 退出 mysql 交互式环境</span><br><span class="line">quit</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装一些 zabbix-proxy 系统可能会需要</span></span><br><span class="line"><span class="comment"># 但又未在 zabbix-proxy-mysql 软件包里</span></span><br><span class="line"><span class="comment"># 明确指定依赖的软件包，</span></span><br><span class="line"><span class="comment"># 这里对于有用 snmp 监控网络设备的场景来讲非常重要</span></span><br><span class="line"><span class="comment"># 因为缺省是不会安装 snmp-mibs-downloader 之类</span></span><br><span class="line"><span class="comment"># 必须的软件包的。</span></span><br><span class="line"><span class="comment"># 注意，同时也安装上了 zabbix-agent，这个是无所谓的，</span></span><br><span class="line"><span class="comment"># 毕竟，所有的服务器都要装 zabbix-agent 不是吗</span></span><br><span class="line">apt-get install \</span><br><span class="line">    libsnmp-base \</span><br><span class="line">    snmp-mibs-downloader \</span><br><span class="line">    snmp \</span><br><span class="line">    libsnmp30 \</span><br><span class="line">    zabbix-proxy-mysql \</span><br><span class="line">    zabbix-agent;</span><br><span class="line"><span class="comment"># 创建 zabbix-proxy 需要的数据库结构及一些初始数据</span></span><br><span class="line">zcat \</span><br><span class="line">    /usr/share/doc/zabbix-proxy-mysql/schema.sql.gz \</span><br><span class="line">     | mysql -uzabbix -p zabbix;</span><br></pre></td></tr></table></figure>
+<h2 id="CONFIGURATION"><a href="#CONFIGURATION" class="headerlink" title="CONFIGURATION"></a>CONFIGURATION</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改 zabbix proxy 的设置文件</span></span><br><span class="line">vim /etc/zabbix/zabbix_proxy.conf</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改 zabbix agent 的配置文件</span></span><br><span class="line"><span class="comment"># 本来这个不是本文讨论的重点</span></span><br><span class="line"><span class="comment"># 只是部署 zabbix proxy 时都会部署 zabbix agent</span></span><br><span class="line">vim /etc/zabbix/zabbix_agentd.conf</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 最后，将几个服务设为自启动</span></span><br><span class="line">systemctl <span class="built_in">enable</span> mysql.service;</span><br><span class="line">systemctl <span class="built_in">enable</span> zabbix-proxy.service;</span><br><span class="line">systemctl <span class="built_in">enable</span> zabbix-agent.service;</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2018/05/从apt-get出抓取binary-i386-Packages-gz失败的错误说开去/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="老杨">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/05/从apt-get出抓取binary-i386-Packages-gz失败的错误说开去/index.html" class="post-title-link" itemprop="url">从apt-get出抓取binary-i386/Packages.gz失败的错误说开去</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-05-13 15:01:34" itemprop="dateCreated datePublished" datetime="2018-05-13T15:01:34+08:00">2018-05-13</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-05-30 10:23:34" itemprop="dateModified" datetime="2018-05-30T10:23:34+08:00">2018-05-30</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h1><p>服务器上用 <strong>apt-mirror</strong> 来拉取某些软件官方的 <strong>apt</strong> 仓并本地建仓，用于本地服务器的软件安装和更新，这个大概也是众多运维工程师曾经做过的事情吧。</p>
+<p>今天我在某一台服务器上做 <strong>apt-get update</strong> 时出错了，系统报 “<a href="http://xxx.xx.xx.xx/xxxxxxxxxxxxxxxxxxx/binary-i386/Packages.gz”" target="_blank" rel="noopener">http://xxx.xx.xx.xx/xxxxxxxxxxxxxxxxxxx/binary-i386/Packages.gz”</a> 抓取失败。xxx.xx.xx.xx 是我自己建的 <strong>apt</strong> 仓，用来服务于内部服务器的，xxxxxxxxxxxxxxxxxxx 正是自建仓的路径，这下面当然没有 <strong>binary-i386</strong> 目录，因为服务器都是 <strong>x86_64</strong> 架构的，应该使用的是目录 <strong>binary-amd64</strong> 才对。</p>
+<h1 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h1><p>出错的服务器的操作系统是：<em>Ubuntu 16.04.5 LTS (GNU/Linux 4.15.0-13-generic x86_64)</em></p>
+<ol>
+<li>apt 的配置文件里没有关于 i386 的设置</li>
+<li>source 里也没有关于 i386 的设置</li>
+</ol>
+<h1 id="原因简介"><a href="#原因简介" class="headerlink" title="原因简介"></a>原因简介</h1><p><strong>Ubuntu</strong> 的 <strong>amd64</strong> 系统中，<strong>i386</strong> 是作为额外的体系结构被支持的。证据如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dpkg --<span class="built_in">print</span>-architecture;dpkg --<span class="built_in">print</span>-foreign-architectures</span><br></pre></td></tr></table></figure>
+<p>会输出“amd64”和”i386”。</p>
+<p>所以 <strong>apt</strong> 缺省是希望 <strong>apt</strong> 仓也同时能提供 <strong>i386</strong> 的软件包。而我用 <strong>apt-mirror</strong> 建仓时，没有指定同步抓取 <strong>i386</strong> 的软件包，故而当服务器来抓取 <strong>i386</strong> 相关数据时会出错（因为的确没有哇）。</p>
+<h1 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h1><p>知道原因了以后解决起来相对就简单了，在 <strong>apt-mirror</strong> 的配置文件 <strong>/etc/apt/mirror.list</strong> 中将想要同步抓取的软件多写一行，用 deb-i386 替换 deb，然后再跑下 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-mirror</span><br></pre></td></tr></table></figure>
+<p>就会同时同步 <strong>i386</strong> 的软件包下来，这样客户端 <strong>apt-get</strong> 时就不会有错了。</p>
+<h1 id="进阶阅读"><a href="#进阶阅读" class="headerlink" title="进阶阅读"></a>进阶阅读</h1><p>可以让 <strong>x86_64</strong> 系统架构的服务器仅安装 <strong>amd64</strong> 的软件吗？这样 <strong>apt-get</strong> 时也不会去抓群 <strong>i386</strong> 相关的东西了，这样的话也可以避免上面的错误。</p>
+<p>回答是：当然可以！</p>
+<p>首先，干掉系统现有的所有 <strong>i386</strong> 的软件包<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-get purge <span class="string">".*:i386"</span></span><br></pre></td></tr></table></figure></p>
+<p>接着，将 <strong>i386</strong> 从支持的体系结构里删掉<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dpkg --remove-architecture i386</span><br></pre></td></tr></table></figure></p>
+<p>这样也可以达到目的！ </p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2018/03/一次powerdns上某个zone传输失败的问题的解决过程/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="老杨">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/03/一次powerdns上某个zone传输失败的问题的解决过程/index.html" class="post-title-link" itemprop="url">一次powerdns上某个zone传输失败的问题的解决过程</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-03-12 17:06:04" itemprop="dateCreated datePublished" datetime="2018-03-12T17:06:04+08:00">2018-03-12</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-03-15 17:48:02" itemprop="dateModified" datetime="2018-03-15T17:48:02+08:00">2018-03-15</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h1><p>我司用 <a href="https://www.powerdns.com/" target="_blank" rel="noopener">PowerDNS</a> 来维护域名，某天否然发现有纪录在 PowerDNS 已经更新了，但是客户端查询解析结果却迟迟没有更新。</p>
+<h1 id="排查问题"><a href="#排查问题" class="headerlink" title="排查问题"></a>排查问题</h1><h2 id="请求传输数据的一端"><a href="#请求传输数据的一端" class="headerlink" title="请求传输数据的一端"></a>请求传输数据的一端</h2><p>在用做 dns 查询用的服务器上（也是 PowerDNS），执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pdns_control reload;</span><br></pre></td></tr></table></figure>
+<p>然后在 log 里看到有错误输出：</p>
+<blockquote>
+<p>Unable to AXFR zone ‘in-addr.arpa’ from remote ‘1.1.1.1’ (resolver): Remote nameserver closed TCP connection</p>
+</blockquote>
+<p>(1.1.1.1 是主 DNS 服务器)</p>
+<p>看了些文档，说有可能是数据文件太大导致传输失败，于是有直接测试了一下传输 zone：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dig <span class="keyword">in</span>-addr.arpa @1.1.1.1 AXFR;</span><br></pre></td></tr></table></figure>
+<p>结果发现还是未能得到整个 zone 的数据，于是怀疑服务器端可能有问题。</p>
+<h2 id="在传输数据的一端"><a href="#在传输数据的一端" class="headerlink" title="在传输数据的一端"></a>在传输数据的一端</h2><p>在主 DNS 服务器上（这里应该是 1.1.1.1），查看 log，发现有报错误：</p>
+<blockquote>
+<p>Exception: All data was not consumed<br>TCP Connection Thread died because of STL error: All data was not consumed</p>
+</blockquote>
+<p>仔细看了下文档，说有可能是待传输的 zone 的数据文件有问题，于是我又做了下检测：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pdnsutil check-zone <span class="keyword">in</span>-addr.arpa;</span><br></pre></td></tr></table></figure>
+<p>发现一堆的数据（解析纪录）显然有问题，都备份好，然后删除之。</p>
+<p>然后一一回头测试，这回都正常了。</p>
+<h1 id="问题根源"><a href="#问题根源" class="headerlink" title="问题根源"></a>问题根源</h1><p>肯定是大家瞎改反向解析（in-addr.arpa）的数据记录导致的。</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+  </section>
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+  </nav>
+
+
+
+          </div>
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">老杨</p>
+              <p class="site-description motion-element" itemprop="description">好记性比不过烂笔头</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">70</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">269</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/haw-haw" title="GitHub &rarr; https://github.com/haw-haw" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/6fool" title="Twitter &rarr; https://twitter.com/6fool" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://weibo.com/1494877243" title="Weibo &rarr; http://weibo.com/1494877243" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.douban.com/people/hahahaha/" title="DouBan &rarr; https://www.douban.com/people/hahahaha/" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>DouBan</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/hawhaw" title="ZhiHu &rarr; https://www.zhihu.com/people/hawhaw" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>ZhiHu</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">老杨</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.7.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.7.0"></script>
+
+  <script src="/js/src/motion.js?v=6.7.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.7.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.7.0"></script>
+
+
+
+  
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.7.0"></script>
+
+
+
+  
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+      }
+      else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+  
+
+  
+  
+
+  
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

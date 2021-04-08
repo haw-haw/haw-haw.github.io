@@ -1,0 +1,1969 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="YnL0N0ZuAJD3WW5aP8cJ6cGLs2iiLdHGsnzmmUHNPEY">
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="xzxZrDkrj5">
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext">
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=6.7.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.7.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.7.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.7.0">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.7.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+  <meta name="description" content="环境本实验是在 macOS 下做的，Linux 下可能会稍有不同（比如 gzcat）。 日志文件1gzcat data.gz | head -n 40 # data.gz 是日志文件 系统输出：  May 13 00:01:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12513]): Could n">
+<meta name="keywords" content="sed,awk,gzcat,head,curl,POST,json">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用 sed 和 awk 做简单日志分析">
+<meta property="og:url" content="https://ming.theyan.gs/2020/06/利用 sed 和 awk 做简单日志分析/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="环境本实验是在 macOS 下做的，Linux 下可能会稍有不同（比如 gzcat）。 日志文件1gzcat data.gz | head -n 40 # data.gz 是日志文件 系统输出：  May 13 00:01:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12513]): Could n">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-06-15T14:32:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="利用 sed 和 awk 做简单日志分析">
+<meta name="twitter:description" content="环境本实验是在 macOS 下做的，Linux 下可能会稍有不同（比如 gzcat）。 日志文件1gzcat data.gz | head -n 40 # data.gz 是日志文件 系统输出：  May 13 00:01:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12513]): Could n">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://ming.theyan.gs/2020/06/利用 sed 和 awk 做简单日志分析/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>利用 sed 和 awk 做简单日志分析 | 运维烂笔头</title>
+  
+
+
+
+
+  <script async src="//www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-106574959-2');
+  </script>
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">运维烂笔头</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">一个 SA 老兵的工作日志</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-projects">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/projects" rel="section"><i class="menu-item-icon fa fa-fw fa-code"></i> <br>projects</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-sitemap">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/sitemap.xml" rel="section"><i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br>Sitemap</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-commonweal">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/404.html" rel="section"><i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>Commonweal 404</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2020/06/利用 sed 和 awk 做简单日志分析/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="老杨">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">利用 sed 和 awk 做简单日志分析
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2020-06-14 21:43:27" itemprop="dateCreated datePublished" datetime="2020-06-14T21:43:27+08:00">2020-06-14</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2020-06-15 22:32:34" itemprop="dateModified" datetime="2020-06-15T22:32:34+08:00">2020-06-15</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><p>本实验是在 macOS 下做的，Linux 下可能会稍有不同（比如 gzcat）。</p>
+<h2 id="日志文件"><a href="#日志文件" class="headerlink" title="日志文件"></a>日志文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gzcat data.gz | head -n 40 <span class="comment"># data.gz 是日志文件</span></span><br></pre></td></tr></table></figure>
+<p>系统输出：</p>
+<blockquote>
+<p>May 13 00:01:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12513]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:01:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12513]): Service exited with abnormal code: 78<br>May 13 00:02:12 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.xpc.launchd.domain.pid.mdmclient.12523): Failed to bootstrap path: path = /usr/libexec/mdmclient, error = 108: Invalid path<br>May 13 00:04:20 BBAOMACBOOKAIR2 syslogd[113]: ASL Sender Statistics<br>May 13 00:05:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12535]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:05:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12535]): Service exited with abnormal code: 78<br>May 13 00:09:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12536]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:09:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12536]): Service exited with abnormal code: 78<br>May 13 00:17:59 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12555]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:17:59 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12555]): Service exited with abnormal code: 78<br>May 13 00:17:59 BBAOMACBOOKAIR2 syslogd[113]: ASL Sender Statistics<br>May 13 00:19:59 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12556]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:19:59 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12556]): Service exited with abnormal code: 78<br>May 13 00:21:59 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12560]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:21:59 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12560]): Service exited with abnormal code: 78<br>May 13 00:22:18 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.xpc.launchd.domain.user.914945058): Service “com.apple.xpc.launchd.unmanaged.loginwindow.594” tried to register for endpoint “com.apple.tsm.uiserver” already registered by owner: com.apple.TextInputMenuAgent<br>May 13 00:22:49 — last message repeated 1 time —<br>May 13 00:23:50 BBAOMACBOOKAIR2 timed[158]: settimeofday({0x5ebacd96,0x52ddf}) == 0<br>May 13 00:28:05 BBAOMACBOOKAIR2 syslogd[113]: ASL Sender Statistics<br>May 13 00:28:07 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.ScreenSaver.Computer-Name[12564]): Service exited due to SIGKILL | sent by Computer Name[12564]<br>May 13 00:28:17 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing the target of a source after it has been activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:17 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing target queue hierarchy after xpc connection was activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:18 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing the target of a source after it has been activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:18 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing target queue hierarchy after xpc connection was activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:19 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing the target of a source after it has been activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:19 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing target queue hierarchy after xpc connection was activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:20 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing the target of a source after it has been activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:20 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing target queue hierarchy after xpc connection was activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:26 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.preference.displays.MirrorDisplays): Service only ran for 9 seconds. Pushing respawn out by 1 seconds.<br>May 13 00:28:31 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.preference.displays.MirrorDisplays): Service only ran for 4 seconds. Pushing respawn out by 6 seconds.<br>May 13 00:29:49 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12610]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:29:49 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12610]): Service exited with abnormal code: 78<br>May 13 00:30:00 BBAOMACBOOKAIR2 syslogd[113]: Configuration Notice:<br>    ASL Module “com.apple.cdscheduler” claims selected messages.<br>    Those messages may not appear in standard system log files or in the ASL database.<br>May 13 00:30:00 BBAOMACBOOKAIR2 syslogd[113]: Configuration Notice:<br>    ASL Module “com.apple.install” claims selected messages.<br>    Those messages may not appear in standard system log files or in the ASL database.<br>May 13 00:30:00 BBAOMACBOOKAIR2 syslogd[113]: Configuration Notice:<br>    ASL Module “com.apple.callhistory.asl.conf” claims selected messages.</p>
+</blockquote>
+<a id="more"></a>
+<p>以上日志贴出来可能看的不够清晰，其实就几点：</p>
+<ol>
+<li>正常的日志都是日期时间开头，像“May 13 00:30:00”这样</li>
+<li>不是这个开头的日志行（基本都是 \t 跳格开头），其实是上一行的继续（日志分析时要将其和上一行合并）</li>
+<li>有“— last message repeated 1 time —”的日志其实内容跟上一行是完全一样的（开头的日期时间除外）</li>
+</ol>
+<h2 id="要求"><a href="#要求" class="headerlink" title="要求"></a>要求</h2><p>分析系统日志文件（data.gz）从中得到关键信息，用 Json 的格式 POST 上传至服务器 <a href="https://foo.com/bar" target="_blank" rel="noopener">https://foo.com/bar</a> )，key的名称如下（在括号里）：</p>
+<ol>
+<li>设备名称: (deviceName)</li>
+<li>错误的进程号码: (processId)</li>
+<li>进程/服务名称: (processName)</li>
+<li>错误的原因（描述）(description)</li>
+<li>发生的时间（小时级），例如0100-0200，0300-0400, (timeWindow)</li>
+<li>在小时级别内发生的次数 (numberOfOccurrence)</li>
+</ol>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>这里考察的点应该就是多行日志的处理（主要是合并）问题，这个可以借助 sed 可以搞定，但还有一个重复日志的问题，也就是当日志行里有“— last message repeated 1 time —”时的处理问题，没想好怎样完美的解决。</p>
+<h2 id="最终方案代码"><a href="#最终方案代码" class="headerlink" title="最终方案代码"></a>最终方案代码</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gzcat data.gz | head -n 40 | sed -e <span class="string">'1h;2,$H;$!d;g;s/\n\t/ /g'</span> | awk -f log_ana.awk&gt; data.json</span><br><span class="line"><span class="comment"># 上面的 head -n 40 主要是为了演示，只取头 40 行数据，真正的环境是取的整个数据文件的所有数据</span></span><br><span class="line">curl -X POST -H <span class="string">"Content-Type: application/json"</span> -d @data.json https://foo.com/bar</span><br></pre></td></tr></table></figure>
+<p>其中 log_ana.awk 代码如下：</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#! /usr/bin/awk -f</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">BEGIN</span> &#123;</span><br><span class="line">    pre_logline = <span class="string">""</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    processId = <span class="number">0</span></span><br><span class="line">    deviceName = <span class="string">""</span></span><br><span class="line">    processName = <span class="string">""</span></span><br><span class="line">    description = <span class="string">""</span></span><br><span class="line">    timeWindow = <span class="string">""</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="regexp">/--- last message peated 1 time ---/</span> &#123;</span><br><span class="line">    sub(<span class="regexp">/--- last message peated 1 time ---/</span>, pre_logline)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">delete</span> a</span><br><span class="line">    split(<span class="variable">$3</span>, a, <span class="string">":"</span>)</span><br><span class="line">    <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"00"</span>)</span><br><span class="line">        timeWindow = <span class="string">"0000-0100"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"01"</span>)</span><br><span class="line">        timeWindow = <span class="string">"0100-0200"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"02"</span>)</span><br><span class="line">        timeWindow = <span class="string">"0220-0300"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"03"</span>)</span><br><span class="line">        timeWindow = <span class="string">"0300-0400"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"04"</span>)</span><br><span class="line">        timeWindow = <span class="string">"0400-0500"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"05"</span>)</span><br><span class="line">        timeWindow = <span class="string">"0500-0600"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"06"</span>)</span><br><span class="line">        timeWindow = <span class="string">"0600-0700"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"07"</span>)</span><br><span class="line">        timeWindow = <span class="string">"0700-0800"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"08"</span>)</span><br><span class="line">        timeWindow = <span class="string">"0800-0900"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"09"</span>)</span><br><span class="line">        timeWindow = <span class="string">"0900-1000"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"10"</span>)</span><br><span class="line">        timeWindow = <span class="string">"1000-1100"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"11"</span>)</span><br><span class="line">        timeWindow = <span class="string">"1100-1200"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"12"</span>)</span><br><span class="line">        timeWindow = <span class="string">"1200-1300"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"13"</span>)</span><br><span class="line">        timeWindow = <span class="string">"1300-1400"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"14"</span>)</span><br><span class="line">        timeWindow = <span class="string">"1400-1500"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"15"</span>)</span><br><span class="line">        timeWindow = <span class="string">"1500-1600"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"16"</span>)</span><br><span class="line">        timeWindow = <span class="string">"1600-1700"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"17"</span>)</span><br><span class="line">        timeWindow = <span class="string">"1700-1800"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"18"</span>)</span><br><span class="line">        timeWindow = <span class="string">"1800-1900"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"19"</span>)</span><br><span class="line">        timeWindow = <span class="string">"1900-2000"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"20"</span>)</span><br><span class="line">        timeWindow = <span class="string">"2000-2100"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"21"</span>)</span><br><span class="line">        timeWindow = <span class="string">"2100-2200"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"22"</span>)</span><br><span class="line">        timeWindow = <span class="string">"2200-2300"</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">"23"</span>)</span><br><span class="line">        timeWindow = <span class="string">"2300-2400"</span></span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">4</span>; i&lt;=NF; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (i == <span class="number">4</span>) &#123;</span><br><span class="line">            pre_logline = <span class="variable">$i</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            pre_logline = pre_logline<span class="string">" "</span><span class="variable">$i</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> ((pre_logline, timeWindow) <span class="keyword">in</span> countA) &#123;</span><br><span class="line">        countA[pre_logline, timeWindow] = countA[pre_logline, timeWindow] + <span class="number">1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        countA[pre_logline, timeWindow] = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">END</span> &#123;</span><br><span class="line">    print <span class="string">"["</span></span><br><span class="line">    n = <span class="number">1</span></span><br><span class="line">    sum = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> (k <span class="keyword">in</span> countA) &#123;</span><br><span class="line">        processId = <span class="number">0</span></span><br><span class="line">        deviceName = <span class="string">""</span></span><br><span class="line">        processName = <span class="string">""</span></span><br><span class="line">        description = <span class="string">""</span></span><br><span class="line">        timeWindow = <span class="string">""</span></span><br><span class="line">        c = length(countA)</span><br><span class="line">        <span class="keyword">delete</span> a</span><br><span class="line">        split(k, a, SUBSEP)</span><br><span class="line">	numberOfOccurrence = countA[a[<span class="number">1</span>], a[<span class="number">2</span>]]</span><br><span class="line">        timeWindow = a[<span class="number">2</span>]</span><br><span class="line">        <span class="keyword">delete</span> aa</span><br><span class="line">        split(a[<span class="number">1</span>], aa, <span class="string">" "</span>)</span><br><span class="line">        deviceName = aa[<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">delete</span> aaa</span><br><span class="line">        split(aa[<span class="number">2</span>], aaa, <span class="string">"]"</span>)</span><br><span class="line">        <span class="keyword">delete</span> aaaa</span><br><span class="line">        split(aaa[<span class="number">1</span>], aaaa, <span class="string">"["</span>)</span><br><span class="line">        processName = aaaa[<span class="number">1</span>]</span><br><span class="line">        processId = aaaa[<span class="number">2</span>]</span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">3</span>; i&lt;=length(aa); i++) &#123;</span><br><span class="line">            gsub(<span class="regexp">/"/</span>, <span class="string">"\\\""</span>, aa[i])</span><br><span class="line">            <span class="keyword">if</span> (i == <span class="number">3</span>) &#123;</span><br><span class="line">                description = aa[i]</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                description = description<span class="string">" "</span>aa[i]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    	printf <span class="string">"  &#123;\n    \"deviceName\":\"%s\", \n    \"processId\":%d, \n    \"processName\":\"%s\", \n    \"description\":\"%s\", \n    \"timeWindow\":\"%s\", \n    \"numberOfOccurrence\":%d \n  &#125;"</span>, deviceName, processId, processName, description, timeWindow, numberOfOccurrence</span><br><span class="line">        sum = sum + numberOfOccurrence</span><br><span class="line">        <span class="keyword">if</span> (n &lt; c)</span><br><span class="line">            print <span class="string">", "</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            print <span class="string">""</span></span><br><span class="line">        n++</span><br><span class="line">    &#125;</span><br><span class="line">    print <span class="string">"]"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>data.json 文件的内容可以这样看：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat data.json</span><br></pre></td></tr></table></figure>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12560]): Could not find uid associated with service: 0: Undefined error: 0 501"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12535]): Could not find uid associated with service: 0: Undefined error: 0 501"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"---"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">0</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"last"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"message repeated 1 time ---"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12513]): Service exited with abnormal code: 78"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.preference.displays.MirrorDisplays): Service only ran for 9 seconds. Pushing respawn out by 1 seconds."</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">158</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"timed"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"settimeofday(&#123;0x5ebacd96,0x52ddf&#125;) == 0"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.xpc.launchd.domain.user.914945058): Service \"com.apple.xpc.launchd.unmanaged.loginwindow.594\" tried to register for endpoint \"com.apple.tsm.uiserver\" already registered by owner: com.apple.TextInputMenuAgent"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">113</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"syslogd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"Configuration Notice: ASL Module \"com.apple.install\" claims selected messages. Those messages may not appear in standard system log files or in the ASL database."</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12610]): Could not find uid associated with service: 0: Undefined error: 0 501"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12610]): Service exited with abnormal code: 78"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.preference.displays.MirrorDisplays): Service only ran for 4 seconds. Pushing respawn out by 6 seconds."</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12535]): Service exited with abnormal code: 78"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.xpc.launchd.domain.pid.mdmclient.12523): Failed to bootstrap path: path = /usr/libexec/mdmclient, error = 108: Invalid path"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">960</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"VTDecoderXPCService"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"DEPRECATED USE in libdispatch client: Changing target queue hierarchy after xpc connection was activated; set a breakpoint on _dispatch_bug_deprecated to debug"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">4</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12555]): Could not find uid associated with service: 0: Undefined error: 0 501"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">960</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"VTDecoderXPCService"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"DEPRECATED USE in libdispatch client: Changing the target of a source after it has been activated; set a breakpoint on _dispatch_bug_deprecated to debug"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">4</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12536]): Service exited with abnormal code: 78"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12513]): Could not find uid associated with service: 0: Undefined error: 0 501"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12536]): Could not find uid associated with service: 0: Undefined error: 0 501"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.ScreenSaver.Computer-Name[12564]): Service exited due to SIGKILL | sent by Computer Name[12564]"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12555]): Service exited with abnormal code: 78"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">113</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"syslogd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"Configuration Notice: ASL Module \"com.apple.callhistory.asl.conf\" claims selected messages."</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12560]): Service exited with abnormal code: 78"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">113</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"syslogd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"ASL Sender Statistics"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">3</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">113</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"syslogd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"Configuration Notice: ASL Module \"com.apple.cdscheduler\" claims selected messages. Those messages may not appear in standard system log files or in the ASL database."</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12556]): Could not find uid associated with service: 0: Undefined error: 0 501"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"deviceName"</span>:<span class="string">"BBAOMACBOOKAIR2"</span>,</span><br><span class="line">    <span class="attr">"processId"</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">"processName"</span>:<span class="string">"com.apple.xpc.launchd"</span>,</span><br><span class="line">    <span class="attr">"description"</span>:<span class="string">"(com.apple.mdworker.bundles[12556]): Service exited with abnormal code: 78"</span>,</span><br><span class="line">    <span class="attr">"timeWindow"</span>:<span class="string">"0000-0100"</span>,</span><br><span class="line">    <span class="attr">"numberOfOccurrence"</span>:<span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>这里的大概解释下：</p>
+<p>多行日志的合并问题，这里是用 sed 命令解决的，awk 程序主要是处理了“— last message peated 1 time —”的问题以及做日志分析（从日志里抓取关键信息并做统计且生成上报数据文件）。其实这样不是特完美，毕竟日志文件循环了两遍，理论上来讲最好过一遍就处理完毕的，但是我在 awk 里实在是没想好怎样同时处理多行日志合并以及“— last message peated 1 time —”的问题。这里请各位大佬教我。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>如果您觉得我的经验能够帮助到您，请不吝赏赐，非常感谢！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechat-reward.png" alt="老杨 WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay-reward.png" alt="老杨 Alipay">
+        <p>Alipay</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/sed/" rel="tag"># sed</a>
+          
+            <a href="/tags/awk/" rel="tag"># awk</a>
+          
+            <a href="/tags/gzcat/" rel="tag"># gzcat</a>
+          
+            <a href="/tags/head/" rel="tag"># head</a>
+          
+            <a href="/tags/curl/" rel="tag"># curl</a>
+          
+            <a href="/tags/POST/" rel="tag"># POST</a>
+          
+            <a href="/tags/json/" rel="tag"># json</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/用kindle追网文/index.html" rel="next" title="用 Kindle 来追网文">
+                <i class="fa fa-chevron-left"></i> 用 Kindle 来追网文
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/07/用 Kindle 追网文_2/index.html" rel="prev" title="用 Kindle 来追网文之二">
+                用 Kindle 来追网文之二 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">老杨</p>
+              <p class="site-description motion-element" itemprop="description">好记性比不过烂笔头</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">70</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">269</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/haw-haw" title="GitHub &rarr; https://github.com/haw-haw" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/6fool" title="Twitter &rarr; https://twitter.com/6fool" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://weibo.com/1494877243" title="Weibo &rarr; http://weibo.com/1494877243" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.douban.com/people/hahahaha/" title="DouBan &rarr; https://www.douban.com/people/hahahaha/" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>DouBan</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/hawhaw" title="ZhiHu &rarr; https://www.zhihu.com/people/hawhaw" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>ZhiHu</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#环境"><span class="nav-number">1.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#日志文件"><span class="nav-number">2.</span> <span class="nav-text">日志文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#要求"><span class="nav-number">3.</span> <span class="nav-text">要求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-number">4.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最终方案代码"><span class="nav-number">5.</span> <span class="nav-text">最终方案代码</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">老杨</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.7.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.7.0"></script>
+
+  <script src="/js/src/motion.js?v=6.7.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.7.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.7.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.7.0"></script>
+<script src="/js/src/post-details.js?v=6.7.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.7.0"></script>
+
+
+
+  
+
+
+  
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+      }
+      else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
