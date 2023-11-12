@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="好记性比不过烂笔头">
+<meta property="og:type" content="website">
+<meta property="og:title" content="运维烂笔头">
+<meta property="og:url" content="https://ming.theyan.gs/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="好记性比不过烂笔头">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="老杨">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":true,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"index.html","title":""}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>运维烂笔头 - 一个 SA 老兵的工作日志</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">运维烂笔头</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2023/05/Amazon%20Linux%202023%EF%BC%9ABug%20%E8%BF%98%E6%98%AF%E7%89%B9%E6%80%A7%EF%BC%9F/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/05/Amazon%20Linux%202023%EF%BC%9ABug%20%E8%BF%98%E6%98%AF%E7%89%B9%E6%80%A7%EF%BC%9F/index.html" class="post-title-link" itemprop="url">Amazon Linux 2023：Bug 还是特性？</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-05-18 18:32:25" itemprop="dateCreated datePublished" datetime="2023-05-18T18:32:25+08:00">2023-05-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-19 20:32:47" itemprop="dateModified" datetime="2023-05-19T20:32:47+08:00">2023-05-19</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>在 AWS 的一个 VPC 内部的一台 EC2 上搭了一个 OpenVPN 服务器，对，就是 <a href="/2023/02/%E4%BB%8E%20Client%20VPN%20endpoint%20%E8%BF%81%E7%A7%BB%E5%88%B0%20EC2%20%E4%B8%8A%E7%9A%84%20OpenVPN/index.html">从 Client VPN endpoint 迁移到 EC2 上的 OpenVPN</a> 提到的这件事。然后我有台 PC 通过 OpenVPN 客户端软件连了过来。以下是基本信息。</p>
+<blockquote>
+<p><strong><em>NOTE:</em></strong> IP 地址都不是实际真实情况</p>
+</blockquote>
+<ul>
+<li>EC2（A）<ul>
+<li>公网 IP：<code>1.1.1.1</code>（本地并没有，这个是防火墙或其他设备给做的一对一 map）</li>
+<li>私网 IP：<code>10.0.0.2/24</code></li>
+<li>私网网关：<code>10.0.0.1</code></li>
+<li>私网网卡：enX0</li>
+<li>tun 设备名：tun0</li>
+<li>tun 设备 IP：<code>172.16.0.1/24</code></li>
+</ul>
+</li>
+<li>PC（B）<ul>
+<li>tun 设备名：tun0</li>
+<li>tun 设备 IP：<code>172.16.0.2/24</code></li>
+</ul>
+</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/05/Amazon%20Linux%202023%EF%BC%9ABug%20%E8%BF%98%E6%98%AF%E7%89%B9%E6%80%A7%EF%BC%9F/index.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2023/04/%E9%80%9A%E8%BF%87%20API%20%E6%8A%93%E5%8F%96%20linear.app%20%E7%9A%84%E4%BB%BB%E5%8A%A1%E7%94%9F%E6%88%90%E5%91%A8%E6%8A%A5/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/04/%E9%80%9A%E8%BF%87%20API%20%E6%8A%93%E5%8F%96%20linear.app%20%E7%9A%84%E4%BB%BB%E5%8A%A1%E7%94%9F%E6%88%90%E5%91%A8%E6%8A%A5/index.html" class="post-title-link" itemprop="url">通过 API 抓取 linear.app 的任务生成周报</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-04-29 19:21:34 / 修改时间：22:15:28" itemprop="dateCreated datePublished" datetime="2023-04-29T19:21:34+08:00">2023-04-29</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>某个项目用了 linear.app 来做任务分配和跟踪，为了写周报，想利用 API 来自动获取任务信息。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/04/%E9%80%9A%E8%BF%87%20API%20%E6%8A%93%E5%8F%96%20linear.app%20%E7%9A%84%E4%BB%BB%E5%8A%A1%E7%94%9F%E6%88%90%E5%91%A8%E6%8A%A5/index.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2023/03/%E5%88%A9%E7%94%A8%20AWS%20System%20Manager%20%E6%9D%A5%E8%BF%9E%20VPC%20%E5%86%85%E7%BD%91%E7%9A%84%E8%B5%84%E6%BA%90/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/%E5%88%A9%E7%94%A8%20AWS%20System%20Manager%20%E6%9D%A5%E8%BF%9E%20VPC%20%E5%86%85%E7%BD%91%E7%9A%84%E8%B5%84%E6%BA%90/index.html" class="post-title-link" itemprop="url">利用 AWS System Manager 来连 VPC 内网的资源</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-09 21:23:34" itemprop="dateCreated datePublished" datetime="2023-03-09T21:23:34+08:00">2023-03-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-14 23:34:27" itemprop="dateModified" datetime="2023-03-14T23:34:27+08:00">2023-03-14</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><h3 id="配置好的-EC2"><a href="#配置好的-EC2" class="headerlink" title="配置好的 EC2"></a>配置好的 EC2</h3><p>VPC 内需要有一台 EC2（有无公网 IP 好像没关系），并做好相关配置</p>
+<h4 id="安装-SSM-Agent"><a href="#安装-SSM-Agent" class="headerlink" title="安装 SSM Agent"></a>安装 SSM Agent</h4><p>Amazon Linux（无论是 1，还是 2，或者是 2023） 一般是预装好的，只需要确认是否正常启动：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl status amazon-ssm-agent</span><br><span class="line"><span class="comment"># 如果没有启动的话，设置为自启动，并启动</span></span><br><span class="line">sudo systemctl <span class="built_in">enable</span> amazon-ssm-agent</span><br><span class="line">sudo systemctl start amazon-ssm-agent</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/03/%E5%88%A9%E7%94%A8%20AWS%20System%20Manager%20%E6%9D%A5%E8%BF%9E%20VPC%20%E5%86%85%E7%BD%91%E7%9A%84%E8%B5%84%E6%BA%90/index.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2023/02/%E4%BB%8E%20Client%20VPN%20endpoint%20%E8%BF%81%E7%A7%BB%E5%88%B0%20EC2%20%E4%B8%8A%E7%9A%84%20OpenVPN/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/02/%E4%BB%8E%20Client%20VPN%20endpoint%20%E8%BF%81%E7%A7%BB%E5%88%B0%20EC2%20%E4%B8%8A%E7%9A%84%20OpenVPN/index.html" class="post-title-link" itemprop="url">从 Client VPN endpoint 迁移到 EC2 上的 OpenVPN</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-02-22 20:16:25" itemprop="dateCreated datePublished" datetime="2023-02-22T20:16:25+08:00">2023-02-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-02-25 22:26:44" itemprop="dateModified" datetime="2023-02-25T22:26:44+08:00">2023-02-25</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>原本有一个 Client VPN endpoint 在 AWS 新加坡。有几个原因导致要迁移：</p>
+<ul>
+<li>没几天就不能用了，具体原因不足为外人道也，懂的都懂。</li>
+<li>Client VPN endpoint 太贵了。</li>
+</ul>
+<h2 id="现有环境"><a href="#现有环境" class="headerlink" title="现有环境"></a>现有环境</h2><ul>
+<li>免费的 EC2 一台，跑的是 Amazon Linux 2023</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/02/%E4%BB%8E%20Client%20VPN%20endpoint%20%E8%BF%81%E7%A7%BB%E5%88%B0%20EC2%20%E4%B8%8A%E7%9A%84%20OpenVPN/index.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2023/01/%E7%94%A8%20Scratch%203%20%E5%88%B6%E4%BD%9C%E5%B0%8F%E6%B8%B8%E6%88%8F%EF%BC%9A2048/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/01/%E7%94%A8%20Scratch%203%20%E5%88%B6%E4%BD%9C%E5%B0%8F%E6%B8%B8%E6%88%8F%EF%BC%9A2048/index.html" class="post-title-link" itemprop="url">用 Scratch 3 制作小游戏：2048</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-01-12 19:11:32" itemprop="dateCreated datePublished" datetime="2023-01-12T19:11:32+08:00">2023-01-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-01-21 20:22:24" itemprop="dateModified" datetime="2023-01-21T20:22:24+08:00">2023-01-21</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>乐宝幼儿园的时候上过一段时间的 Scratch 的课，他对这个表现出了浓厚的兴趣，于是我就给他买了基本相关的书籍，他也爱不释手。由于领导注意到乐宝对电子产品的痴迷，怕他迷失，所以规定他周末才能玩儿半小时的 Scratch。我发现他在用 Scratch 做一点小程序（照着书吧），而且还乐此不疲。正好我也有时间，所以我想琢磨下怎么做个游戏，然后再教乐乐（编写）。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/01/%E7%94%A8%20Scratch%203%20%E5%88%B6%E4%BD%9C%E5%B0%8F%E6%B8%B8%E6%88%8F%EF%BC%9A2048/index.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2022/12/How%20to%20deal%20with%20a%20faked%20tf%20card/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/12/How%20to%20deal%20with%20a%20faked%20tf%20card/index.html" class="post-title-link" itemprop="url">How to deal with a faked tf card</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-12-09 22:23:35" itemprop="dateCreated datePublished" datetime="2022-12-09T22:23:35+08:00">2022-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-12-14 21:42:34" itemprop="dateModified" datetime="2022-12-14T21:42:34+08:00">2022-12-14</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>上一任租户有个可能运营商送的监控，有个摄像头，反正没用了，我就拆下来看看，发现里面有个 TF 卡，标着 256G 容量。就是如下这货：</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/12/How%20to%20deal%20with%20a%20faked%20tf%20card/index.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2022/11/How%20to%20Install%20Xubuntu%20on%20a%20Chromebook/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/11/How%20to%20Install%20Xubuntu%20on%20a%20Chromebook/index.html" class="post-title-link" itemprop="url">How to Install Xubuntu on a Chromebook</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-11-02 19:18:29" itemprop="dateCreated datePublished" datetime="2022-11-02T19:18:29+08:00">2022-11-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-11-23 20:31:53" itemprop="dateModified" datetime="2022-11-23T20:31:53+08:00">2022-11-23</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>鱼总毕业了，带回来一台 <a target="_blank" rel="noopener" href="https://support.hp.com/gb-en/document/c06220011">Chromebook(HP Chromebook 11A G6 EE)</a>，说是毕业了，学校就把学生用的电脑送给学生了。</p>
+<p>鱼总说这电脑配置挺渣的，但续航还行，ebay 上还能卖个二三十刀，让我看着办。</p>
+<p>我还能怎么办？！凉拌呗。当下失业在家，没有收入，当然有垃圾必捡，且用且珍惜啦。</p>
+<p>于是，折腾走起。鉴于国内使用 ChromeOS 的种种不便，决定还是装一套 Linux 跑着吧。本来，ChromeOS 就直接支持 Linux(打开开发者模式就会有个简单的 Linux 可用)，而且还能通过几种工具（如 <a target="_blank" rel="noopener" href="https://github.com/dnschneid/crouton">Crouton</a> 和 <a target="_blank" rel="noopener" href="https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md">Crostini</a> 或 <a target="_blank" rel="noopener" href="https://chrx.org/">chrx</a> ）安装 Linux，但我觉得还是要装一个“干净”的 Linux 更好一些。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/11/How%20to%20Install%20Xubuntu%20on%20a%20Chromebook/index.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2022/10/%E5%88%A9%E7%94%A8%20termux%20%E5%92%8C%20termux-api%20%E5%9C%A8%20android%20%E6%89%8B%E6%9C%BA%E4%B8%8A%E5%AE%9A%E6%97%B6%E6%9B%B4%E6%96%B0%E5%A3%81%E7%BA%B8/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/10/%E5%88%A9%E7%94%A8%20termux%20%E5%92%8C%20termux-api%20%E5%9C%A8%20android%20%E6%89%8B%E6%9C%BA%E4%B8%8A%E5%AE%9A%E6%97%B6%E6%9B%B4%E6%96%B0%E5%A3%81%E7%BA%B8/index.html" class="post-title-link" itemprop="url">利用 Termux 和 Termux-API 在 Android 手机上定时自动更新壁纸</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-10-13 22:37:22" itemprop="dateCreated datePublished" datetime="2022-10-13T22:37:22+08:00">2022-10-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-10-18 20:12:35" itemprop="dateModified" datetime="2022-10-18T20:12:35+08:00">2022-10-18</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>这个事情的需求，其实……就是闲得。</p>
+<p>开个玩笑。我其实之前用 Tasker 这个 APP 做过类似的事情，见之前文章：<a href="/2018/07/%E5%88%86%E4%BA%AB%E4%B8%80%E4%BA%9B%E8%87%AA%E5%B7%B1DIY%E7%9A%84task%E7%9A%84profile/index.html">分享一些自己DIY的task的profile</a>，但是有一阵遇到了 android 手机的壁纸 bug，我的 pixel 给干挂了两回，其中有一回甚至给重制了才救回来，救回来之后就没起过自动更换壁纸的任务了。</p>
+<p>这次是看到 V 站上有个大佬，展示自己极少的 APP 时，截图里展示了一个桌面，上面的壁纸上有格言，还有英文单词。于是我就自然而然的想要不要把毒鸡汤也写到壁纸上呢？：）</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/10/%E5%88%A9%E7%94%A8%20termux%20%E5%92%8C%20termux-api%20%E5%9C%A8%20android%20%E6%89%8B%E6%9C%BA%E4%B8%8A%E5%AE%9A%E6%97%B6%E6%9B%B4%E6%96%B0%E5%A3%81%E7%BA%B8/index.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2022/09/Best%20Practices%20for%20VPC%20IP%20Address%20Allocation/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/09/Best%20Practices%20for%20VPC%20IP%20Address%20Allocation/index.html" class="post-title-link" itemprop="url">Best Practices for VPC IP Address Allocation</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-09-13 20:13:23" itemprop="dateCreated datePublished" datetime="2022-09-13T20:13:23+08:00">2022-09-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-09-22 23:13:35" itemprop="dateModified" datetime="2022-09-22T23:13:35+08:00">2022-09-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>如今公有云用的越来越多，各个区域、不同可用区，还有各种特殊服务，再加上也许还有自建 IDC，还有办公网内网。我的传统是会将这些内网打通的。所以，各个节点网络的 IP 地址分配策略（方案）就成了一个绕不开的话题。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/09/Best%20Practices%20for%20VPC%20IP%20Address%20Allocation/index.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2022/08/%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A%E5%A4%9A%20IDC%20%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%85%E7%BD%91%E6%89%93%E9%80%9A%E6%96%B9%E6%A1%88/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/08/%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A%E5%A4%9A%20IDC%20%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%85%E7%BD%91%E6%89%93%E9%80%9A%E6%96%B9%E6%A1%88/index.html" class="post-title-link" itemprop="url">中小企业多 IDC 之间的内网打通方案</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-08-03 21:33:42" itemprop="dateCreated datePublished" datetime="2022-08-03T21:33:42+08:00">2022-08-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-08-12 23:11:23" itemprop="dateModified" datetime="2022-08-12T23:11:23+08:00">2022-08-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>这个问题我觉得中小公司有需求，但是大公司应该没这个需求，大公司肯定都找第三方直接 MPLS 之类的商业全套解决方案了。但是对于缺钱的中小企业，我觉得还是有借鉴意义的。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/08/%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A%E5%A4%9A%20IDC%20%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%85%E7%BD%91%E6%89%93%E9%80%9A%E6%96%B9%E6%A1%88/index.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

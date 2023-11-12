@@ -1,0 +1,752 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>运维烂笔头</title>
+  <icon>https://www.gravatar.com/avatar/3b9aac9ce1a62704e5a7a37b8ae39081</icon>
+  <subtitle>一个 SA 老兵的工作日志</subtitle>
+  <link href="https://ming.theyan.gs/atom.xml" rel="self"/>
+  
+  <link href="https://ming.theyan.gs/"/>
+  <updated>2023-05-19T12:32:47.000Z</updated>
+  <id>https://ming.theyan.gs/</id>
+  
+  <author>
+    <name>老杨</name>
+    <email>m@theyan.gs</email>
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Amazon Linux 2023：Bug 还是特性？</title>
+    <link href="https://ming.theyan.gs/2023/05/Amazon%20Linux%202023%EF%BC%9ABug%20%E8%BF%98%E6%98%AF%E7%89%B9%E6%80%A7%EF%BC%9F/index.html"/>
+    <id>https://ming.theyan.gs/2023/05/Amazon%20Linux%202023%EF%BC%9ABug%20%E8%BF%98%E6%98%AF%E7%89%B9%E6%80%A7%EF%BC%9F/index.html</id>
+    <published>2023-05-18T10:32:25.000Z</published>
+    <updated>2023-05-19T12:32:47.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>在 AWS 的一个 VPC 内部的一台 EC2 上搭了一个 OpenVPN 服务器，对，就是 <a href="/2023/02/%E4%BB%8E%20Client%20VPN%20endpoint%20%E8%BF%81%E7%A7%BB%E5%88%B0%20EC2%20%E4%B8%8A%E7%9A%84%20OpenVPN/index.html">从 Client VPN endpoint 迁移到 EC2 上的 OpenVPN</a> 提到的这件事。然后我有台 PC 通过 OpenVPN 客户端软件连了过来。以下是基本信息。</p><blockquote><p><strong><em>NOTE:</em></strong> IP 地址都不是实际真实情况</p></blockquote><ul><li>EC2（A）<ul><li>公网 IP：<code>1.1.1.1</code>（本地并没有，这个是防火墙或其他设备给做的一对一 map）</li><li>私网 IP：<code>10.0.0.2/24</code></li><li>私网网关：<code>10.0.0.1</code></li><li>私网网卡：enX0</li><li>tun 设备名：tun0</li><li>tun 设备 IP：<code>172.16.0.1/24</code></li></ul></li><li>PC（B）<ul><li>tun 设备名：tun0</li><li>tun 设备 IP：<code>172.16.0.2/24</code></li></ul></li></ul><span id="more"></span><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>问题的核心是：B 无法 ping 通 A 的私网 IP。换句话说，当我在 B 上执行 <code>ping 10.0.0.2</code> 命令时，无法得到响应。俗话就是 ping 不通 10.0.0.2。</p><h2 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h2><h3 id="初步排查"><a href="#初步排查" class="headerlink" title="初步排查"></a>初步排查</h3><p>我对 AWS EC2 的网络问题进行了深入的排查，包括各种路由表、安全组、网络 ACL，甚至本地的防火墙配置等等。然而，我并没有找到问题的所在。我可以访问 VPC 内部的私网里的 RDS 资源，也可以在 A 上明显看到有接收到数据包。</p><h3 id="ICMP-包的追踪"><a href="#ICMP-包的追踪" class="headerlink" title="ICMP 包的追踪"></a>ICMP 包的追踪</h3><p>我继续深入，发现在 A 上可以接收到 B 发送的 icmp 包，而且 A 也确实有回包，但是奇怪的是，回包并没有通过 tun0 设备，而是直接从 enX0 设备发送出去！</p><h3 id="不是路由的问题（？）"><a href="#不是路由的问题（？）" class="headerlink" title="不是路由的问题（？）"></a>不是路由的问题（？）</h3><p>马上怀疑本地路由有问题，直接在 A 上执行</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip r get 172.16.0.2</span><br></pre></td></tr></table></figure><p>发现没问题呀，是从设备 tun0 走的呀？这下就完全把我给整不会了。再此之后，我还做了好些努力，比如：</p><h3 id="继续检测排查"><a href="#继续检测排查" class="headerlink" title="继续检测排查"></a>继续检测排查</h3><ul><li>在 A 上 ping B 的 VPN 地址（tun0 设备上）：<ul><li><code>ping 172.16.0.2</code>，当然是通的</li><li><code>ping -I 10.0.0.2 172.16.0.2</code>，这种指定源 IP 的方式 ping，当然是不通的，同样问题，听包发现包没往 tun0 设备上走，而是往 enX0 上走了</li></ul></li><li>跟各种 AI 掰扯，也被告知过 n 多需要检查的地方，比如 kernel 参数 rp_filter 啥的，都对，但都没啥意义，都查过 n 多遍了。</li><li>还在微信朋友圈里发了这个问题，看看朋友圈的卧龙凤雏有没有啥好一点的建议方法。回复基本上都有道理，但没有一个能给我灵感的。</li></ul><h2 id="问题原因"><a href="#问题原因" class="headerlink" title="问题原因"></a>问题原因</h2><p>多番努力，虽然没有结果，但是慢慢还是明白了问题所在就是为什么从 10.0.0.2 出去按路由表应该往 tun0 上走的包却走到了 enX0 上？“这还是路由的问题“，我盖棺定论。</p><p>老想想不出为什么，于是就上网找了找 Linux 高级路由的资料看了看，突然想起来：Linux 系统里，路由选择上比路由表级别更高的还有一个：路由策略！柳暗花明呀。</p><p>我立马起来，登录上 EC2，</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip rule s</span><br></pre></td></tr></table></figure><p>果然有一条记录：</p><blockquote><p>10000:  from 10.0.0.2 lookup 10000 proto static</p></blockquote><p>果然有货，再接着看这条 id 是 10000 的路由表里有什么：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip r s table 10000</span><br></pre></td></tr></table></figure><p>系统显示：</p><blockquote><p>default via 10.0.0.1 dev enX0 proto dhcp metric 512<br>10.0.0.0&#x2F;24 dev enX0 proto static scope link</p></blockquote><p>这一下子逻辑就清晰了，源地址是 10.0.0.2、目标地址是 172.16.0.2 的数据包之所以会往 enX0 上走是因为路由策略 <code>10000:  from 10.0.0.2 lookup 10000 proto static</code>，这个策略规定了源地址是 10.0.0.2 的数据包怎么走要看路由表 10000，而在 10000 这张路由表又是这样的：</p><blockquote><p>default via 10.0.0.1 dev enX0 proto dhcp metric 512<br>10.0.0.0&#x2F;24 dev enX0 proto static scope link</p></blockquote><p>按照这个路由表，去往 172.16.0.2 的数据包不妥妥的要往 enX0 上发吗？</p><h2 id="问题验证"><a href="#问题验证" class="headerlink" title="问题验证"></a>问题验证</h2><p>最后，我还要做最后一个测试，以验证我的结论：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo ip r add 172.16.0.0/24 \</span><br><span class="line">    dev tun0 \</span><br><span class="line">    src 172.16.0.1 \</span><br><span class="line">    table 10000</span><br></pre></td></tr></table></figure><p>然后，那边在 B 上 <code>ping 10.0.0.2</code> 马上就通了。</p><p>最后的最后，我把刚加的这条路由删掉了，因为我还没想好要不要修以及怎么修这个问题。</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ip r del 172.16.0.0/24 table 10000</span><br></pre></td></tr></table></figure><h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>由于 Amazon Linux 2023 中在策略路由里将从 EC2 私网地址为源地址的数据包强制走了另外一张路由表，在那张表里源地址为 EC2 私网地址的数据包会走 enX0，而我的 OpenVPN 服务启动时只修改了缺省的路由表：main，故而导致从 OpenVPN 的客户端不能通 EC2 的私网地址。</p><p>所以，这到底是 Amazon Linux 2023 的 bug 呢，还是 OpenVPN 的 bug 呢？这个问题还需要进一步的探讨和研究。</p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h2&gt;&lt;p&gt;在 AWS 的一个 VPC 内部的一台 EC2 上搭了一个 OpenVPN 服务器，对，就是 &lt;a href=&quot;/2023/02/%E4%BB%8E%20Client%20VPN%20endpoint%20%E8%BF%81%E7%A7%BB%E5%88%B0%20EC2%20%E4%B8%8A%E7%9A%84%20OpenVPN/index.html&quot;&gt;从 Client VPN endpoint 迁移到 EC2 上的 OpenVPN&lt;/a&gt; 提到的这件事。然后我有台 PC 通过 OpenVPN 客户端软件连了过来。以下是基本信息。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;NOTE:&lt;/em&gt;&lt;/strong&gt; IP 地址都不是实际真实情况&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;EC2（A）&lt;ul&gt;
+&lt;li&gt;公网 IP：&lt;code&gt;1.1.1.1&lt;/code&gt;（本地并没有，这个是防火墙或其他设备给做的一对一 map）&lt;/li&gt;
+&lt;li&gt;私网 IP：&lt;code&gt;10.0.0.2/24&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;私网网关：&lt;code&gt;10.0.0.1&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;私网网卡：enX0&lt;/li&gt;
+&lt;li&gt;tun 设备名：tun0&lt;/li&gt;
+&lt;li&gt;tun 设备 IP：&lt;code&gt;172.16.0.1/24&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;PC（B）&lt;ul&gt;
+&lt;li&gt;tun 设备名：tun0&lt;/li&gt;
+&lt;li&gt;tun 设备 IP：&lt;code&gt;172.16.0.2/24&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</summary>
+    
+    
+    
+    
+    <category term="ip" scheme="https://ming.theyan.gs/tags/ip/"/>
+    
+    <category term="OpenVPN" scheme="https://ming.theyan.gs/tags/OpenVPN/"/>
+    
+    <category term="AWS" scheme="https://ming.theyan.gs/tags/AWS/"/>
+    
+    <category term="AL2023" scheme="https://ming.theyan.gs/tags/AL2023/"/>
+    
+    <category term="Amazon Linux 2023" scheme="https://ming.theyan.gs/tags/Amazon-Linux-2023/"/>
+    
+    <category term="EC2" scheme="https://ming.theyan.gs/tags/EC2/"/>
+    
+    <category term="策略路由" scheme="https://ming.theyan.gs/tags/%E7%AD%96%E7%95%A5%E8%B7%AF%E7%94%B1/"/>
+    
+    <category term="ping" scheme="https://ming.theyan.gs/tags/ping/"/>
+    
+    <category term="路由表" scheme="https://ming.theyan.gs/tags/%E8%B7%AF%E7%94%B1%E8%A1%A8/"/>
+    
+    <category term="rp_filter" scheme="https://ming.theyan.gs/tags/rp-filter/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>通过 API 抓取 linear.app 的任务生成周报</title>
+    <link href="https://ming.theyan.gs/2023/04/%E9%80%9A%E8%BF%87%20API%20%E6%8A%93%E5%8F%96%20linear.app%20%E7%9A%84%E4%BB%BB%E5%8A%A1%E7%94%9F%E6%88%90%E5%91%A8%E6%8A%A5/index.html"/>
+    <id>https://ming.theyan.gs/2023/04/%E9%80%9A%E8%BF%87%20API%20%E6%8A%93%E5%8F%96%20linear.app%20%E7%9A%84%E4%BB%BB%E5%8A%A1%E7%94%9F%E6%88%90%E5%91%A8%E6%8A%A5/index.html</id>
+    <published>2023-04-29T11:21:34.000Z</published>
+    <updated>2023-04-29T14:15:28.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>某个项目用了 linear.app 来做任务分配和跟踪，为了写周报，想利用 API 来自动获取任务信息。</p><span id="more"></span><h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><h3 id="获取-API-密钥"><a href="#获取-API-密钥" class="headerlink" title="获取 API 密钥"></a>获取 API 密钥</h3><p>在 linear.app 里，点击自己的头像-&gt;Settings，点击左边导航栏的 <code>API</code>，在右边页面的 <code>Personal API keys</code> 下面 <code>Create key</code> 一下，然后记住。</p><h3 id="安装-SDK"><a href="#安装-SDK" class="headerlink" title="安装 SDK"></a>安装 SDK</h3><p>linear.app 的官方的 SDK 是 TypeScript 写的，但实际上 JavaScript 也是兼容的吧。官方给的安装 SDK 的命令就是下面这个：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install @linear/sdk</span><br><span class="line"><span class="comment"># 安装 SDK</span></span><br></pre></td></tr></table></figure><h3 id="GraphQL-介绍"><a href="#GraphQL-介绍" class="headerlink" title="GraphQL 介绍"></a>GraphQL 介绍</h3><p>linear.app 的公开的 API 都是用 GraphQL 搭建的，官方也建议用 GraphQL 来获取数据</p><h2 id="实现代码"><a href="#实现代码" class="headerlink" title="实现代码"></a>实现代码</h2><p>前方高能预警：调包侠再次上线！</p><p>核心实现代码：</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">LinearClient</span> &#125; <span class="keyword">from</span> <span class="string">&#x27;@linear/sdk&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 用你的linear.app API密钥替换这里的YOUR_API_KEY</span></span><br><span class="line"><span class="keyword">const</span> apiKey = <span class="string">&#x27;lin_api_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&#x27;</span>;</span><br><span class="line"><span class="keyword">const</span> linearClient = <span class="keyword">new</span> <span class="title class_">LinearClient</span>(&#123; apiKey &#125;);</span><br><span class="line"><span class="keyword">const</span> graphQLClient = linearClient.<span class="property">client</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义一个GraphQL查询来获取上一周完成的工作列表</span></span><br><span class="line"><span class="keyword">const</span> queryLastWeekWork = <span class="string">`</span></span><br><span class="line"><span class="string">  query GetLastWeekWork($startDate: DateTime, $endDate: DateTime) &#123;</span></span><br><span class="line"><span class="string">    viewer &#123;</span></span><br><span class="line"><span class="string">        assignedIssues(filter: &#123;</span></span><br><span class="line"><span class="string">            state: &#123; type: &#123; eq: &quot;completed&quot; &#125; &#125;</span></span><br><span class="line"><span class="string">            completedAt: &#123;</span></span><br><span class="line"><span class="string">                gte: $startDate</span></span><br><span class="line"><span class="string">                lte: $endDate</span></span><br><span class="line"><span class="string">            &#125;</span></span><br><span class="line"><span class="string">        &#125;) &#123;</span></span><br><span class="line"><span class="string">            nodes &#123;</span></span><br><span class="line"><span class="string">                id</span></span><br><span class="line"><span class="string">                title</span></span><br><span class="line"><span class="string">                completedAt</span></span><br><span class="line"><span class="string">                url</span></span><br><span class="line"><span class="string">                creator &#123; id &#125;</span></span><br><span class="line"><span class="string">                assignee &#123; id &#125;</span></span><br><span class="line"><span class="string">            &#125;</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">  &#125;</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义一个函数来获取上周的日期范围</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">getLastWeekDates</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> today = <span class="keyword">new</span> <span class="title class_">Date</span>();</span><br><span class="line">  <span class="keyword">const</span> lastWeekStart = <span class="keyword">new</span> <span class="title class_">Date</span>(today);</span><br><span class="line">  lastWeekStart.<span class="title function_">setDate</span>(today.<span class="title function_">getDate</span>() - <span class="number">7</span>);</span><br><span class="line">  <span class="keyword">const</span> lastWeekEnd = <span class="keyword">new</span> <span class="title class_">Date</span>(today);</span><br><span class="line">  lastWeekEnd.<span class="title function_">setDate</span>(today.<span class="title function_">getDate</span>());</span><br><span class="line">  <span class="keyword">return</span> &#123; <span class="attr">startDate</span>: lastWeekStart.<span class="title function_">toISOString</span>(), <span class="attr">endDate</span>: lastWeekEnd.<span class="title function_">toISOString</span>() &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 执行查询并生成工作周报</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">generateWeeklyReport</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; startDate, endDate &#125; = <span class="title function_">getLastWeekDates</span>(); <span class="comment">// 调用函数获取上周日期范围</span></span><br><span class="line">    <span class="keyword">const</span> response = <span class="keyword">await</span> graphQLClient.<span class="title function_">rawRequest</span>(queryLastWeekWork);</span><br><span class="line">    <span class="keyword">const</span> tasks = response.<span class="property">data</span>.<span class="property">viewer</span>.<span class="property">assignedIssues</span>.<span class="property">nodes</span>;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;工作周报：\n&#x27;</span>);</span><br><span class="line">    tasks.<span class="title function_">forEach</span>(<span class="function">(<span class="params">task</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`- [<span class="subst">$&#123;task.title&#125;</span>](<span class="subst">$&#123;task.url&#125;</span>) 完成于 <span class="subst">$&#123;task.completedAt&#125;</span>`</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">error</span>(<span class="string">&#x27;生成工作周报时出错：&#x27;</span>, error);</span><br><span class="line">  &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>把以上代码存为文件：<code>linear.js</code>，再用 Node.Js 来跑一下：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node linear.js</span><br></pre></td></tr></table></figure><p>周报出炉！</p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h2&gt;&lt;p&gt;某个项目用了 linear.app 来做任务分配和跟踪，为了写周报，想利用 API 来自动获取任务信息。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="linear.app" scheme="https://ming.theyan.gs/tags/linear-app/"/>
+    
+    <category term="SDK" scheme="https://ming.theyan.gs/tags/SDK/"/>
+    
+    <category term="TypeScript" scheme="https://ming.theyan.gs/tags/TypeScript/"/>
+    
+    <category term="JavaScript" scheme="https://ming.theyan.gs/tags/JavaScript/"/>
+    
+    <category term="Node.Js" scheme="https://ming.theyan.gs/tags/Node-Js/"/>
+    
+    <category term="GraphQL" scheme="https://ming.theyan.gs/tags/GraphQL/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>利用 AWS System Manager 来连 VPC 内网的资源</title>
+    <link href="https://ming.theyan.gs/2023/03/%E5%88%A9%E7%94%A8%20AWS%20System%20Manager%20%E6%9D%A5%E8%BF%9E%20VPC%20%E5%86%85%E7%BD%91%E7%9A%84%E8%B5%84%E6%BA%90/index.html"/>
+    <id>https://ming.theyan.gs/2023/03/%E5%88%A9%E7%94%A8%20AWS%20System%20Manager%20%E6%9D%A5%E8%BF%9E%20VPC%20%E5%86%85%E7%BD%91%E7%9A%84%E8%B5%84%E6%BA%90/index.html</id>
+    <published>2023-03-09T13:23:34.000Z</published>
+    <updated>2023-03-14T15:34:27.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><h3 id="配置好的-EC2"><a href="#配置好的-EC2" class="headerlink" title="配置好的 EC2"></a>配置好的 EC2</h3><p>VPC 内需要有一台 EC2（有无公网 IP 好像没关系），并做好相关配置</p><h4 id="安装-SSM-Agent"><a href="#安装-SSM-Agent" class="headerlink" title="安装 SSM Agent"></a>安装 SSM Agent</h4><p>Amazon Linux（无论是 1，还是 2，或者是 2023） 一般是预装好的，只需要确认是否正常启动：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl status amazon-ssm-agent</span><br><span class="line"><span class="comment"># 如果没有启动的话，设置为自启动，并启动</span></span><br><span class="line">sudo systemctl <span class="built_in">enable</span> amazon-ssm-agent</span><br><span class="line">sudo systemctl start amazon-ssm-agent</span><br></pre></td></tr></table></figure><span id="more"></span><p>如果系统没有安装过 SSM Agent，那么安装（以 CentOS 8 为例）：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo dnf install -y \</span><br><span class="line">    https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm</span><br></pre></td></tr></table></figure><h4 id="激活“默认主机管理配置”"><a href="#激活“默认主机管理配置”" class="headerlink" title="激活“默认主机管理配置”"></a>激活“默认主机管理配置”</h4><ol><li>访问 <a href="https://console.aws.amazon.com/systems-manager/">https://console.aws.amazon.com/systems-manager/</a>，打开 AWS Systems Manager 控制台。</li><li>在导航窗格中，选择 <strong>Fleet Manager</strong>。或者如果首先打开 AWS Systems Manager 主页，选择菜单图标 (  <img src="https://docs.aws.amazon.com/zh_cn/systems-manager/latest/userguide/images/menu-icon-small.png" alt="The menu icon">) 以打开导航窗格，然后在导航窗格中选择 <strong>Fleet Manager</strong>。</li><li>在<strong>账户管理</strong>下拉列表中选择<strong>默认主机管理配置</strong>。</li><li>打开<strong>启用默认主机管理配置</strong>。</li><li>选择用于为您的实例启用 Systems Manager 功能的 AWS Identity and Access Management（IAM）角色。我们建议使用“默认主机管理配置”提供的默认角色。它包含使用 Systems Manager 管理您的 Amazon EC2 实例所需的最低权限集合。如果您更喜欢使用自定义角色，则该角色的信任策略必须允许 Systems Manager 作为可信实体。</li><li>选择<strong>配置</strong>以完成设置。</li></ol><p>注意：</p><p>在打开“默认主机管理配置”后，您的实例可能需要最长 30 分钟才能使用所选角色的凭证。您必须在要自动管理 Amazon EC2 实例的每个区域中打开“默认主机管理配置”。</p><p>如不做其他调整，最多 30 分钟以后，你会在 System Manager -&gt; Fleet Manager -&gt; Managed nodes 下看到你的 EC2 了</p><h3 id="本地-aws-cli-和-Session-Manager-plugin"><a href="#本地-aws-cli-和-Session-Manager-plugin" class="headerlink" title="本地 aws-cli 和 Session Manager plugin"></a>本地 aws-cli 和 Session Manager plugin</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 我的本地环境是 Macbook Air (m1)，</span></span><br><span class="line"><span class="comment"># 其他环境可能命令不一样</span></span><br><span class="line">curl \</span><br><span class="line">    <span class="string">&quot;https://awscli.amazonaws.com/AWSCLIV2.pkg&quot;</span> \</span><br><span class="line">    -o <span class="string">&quot;AWSCLIV2.pkg&quot;</span></span><br><span class="line">sudo installer \</span><br><span class="line">    -pkg AWSCLIV2.pkg \</span><br><span class="line">    -target /</span><br><span class="line"><span class="comment"># 以上命令是安装 aws-cli。</span></span><br><span class="line"><span class="comment"># 然后当然还需要配置 aws --configure</span></span><br><span class="line"><span class="comment"># 或 aws --profile xxx --configure</span></span><br><span class="line">curl \</span><br><span class="line">    <span class="string">&quot;https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac_arm64/session-manager-plugin.pkg&quot;</span> \</span><br><span class="line">    -o <span class="string">&quot;session-manager-plugin.pkg&quot;</span></span><br><span class="line">sudo installer \</span><br><span class="line">    -pkg session-manager-plugin.pkg \</span><br><span class="line">    -target /</span><br><span class="line">sudo <span class="built_in">ln</span> \</span><br><span class="line">    -s /usr/local/sessionmanagerplugin/bin/session-manager-plugin \</span><br><span class="line">    /usr/local/bin/session-manager-plugin</span><br></pre></td></tr></table></figure><h2 id="具体使用"><a href="#具体使用" class="headerlink" title="具体使用"></a>具体使用</h2><h3 id="场景一：登录服务器"><a href="#场景一：登录服务器" class="headerlink" title="场景一：登录服务器"></a>场景一：登录服务器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">aws --profile <span class="built_in">test</span> \</span><br><span class="line">    ssm start-session \</span><br><span class="line">    --target i-xxxxxxxxxxxxxxxxxx</span><br><span class="line"><span class="comment"># &quot;i-xxxxxxxxxxxxxxxxxx&quot; 是这台 EC2 的 ID</span></span><br></pre></td></tr></table></figure><h3 id="场景二：打洞到-RDS"><a href="#场景二：打洞到-RDS" class="headerlink" title="场景二：打洞到 RDS"></a>场景二：打洞到 RDS</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">aws --profile <span class="built_in">test</span> \</span><br><span class="line">    ssm start-session \</span><br><span class="line">    --target i-xxxxxxxxxxxxxxxxxx \</span><br><span class="line">    --document-name AWS-StartPortForwardingSessionToRemoteHost \</span><br><span class="line">    --parameters 、</span><br><span class="line">    host=<span class="string">&quot;10.0.0.1&quot;</span>,portNumber=<span class="string">&quot;3306&quot;</span>,localPortNumber=<span class="string">&quot;5555&quot;</span></span><br><span class="line"><span class="comment"># 这里的 “10.0.0.1” 是你要连的 MySQL 的 IP 地址，是假设的，得根据实际情况修改</span></span><br></pre></td></tr></table></figure><p>然后就可以愉快的在本地连数据库了：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -h 127.0.0.1 -P 5555 -U admin -p</span><br></pre></td></tr></table></figure>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;环境&quot;&gt;&lt;a href=&quot;#环境&quot; class=&quot;headerlink&quot; title=&quot;环境&quot;&gt;&lt;/a&gt;环境&lt;/h2&gt;&lt;h3 id=&quot;配置好的-EC2&quot;&gt;&lt;a href=&quot;#配置好的-EC2&quot; class=&quot;headerlink&quot; title=&quot;配置好的 EC2&quot;&gt;&lt;/a&gt;配置好的 EC2&lt;/h3&gt;&lt;p&gt;VPC 内需要有一台 EC2（有无公网 IP 好像没关系），并做好相关配置&lt;/p&gt;
+&lt;h4 id=&quot;安装-SSM-Agent&quot;&gt;&lt;a href=&quot;#安装-SSM-Agent&quot; class=&quot;headerlink&quot; title=&quot;安装 SSM Agent&quot;&gt;&lt;/a&gt;安装 SSM Agent&lt;/h4&gt;&lt;p&gt;Amazon Linux（无论是 1，还是 2，或者是 2023） 一般是预装好的，只需要确认是否正常启动：&lt;/p&gt;
+&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;sudo systemctl status amazon-ssm-agent&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;# 如果没有启动的话，设置为自启动，并启动&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo systemctl &lt;span class=&quot;built_in&quot;&gt;enable&lt;/span&gt; amazon-ssm-agent&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;sudo systemctl start amazon-ssm-agent&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;</summary>
+    
+    
+    
+    
+    <category term="AWS" scheme="https://ming.theyan.gs/tags/AWS/"/>
+    
+    <category term="AWS System Manager" scheme="https://ming.theyan.gs/tags/AWS-System-Manager/"/>
+    
+    <category term="Session Manager" scheme="https://ming.theyan.gs/tags/Session-Manager/"/>
+    
+    <category term="SSM" scheme="https://ming.theyan.gs/tags/SSM/"/>
+    
+    <category term="amazon-ssm-agent" scheme="https://ming.theyan.gs/tags/amazon-ssm-agent/"/>
+    
+    <category term="Fleet Manager" scheme="https://ming.theyan.gs/tags/Fleet-Manager/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>从 Client VPN endpoint 迁移到 EC2 上的 OpenVPN</title>
+    <link href="https://ming.theyan.gs/2023/02/%E4%BB%8E%20Client%20VPN%20endpoint%20%E8%BF%81%E7%A7%BB%E5%88%B0%20EC2%20%E4%B8%8A%E7%9A%84%20OpenVPN/index.html"/>
+    <id>https://ming.theyan.gs/2023/02/%E4%BB%8E%20Client%20VPN%20endpoint%20%E8%BF%81%E7%A7%BB%E5%88%B0%20EC2%20%E4%B8%8A%E7%9A%84%20OpenVPN/index.html</id>
+    <published>2023-02-22T12:16:25.000Z</published>
+    <updated>2023-02-25T14:26:44.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>原本有一个 Client VPN endpoint 在 AWS 新加坡。有几个原因导致要迁移：</p><ul><li>没几天就不能用了，具体原因不足为外人道也，懂的都懂。</li><li>Client VPN endpoint 太贵了。</li></ul><h2 id="现有环境"><a href="#现有环境" class="headerlink" title="现有环境"></a>现有环境</h2><ul><li>免费的 EC2 一台，跑的是 Amazon Linux 2023</li></ul><span id="more"></span><h2 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h2><h3 id="安装-OpenVPN"><a href="#安装-OpenVPN" class="headerlink" title="安装 OpenVPN"></a>安装 OpenVPN</h3><p>由于 Amazon Linux 2023 里没有 OpenVPN 的包，也考察过 Fedora 36 的包，但思来想去，还是源代码编译安装吧，所以 OpenVPN 最后还是源代码编译安装的。</p><p>登录 EC2 后，开始操作：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">wget https://swupdate.openvpn.org/community/releases/openvpn-2.6.6.tar.gz</span><br><span class="line">tar xzvf openvpn-2.6.6.tar.gz</span><br><span class="line"><span class="built_in">cd</span> openvpn-2.6.6</span><br><span class="line">./configure --prefix=/usr/local/openvpn</span><br><span class="line">make</span><br><span class="line"><span class="comment"># configure 和 make 的时候会出一些错误</span></span><br><span class="line"><span class="comment"># 多半是缺少什么包导致的，见招拆招吧，</span></span><br><span class="line"><span class="comment"># 缺什么直接用 sudo dnf install xxx 装上即可</span></span><br><span class="line">sudo make install</span><br><span class="line">sudo <span class="built_in">mkdir</span> /usr/local/openvpn/etc</span><br><span class="line">sudo <span class="built_in">cp</span> ca.crt /usr/local/openvpn/etc/</span><br><span class="line">sudo <span class="built_in">cp</span> server.crt /usr/local/openvpn/etc/</span><br><span class="line">sudo <span class="built_in">cp</span> server.key /usr/local/openvpn/etc/</span><br><span class="line"><span class="comment"># 因为是迁移，所以这里把原来有的 ca.crt、server.crt 和 </span></span><br><span class="line"><span class="comment"># server.key 拷贝到 /usr/local/openvpn/etc/ 目录下</span></span><br><span class="line"><span class="built_in">cd</span> /usr/local/openvpn/etc</span><br><span class="line">sudo wget https://github.com/OpenVPN/openvpn/raw/master/sample/sample-config-files/server.conf</span><br><span class="line"><span class="comment"># 上面是从 OpenVPN 官方代码库里把服务器配置例子扒下来</span></span><br></pre></td></tr></table></figure><h3 id="配置-OpenVPN-服务器"><a href="#配置-OpenVPN-服务器" class="headerlink" title="配置 OpenVPN 服务器"></a>配置 OpenVPN 服务器</h3><p>还是在 EC2 上，<code>/usr/local/openvpn/etc</code> 目录下</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /usr/local/openvpn/etc/server.conf</span><br><span class="line"><span class="comment"># 以官方例子为模版修改服务器配置文件</span></span><br></pre></td></tr></table></figure><p>有几个地方需要改：</p><ul><li>cipher 这一行改成 <code>cipher AES-256-GCM</code></li><li>dh 这一行改成 <code>dh none</code></li><li>user 这一行改成 <code>user nobody</code></li><li>group 这一行改成 <code>group nobody</code></li><li>port 这一行是端口号，自己看着改，缺省 1194 也可以</li><li>proto 这一行建议改成 <code>proto tcp</code></li><li>explicit-exit-notify 这一行如果 proto 设成 tcp 的话要改成 <code>explicit-exit-notify 0</code></li><li>cert 这一行改成 <code>cert /usr/local/openvpn/etc/server.crt</code></li><li>key 这一行改成 <code>key /usr/local/openvpn/etc/server.key</code></li><li>ca 这一行改成 <code>ca /usr/local/openvpn/etc/ca.crt</code></li><li>push “route 这一行需要按需写上要推送的路由（每行写一段），比如 <code>push &quot;route 172.16.0.0 255.240.0.0&quot;</code></li></ul><h3 id="Linux-上打开包转发"><a href="#Linux-上打开包转发" class="headerlink" title="Linux 上打开包转发"></a>Linux 上打开包转发</h3><p>EC2 上</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;net.ipv4.ip_forward = 1&quot;</span> &gt; /etc/sysctl.d/10-OpenVPN.conf</span><br><span class="line">sudo sysctl -p /etc/sysctl.d/10-OpenVPN.conf</span><br></pre></td></tr></table></figure><h3 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h3><p>EC2 上</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo /usr/local/openvpn/sbin/openvpn \</span><br><span class="line">    --config /usr/local/openvpn/etc/server.conf \</span><br><span class="line">    --daemon</span><br></pre></td></tr></table></figure><h3 id="AWS-上修改-EC2-的设置"><a href="#AWS-上修改-EC2-的设置" class="headerlink" title="AWS 上修改 EC2 的设置"></a>AWS 上修改 EC2 的设置</h3><p>所有做包转发的 EC2，都需要强制关掉 AWS 官方的 source&#x2F;destination check。方法是：</p><p><code>Actions</code>-&gt;<code>Networking</code>-&gt;<code>change source/destination check</code>，然后点“stop”</p><p>至此，VPN 从 AWS 的 <code>Client VPN endpoint</code> 已经迁移到我们自己的 EC2 上了，以前的客户端，只需要改下 remote 那一行的服务器地址为 EC2 的公网地址，以及将 proto 改成 tcp（Client VPN endpoint 缺省是 udp，而且不能改）即可继续使用，连新的 VPN 服务器。</p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;原本有一个 Client VPN endpoint 在 AWS 新加坡。有几个原因导致要迁移：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;没几天就不能用了，具体原因不足为外人道也，懂的都懂。&lt;/li&gt;
+&lt;li&gt;Client VPN endpoint 太贵了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;现有环境&quot;&gt;&lt;a href=&quot;#现有环境&quot; class=&quot;headerlink&quot; title=&quot;现有环境&quot;&gt;&lt;/a&gt;现有环境&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;免费的 EC2 一台，跑的是 Amazon Linux 2023&lt;/li&gt;
+&lt;/ul&gt;</summary>
+    
+    
+    
+    
+    <category term="OpenVPN" scheme="https://ming.theyan.gs/tags/OpenVPN/"/>
+    
+    <category term="AWS" scheme="https://ming.theyan.gs/tags/AWS/"/>
+    
+    <category term="AL2023" scheme="https://ming.theyan.gs/tags/AL2023/"/>
+    
+    <category term="Amazon Linux 2023" scheme="https://ming.theyan.gs/tags/Amazon-Linux-2023/"/>
+    
+    <category term="EC2" scheme="https://ming.theyan.gs/tags/EC2/"/>
+    
+    <category term="Client VPN endpoint" scheme="https://ming.theyan.gs/tags/Client-VPN-endpoint/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>用 Scratch 3 制作小游戏：2048</title>
+    <link href="https://ming.theyan.gs/2023/01/%E7%94%A8%20Scratch%203%20%E5%88%B6%E4%BD%9C%E5%B0%8F%E6%B8%B8%E6%88%8F%EF%BC%9A2048/index.html"/>
+    <id>https://ming.theyan.gs/2023/01/%E7%94%A8%20Scratch%203%20%E5%88%B6%E4%BD%9C%E5%B0%8F%E6%B8%B8%E6%88%8F%EF%BC%9A2048/index.html</id>
+    <published>2023-01-12T11:11:32.000Z</published>
+    <updated>2023-01-21T12:22:24.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>乐宝幼儿园的时候上过一段时间的 Scratch 的课，他对这个表现出了浓厚的兴趣，于是我就给他买了基本相关的书籍，他也爱不释手。由于领导注意到乐宝对电子产品的痴迷，怕他迷失，所以规定他周末才能玩儿半小时的 Scratch。我发现他在用 Scratch 做一点小程序（照着书吧），而且还乐此不疲。正好我也有时间，所以我想琢磨下怎么做个游戏，然后再教乐乐（编写）。</p><span id="more"></span><p>真的是这样吗？哈哈，真的起源原因真不是这样的，而是因为乐乐手头有一个我二十多年前买的 Handspring 的 Visor，就是这一款：<a href="https://www.ifixit.com/Device/Handspring_Visor_Deluxe_PDA">Handspring Visor Deluxe PDA@ifixit</a>，乐乐也很喜欢，但我网上找了找，几乎已经没有任何应用了，连中文支持：CJK，貌似都没法用了。于是我想能不能自己写点简单的小程序，port 上去。于是就有了写个小游戏：2048 的想法。</p><p>这才是最初的需求，至于改用 Scratch 来弄，那是后来的想法。</p><h2 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h2><p>后来一搜，Scratch 官网就有一大堆的 2048 游戏程序例程（当然是别人分享出来的），我看了好多，都觉得有点复杂。而且油管上也有人录视频专门讲怎样编写 2048 这个游戏。本来想哪天翻译下来，再录个视频（又给自己挖了个坑：）。然后在中文世界里翻一翻，发现 B 站也有详细讲解的中文的视频。具体链接在这里：<a href="https://www.bilibili.com/video/BV1oZ4y1s7TQ/">B 站用 Scratch 编写 2048 游戏的教学视频</a> 然后我的这个 2048 程序也是完全按照这个视频做（抄）下来的。</p><p>所以，这里说起来过程，其实就是一个字：抄。：）</p><p>言归正传。这个视频里其实还是有一些小坑的。大家从头看到尾了就会知道。有些的，是前面挖，但是后面自己填了，但是有一些是没填的。我这里就提一下没填的。其实主要就是一个：变量 <code>clone?</code> 的问题。</p><p>这个变量我理解应该是标识角色是否是克隆体的。由于作者的疏忽，视频里作者点击“新建一个变量”，然后输入变量名“clond?”，保持缺省选项：“所有角色可见”的前提下点击“OK”，结果发现系统已有这个变量。这是个容易忽视的小细节。在我的系统里（Scratch 3.29）里，照作者的方式是能新建这个变量：<code>clone?</code> 的，就算系统已存在叫“clone?”的变量。</p><p>然后一直到最后，我都发现有一个小问题：就是我的程序跑起来，会在 4x4 方格的右下方，显示一个方框角色，怎么都弄不掉。仔细再看了看程序代码，发现这个方块是方块角色做完 16 次克隆自己的操作以后移动到的位置。但是按照程序里处理广播消息：show 的积木块的代码来讲，母体角色是应该不显示的呀。再仔细看看处理广播消息：show 的程序，发现这个逻辑有问题：</p><p>这段程序是在 <code>clone? = 1</code> 的前提下才执行的（这个思路貌似很清晰：只有克隆块才执行），但问题是启动时变量 <code>clone?</code> 被赋值为 0，但是在“当作为克隆体启动时执行”的代码块里，又将 <code>clone?</code> 设置成了 1。问题来了，<code>clone?</code> 是个全局变量，克隆体里将其设置为 1 了，那么母体角色也能读到，所以每次做 show 操作时，母体角色执行时也会是 <code>clone? = 1</code> 成立，所以母体角色也被显示了出来。:(</p><p>当然，也有其他办法来修复这个 bug，但我又翻了翻 Scratch 关于变量的资料，发现其实这里只要将 <code>clone?</code> 设置为本角色可见就行了。因为在母体角色里，<code>clone?</code> 是为 0 的（系统启动时设置的）。克隆以后，克隆体继承了这个私有变量（本角色可见的变量），然后又在“作为克隆体启动时”的代码块里将其（<code>clone?</code>）设置成了 1，但是母体角色里 <code>clone?</code> 还是 0！！！！！这样母体角色在执行处理 show 消息的代码块时，判断 <code>clone? = 1</code> 不成立，所以不会被显示。问题被解决。</p><h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>这里贴一张改好后我自己玩儿 2048 时的截图</p><p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/Screenshot%202023-09-28%20at%2010.40.13.png" alt="2048，我玩儿到 512 了"></p><p>然后，最最后，我把代码贴出来，有兴趣的可以用来教小朋友哟。哈哈</p><ul><li><a href="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/2048.sb3">整个 2048 项目 Scratch 3 源代码</a></li></ul>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;乐宝幼儿园的时候上过一段时间的 Scratch 的课，他对这个表现出了浓厚的兴趣，于是我就给他买了基本相关的书籍，他也爱不释手。由于领导注意到乐宝对电子产品的痴迷，怕他迷失，所以规定他周末才能玩儿半小时的 Scratch。我发现他在用 Scratch 做一点小程序（照着书吧），而且还乐此不疲。正好我也有时间，所以我想琢磨下怎么做个游戏，然后再教乐乐（编写）。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="game" scheme="https://ming.theyan.gs/tags/game/"/>
+    
+    <category term="游戏" scheme="https://ming.theyan.gs/tags/%E6%B8%B8%E6%88%8F/"/>
+    
+    <category term="Scratch" scheme="https://ming.theyan.gs/tags/Scratch/"/>
+    
+    <category term="Scratch3" scheme="https://ming.theyan.gs/tags/Scratch3/"/>
+    
+    <category term="2048" scheme="https://ming.theyan.gs/tags/2048/"/>
+    
+    <category term="Handspring Visor" scheme="https://ming.theyan.gs/tags/Handspring-Visor/"/>
+    
+    <category term="PDA" scheme="https://ming.theyan.gs/tags/PDA/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>How to deal with a faked tf card</title>
+    <link href="https://ming.theyan.gs/2022/12/How%20to%20deal%20with%20a%20faked%20tf%20card/index.html"/>
+    <id>https://ming.theyan.gs/2022/12/How%20to%20deal%20with%20a%20faked%20tf%20card/index.html</id>
+    <published>2022-12-09T14:23:35.000Z</published>
+    <updated>2022-12-14T13:42:34.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>上一任租户有个可能运营商送的监控，有个摄像头，反正没用了，我就拆下来看看，发现里面有个 TF 卡，标着 256G 容量。就是如下这货：</p><span id="more"></span><p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/tf-faked.jpg" alt="&quot;256G&quot; 的 TF 卡"></p><h3 id="134G-268G"><a href="#134G-268G" class="headerlink" title="134G-&gt;268G"></a>134G-&gt;268G</h3><p>插到电脑里，发现只能看到 134G 的容量，DiskUtil 里也是，如下图：</p><p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/tf134g.jpg" alt="MacOS 里的 DiskUtil 下只能看到 134G 的 TF 卡"></p><p>MacOS 下，执行：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo diskutil eraseDisk xxx xxxx xxxx xxxx</span><br></pre></td></tr></table></figure><p>大致意思就是使用 MacOS 下的命令 diskutil 及相关参数 eraseDisk 来做。</p><p>注意：diskutil 的图形模式不具有这些功能！</p><p>这回，终于能认出来 268G 的容量了，如下图所示：</p><p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/tf268g.jpg" alt="MacOS 下的 DiskUtil 终于认到 268G 的容量了"></p><h3 id="268G-30G"><a href="#268G-30G" class="headerlink" title="268G-&gt;30G"></a>268G-&gt;30G</h3><p>于是，插上电脑（HP Chromebook 11a G6 EE，关于这台机器，可以看文章：[How to Install Xubuntu on a Chromebook](“&#x2F;2022&#x2F;11&#x2F;How to Install Xubuntu on a Chromebook&#x2F;“)）开始安装 Linux，结果发现老失败，说是 TF 卡那个分区失败。于是开始怀疑卡（标称容量）有问题，网上搜了些相关资料，然后在电脑上下载了个叫 f3 的程序，用其工具 <code>f3probe</code> 来测了一下，结果是：30G！测出来真实的容量只有 30G！</p><p>然后根据建议用 <code>f3fix</code> 命令修复了下，想把正确的容量大小写回去，结果发现……跟我想要的结果不一样。再次考虑到 f3 是一个八年前的项目了，我又找了台 windows 机器，装了一个 DiskGenius，想再确认一下容量。</p><h3 id="30G-26G"><a href="#30G-26G" class="headerlink" title="30G-&gt;26G"></a>30G-&gt;26G</h3><p>这一回，DiskGenius 只认出 26G 的容量！！！最后我赶紧分区、格式化，然后插回到监控摄像头里，这种容量造假的 TF 卡，我可不敢用来跑系统。说不定速度也是造假的呢。</p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;上一任租户有个可能运营商送的监控，有个摄像头，反正没用了，我就拆下来看看，发现里面有个 TF 卡，标着 256G 容量。就是如下这货：&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="TF" scheme="https://ming.theyan.gs/tags/TF/"/>
+    
+    <category term="Micro SD" scheme="https://ming.theyan.gs/tags/Micro-SD/"/>
+    
+    <category term="faked" scheme="https://ming.theyan.gs/tags/faked/"/>
+    
+    <category term="f3" scheme="https://ming.theyan.gs/tags/f3/"/>
+    
+    <category term="f3probe" scheme="https://ming.theyan.gs/tags/f3probe/"/>
+    
+    <category term="f3fix" scheme="https://ming.theyan.gs/tags/f3fix/"/>
+    
+    <category term="DiskGenius" scheme="https://ming.theyan.gs/tags/DiskGenius/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>How to Install Xubuntu on a Chromebook</title>
+    <link href="https://ming.theyan.gs/2022/11/How%20to%20Install%20Xubuntu%20on%20a%20Chromebook/index.html"/>
+    <id>https://ming.theyan.gs/2022/11/How%20to%20Install%20Xubuntu%20on%20a%20Chromebook/index.html</id>
+    <published>2022-11-02T11:18:29.000Z</published>
+    <updated>2022-11-23T12:31:53.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>鱼总毕业了，带回来一台 <a href="https://support.hp.com/gb-en/document/c06220011">Chromebook(HP Chromebook 11A G6 EE)</a>，说是毕业了，学校就把学生用的电脑送给学生了。</p><p>鱼总说这电脑配置挺渣的，但续航还行，ebay 上还能卖个二三十刀，让我看着办。</p><p>我还能怎么办？！凉拌呗。当下失业在家，没有收入，当然有垃圾必捡，且用且珍惜啦。</p><p>于是，折腾走起。鉴于国内使用 ChromeOS 的种种不便，决定还是装一套 Linux 跑着吧。本来，ChromeOS 就直接支持 Linux(打开开发者模式就会有个简单的 Linux 可用)，而且还能通过几种工具（如 <a href="https://github.com/dnschneid/crouton">Crouton</a> 和 <a href="https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md">Crostini</a> 或 <a href="https://chrx.org/">chrx</a> ）安装 Linux，但我觉得还是要装一个“干净”的 Linux 更好一些。</p><span id="more"></span><h2 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h2><h3 id="turn-on-Developer-Mode"><a href="#turn-on-Developer-Mode" class="headerlink" title="turn on Developer Mode"></a>turn on Developer Mode</h3><p>在 Chromebook 上打开开发者模式（Developer Mode），方法很简单。</p><ul><li>关机</li><li>开机。同时按住 Esc key, refresh key（键盘最上一排，带箭头的大半个圆圈的那个键）和电源键</li><li>当显示 Chrome OS is missing or damaged 的图片时，同时按住 Ctrl+D</li><li>如果需要输入的话，直接回车</li><li>机器会重启进入 Chromebook 的初始化安装设置，完成设置后</li><li>当显示 OS verification is off 提示时按 Ctrl+D，系统会重启。搞定。</li></ul><h3 id="Create-a-Bootable-USB-Drive"><a href="#Create-a-Bootable-USB-Drive" class="headerlink" title="Create a Bootable USB Drive"></a>Create a Bootable USB Drive</h3><p>创建一个 Linux distribution 的安装 U 盘。</p><ul><li>下载一个 Linux 的 iso 文件（image）</li><li>用 dd 命令或其他烧 iso 文件到 U 盘的工具（如 <a href="https://etcher.balena.io/">Balena Etcher</a> ）将 ISO 文件写到 U 盘里。</li></ul><h3 id="disable-firmware-write-protect"><a href="#disable-firmware-write-protect" class="headerlink" title="disable firmware write-protect"></a>disable firmware write-protect</h3><p>因为下一步刷写新的 firmware 需要关闭 write protection。所以这一步我们需要提前做。根据 Chromebook 的型号不一样，关闭 WP 的方法各异，具体请查阅：<a href="https://mrchromebox.tech/#devices%EF%BC%8C%E6%89%BE%E5%88%B0%E4%BD%A0%E7%9A%84">https://mrchromebox.tech/#devices，找到你的</a> Chromebook 的型号，看看其的 <em><strong>WP Method</strong></em> 是哪种情况，我的 HP Chromebook 11A G6 EE 是“battery”，意思是可以通过摘掉电池（battery）的方法来临时禁掉 firmware write-protect。</p><p>这里禁掉 WP 的方法很多，有的是拧下一颗螺钉……</p><p>于是我们先拆机，具体可以参考油管上的一个视频：<a href="https://www.youtube.com/watch?v=SnTBAYd_am4">HP Chromebook 11 G6 EE Battery Replacement@youtube</a>，或者是拆机图：<a href="https://www.ifixit.com/Guide/HP+Chromebook+11+G6+EE+Battery+Replacement/154057">HP Chromebook 11 G6 EE Battery Replacement@ifixit</a>，先把盖子拆了。</p><p>看到电池以后，把电池和主板连接的那个接头小心的拔出即可。</p><h3 id="Install-a-UEFI-BIOS"><a href="#Install-a-UEFI-BIOS" class="headerlink" title="Install a UEFI BIOS"></a>Install a UEFI BIOS</h3><p>刷一个 UEFI 的 BIOS 的 firmware，这里用的是 <a href="https://mrchromebox.tech/">mrchromebox 改过的 coreboot</a></p><ul><li>开机（因为电池被断开，所以要接着电源）</li><li>按 Ctrl+Alt+t，输入 <code>shell</code>，回车</li><li>接着输入命令：<code>cd; curl -LO mrchromebox.tech/firmware-util.sh &amp;&amp; sudo bash firmware-util.sh</code></li><li>输入 2（也就是选“Install&#x2F;Update UEFI (Full ROM) Firmware”）</li><li>按提示输入（有机会插入 U 盘备份原来机器上的 ChromeOS 系统）直到刷写结束</li></ul><p>上面的过程有几个需要注意的地方：</p><ol><li>curl 命令的参数 “-LO” 是大写的英文字母”L”和“O”（不是数字 0 哟）</li><li>curl 命令出 ssl 握手错误的时候，多加一个参数“k”（也就是用参数“-LOk”而不是”-LO”）</li></ol><h3 id="Install-Linux-to-Chromebook-by-USB-stick"><a href="#Install-Linux-to-Chromebook-by-USB-stick" class="headerlink" title="Install Linux to Chromebook by USB stick"></a>Install Linux to Chromebook by USB stick</h3><p>这里终于要用到前面做的 USB 启动盘了。</p><ul><li>插入前面做好的 Linux USB 启动盘</li><li>开机（保持电源接入）</li><li>敲击 esc 键进入 BIOS</li><li>选择 U 盘启动</li><li>然后就正常安装即可</li></ul>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;鱼总毕业了，带回来一台 &lt;a href=&quot;https://support.hp.com/gb-en/document/c06220011&quot;&gt;Chromebook(HP Chromebook 11A G6 EE)&lt;/a&gt;，说是毕业了，学校就把学生用的电脑送给学生了。&lt;/p&gt;
+&lt;p&gt;鱼总说这电脑配置挺渣的，但续航还行，ebay 上还能卖个二三十刀，让我看着办。&lt;/p&gt;
+&lt;p&gt;我还能怎么办？！凉拌呗。当下失业在家，没有收入，当然有垃圾必捡，且用且珍惜啦。&lt;/p&gt;
+&lt;p&gt;于是，折腾走起。鉴于国内使用 ChromeOS 的种种不便，决定还是装一套 Linux 跑着吧。本来，ChromeOS 就直接支持 Linux(打开开发者模式就会有个简单的 Linux 可用)，而且还能通过几种工具（如 &lt;a href=&quot;https://github.com/dnschneid/crouton&quot;&gt;Crouton&lt;/a&gt; 和 &lt;a href=&quot;https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md&quot;&gt;Crostini&lt;/a&gt; 或 &lt;a href=&quot;https://chrx.org/&quot;&gt;chrx&lt;/a&gt; ）安装 Linux，但我觉得还是要装一个“干净”的 Linux 更好一些。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="Ubuntu" scheme="https://ming.theyan.gs/tags/Ubuntu/"/>
+    
+    <category term="Linux" scheme="https://ming.theyan.gs/tags/Linux/"/>
+    
+    <category term="Xubuntu" scheme="https://ming.theyan.gs/tags/Xubuntu/"/>
+    
+    <category term="Chromebook" scheme="https://ming.theyan.gs/tags/Chromebook/"/>
+    
+    <category term="coreboot" scheme="https://ming.theyan.gs/tags/coreboot/"/>
+    
+    <category term="HP" scheme="https://ming.theyan.gs/tags/HP/"/>
+    
+    <category term="HP Chromebook 11A G6 EE" scheme="https://ming.theyan.gs/tags/HP-Chromebook-11A-G6-EE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>利用 Termux 和 Termux-API 在 Android 手机上定时自动更新壁纸</title>
+    <link href="https://ming.theyan.gs/2022/10/%E5%88%A9%E7%94%A8%20termux%20%E5%92%8C%20termux-api%20%E5%9C%A8%20android%20%E6%89%8B%E6%9C%BA%E4%B8%8A%E5%AE%9A%E6%97%B6%E6%9B%B4%E6%96%B0%E5%A3%81%E7%BA%B8/index.html"/>
+    <id>https://ming.theyan.gs/2022/10/%E5%88%A9%E7%94%A8%20termux%20%E5%92%8C%20termux-api%20%E5%9C%A8%20android%20%E6%89%8B%E6%9C%BA%E4%B8%8A%E5%AE%9A%E6%97%B6%E6%9B%B4%E6%96%B0%E5%A3%81%E7%BA%B8/index.html</id>
+    <published>2022-10-13T14:37:22.000Z</published>
+    <updated>2022-10-18T12:12:35.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>这个事情的需求，其实……就是闲得。</p><p>开个玩笑。我其实之前用 Tasker 这个 APP 做过类似的事情，见之前文章：<a href="/2018/07/%E5%88%86%E4%BA%AB%E4%B8%80%E4%BA%9B%E8%87%AA%E5%B7%B1DIY%E7%9A%84task%E7%9A%84profile/index.html">分享一些自己DIY的task的profile</a>，但是有一阵遇到了 android 手机的壁纸 bug，我的 pixel 给干挂了两回，其中有一回甚至给重制了才救回来，救回来之后就没起过自动更换壁纸的任务了。</p><p>这次是看到 V 站上有个大佬，展示自己极少的 APP 时，截图里展示了一个桌面，上面的壁纸上有格言，还有英文单词。于是我就自然而然的想要不要把毒鸡汤也写到壁纸上呢？：）</p><span id="more"></span><h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><h3 id="Termux-和-Termux-API"><a href="#Termux-和-Termux-API" class="headerlink" title="Termux 和 Termux-API"></a>Termux 和 Termux-API</h3><p>我这里环境（Termux 和 Termux-API）是现成的，但如果没有需要安装的话，请记住，不要装 google play 上的 Termux 和 Termux-API，而是要装 F-Droid 这个市场上的 Termux 和 Termux-API！</p><p>注意：要给 Termux 足够的权限（也许 Termux-API 也需要）：</p><ul><li>后台运行的权限（不要被节电模式给干掉）</li><li>要设置为随机启动</li></ul><p>最后，还要打开 Termux，输入：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">apt install termux-api;</span><br><span class="line"><span class="comment"># pkg install termux-api; # 也可以用命令 pkg</span></span><br></pre></td></tr></table></figure><h3 id="ImageMagick-及其他软件"><a href="#ImageMagick-及其他软件" class="headerlink" title="ImageMagick 及其他软件"></a>ImageMagick 及其他软件</h3><p>打开 Termux，继续输入：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">apt install ImageMagick;</span><br><span class="line">apt install wget curl grep sed;</span><br></pre></td></tr></table></figure><h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><h3 id="抓取毒鸡汤"><a href="#抓取毒鸡汤" class="headerlink" title="抓取毒鸡汤"></a>抓取毒鸡汤</h3><p><a href="https://djt.theyan.gs/">毒鸡汤</a> 也是我自己 fork 了某个大佬的代码，自己搭建的服务。本身没提供 API 服务，这里也没想再开发一个 API 接口，所以直接模拟 web 访问，然后把需要的数据抓出来即可。不过我们还需要手工折行。</p><h3 id="定时抓取壁纸并处理（用-ImageMagick）"><a href="#定时抓取壁纸并处理（用-ImageMagick）" class="headerlink" title="定时抓取壁纸并处理（用 ImageMagick）"></a>定时抓取壁纸并处理（用 ImageMagick）</h3><p>我自己有个壁纸服务：<a href="https://wallpaper.theyan.gs/wp">壁纸</a>，会定时更新输出的壁纸，后台爬虫是用 go 实现的。</p><p>这里我就直接用了自己的这个壁纸服务，定时（每小时）去抓一个壁纸回来。接着做如下处理：</p><ul><li>如果宽小于 1080 或者高小于 2400 的话，会首先被按原比例放大，直到宽达到 1080 或高达到 2400（具体看哪种放大的比率小）。</li><li>再接着在壁纸正中截取一个 1080x2400 的图片出来</li><li>最后在这个截取出来的 1080x2400 的图片的合适位置写上毒鸡汤服务中抓取出来的文本数据，把最终结果保存为文件</li></ul><h3 id="设置壁纸"><a href="#设置壁纸" class="headerlink" title="设置壁纸"></a>设置壁纸</h3><p>最后自然是把上一步保留的文件用 termux-wallpaper 命令（来自于软件包 Termux-API）设置成新壁纸。</p><h3 id="把整个工作自动化"><a href="#把整个工作自动化" class="headerlink" title="把整个工作自动化"></a>把整个工作自动化</h3><p>把上面的流程写成代码（假设存为文件 $HOME&#x2F;bin&#x2F;change_wallpaper.sh），再用 termux-job-scheduler（来自于软件包 Termux-API）将这个代码设置为定时运行。我的例子里我是这样用的。打开 Termux，输入命令：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">termux-job-scheduler \</span><br><span class="line">    --persisted <span class="literal">true</span> \</span><br><span class="line">    --period-ms 3600000 \</span><br><span class="line">    -s <span class="variable">$HOME</span>/bin/change_wallpaper.sh;</span><br><span class="line"><span class="comment"># persisted 是指重启后保持有效</span></span><br><span class="line"><span class="comment"># period-ms 3600000 是指一小时跑一次</span></span><br></pre></td></tr></table></figure><h2 id="几个坑"><a href="#几个坑" class="headerlink" title="几个坑"></a>几个坑</h2><h3 id="中文字体"><a href="#中文字体" class="headerlink" title="中文字体"></a>中文字体</h3><p>在图片上写中文（含全角标点）时需要用中文的字体，因为普通字体里没有中文字符呀！</p><p>所以，要在所有可用字体里选出有中文字符且全角标点位置不在中间的，其实还有个想法，就是想找一个酷一点的中文字体，我把所有可用字体做了个循环，测试写中文字符以及全角标点，结果保存到文件里，代码大概如下：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> $(\</span><br><span class="line">    magick -list font | \</span><br><span class="line">    grep <span class="string">&quot;Font:&quot;</span> | \</span><br><span class="line">    awk <span class="string">&#x27;&#123;print $2&#125;&#x27;</span> \</span><br><span class="line">)</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="variable">$i</span></span><br><span class="line">    convert \</span><br><span class="line">        -font <span class="variable">$i</span> \</span><br><span class="line">        -pointsize 72 \</span><br><span class="line">        label:测，。试<span class="built_in">test</span> \</span><br><span class="line">        x.jpg x-<span class="variable">$&#123;i&#125;</span>.jpg</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure><p>我先在我的 Mac 里跑的，找到一堆合适的字体以后，再去找 Termux 里 <code>magick -list font | grep &quot;Fonts:&quot; | awk &#39;&#123;print $2&#125;&#39;</code> 的结果来做对比，结果发现，匹配上的只有一种字体：<strong>Noto-Serif-CJK-SC</strong>。:(</p><p>当然，也可以再单独在 Termux 里安装新的好看的可用字体。但我没这么做，看以后需求吧。</p><h3 id="crond-vs-termux-job-scheduler"><a href="#crond-vs-termux-job-scheduler" class="headerlink" title="crond vs termux-job-scheduler"></a>crond vs termux-job-scheduler</h3><p>其实最早这个方案我是打算用 crond 来做定时任务的，软件都安装设置好了。</p><p>打开 Termux，</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install cronie termux-services;</span><br></pre></td></tr></table></figure><p>关闭并重新打开 Termux</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sv-enable crond;</span><br></pre></td></tr></table></figure><p>但是发现用 crond 跑其他任务都没问题，但是跑 termux-API 里的命令总会报 Selinux 的错误！实在是搞不定啊，于是才转向 termux-job-scheduler 方案。</p><p>其实刚用 termux-job-scheduler 时日志里也出跟 crond 一样的信息，当时心就哇凉了，但没想到后来自己居然就好了？！：）</p><h3 id="ImageMagick-的-crop-跟-gravity-Center-一起用的问题"><a href="#ImageMagick-的-crop-跟-gravity-Center-一起用的问题" class="headerlink" title="ImageMagick 的 -crop 跟 -gravity Center 一起用的问题"></a>ImageMagick 的 -crop 跟 -gravity Center 一起用的问题</h3><p>ImageMagick 软件包里的命令：<strong>convert</strong> 有个参数：*-crop*，功能是用来从图片上截取一部分，这个参数还需要提供 x、y 两个参数，这两个可以理解为横坐标（x）和纵坐标（y），这个时候学过一点点编程基础的小可爱们是不是自然而然都会以为 <em>-crop</em> 参数（其实是操作参数，可以理解为命令）截取的长方形图片是以这个横坐标 x、纵坐标y 为顶点的呢？</p><p>我一开始也是这么认为的，所以当我用 <em>-gravity Center</em> 将坐标零点设置为图片中心之后，我将参数 x 和 y 分别设置成了 -540 和 -1200，结果就悲催了，最后经过调试，才知道当有 <em>-gravity Center</em> 时，x 和 y 是指截取长方形的中心的坐标！！！！</p><p>所以，这里的 x 和 y 都应该是 0 才对！！</p><h2 id="change-wallpaper-sh-代码"><a href="#change-wallpaper-sh-代码" class="headerlink" title="change_wallpaper.sh 代码"></a>change_wallpaper.sh 代码</h2><p>最后，show you the code:</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/data/data/com.termux/files/usr/bin/bash</span></span><br><span class="line"></span><br><span class="line">TMP_IMG=<span class="string">&quot;<span class="subst">$(mktemp $HOME/tmp/tmpimg.XXXXXX)</span>&quot;</span></span><br><span class="line">sublen=8   <span class="comment"># 每行显示的字符个数</span></span><br><span class="line">DJT_TXT=<span class="string">&quot;<span class="subst">$(</span></span></span><br><span class="line"><span class="subst"><span class="string">        curl -s https://djt.theyan.gs | \</span></span></span><br><span class="line"><span class="subst"><span class="string">        grep -Po &#x27;(xxxxxxxxxx)</span>&#x27; | \</span></span><br><span class="line"><span class="string">        sed -r &#x27;s/.&#123;&#x27;&quot;</span><span class="variable">$sublen</span><span class="string">&quot;&#x27;&#125;/&amp;\n/g&#x27; \</span></span><br><span class="line"><span class="string">)&quot;</span></span><br><span class="line"></span><br><span class="line">wget -q -O - https://wallpaper.theyan.gs/wp | \</span><br><span class="line">    convert - \</span><br><span class="line">        -resize <span class="string">&#x27;1080x2400^&lt;&#x27;</span> \</span><br><span class="line">        - | \</span><br><span class="line">    convert - -gravity Center \</span><br><span class="line">        -crop 1080x2400+0+0 \</span><br><span class="line">        +repage \</span><br><span class="line">        - | \</span><br><span class="line">    magick - -font Noto-Serif-CJK-SC \</span><br><span class="line">        -pointsize 128 \</span><br><span class="line">        -fill DarkViolet \</span><br><span class="line">        -annotate +5+500 \</span><br><span class="line">        <span class="string">&quot;<span class="variable">$DJT_TXT</span>&quot;</span> \</span><br><span class="line">        <span class="variable">$TMP_IMG</span></span><br><span class="line"></span><br><span class="line">termux-wallpaper -f <span class="variable">$TMP_IMG</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">rm</span> <span class="variable">$TMP_IMG</span></span><br><span class="line"><span class="comment"># 抓毒鸡汤那一段 grep 的正则需要自己调整这个程序才能正常跑</span></span><br><span class="line"><span class="comment"># 不要来抓我的毒鸡汤的数据呀：（，这个项目程序、数据都是开源的，可以直接下载的，地址毒鸡汤上有。</span></span><br></pre></td></tr></table></figure><p>最后，附壁纸截图一张：</p><p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/WechatIMG116.jpeg" alt="手机壁纸截图"></p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;这个事情的需求，其实……就是闲得。&lt;/p&gt;
+&lt;p&gt;开个玩笑。我其实之前用 Tasker 这个 APP 做过类似的事情，见之前文章：&lt;a href=&quot;/2018/07/%E5%88%86%E4%BA%AB%E4%B8%80%E4%BA%9B%E8%87%AA%E5%B7%B1DIY%E7%9A%84task%E7%9A%84profile/index.html&quot;&gt;分享一些自己DIY的task的profile&lt;/a&gt;，但是有一阵遇到了 android 手机的壁纸 bug，我的 pixel 给干挂了两回，其中有一回甚至给重制了才救回来，救回来之后就没起过自动更换壁纸的任务了。&lt;/p&gt;
+&lt;p&gt;这次是看到 V 站上有个大佬，展示自己极少的 APP 时，截图里展示了一个桌面，上面的壁纸上有格言，还有英文单词。于是我就自然而然的想要不要把毒鸡汤也写到壁纸上呢？：）&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="Android" scheme="https://ming.theyan.gs/tags/Android/"/>
+    
+    <category term="Termux" scheme="https://ming.theyan.gs/tags/Termux/"/>
+    
+    <category term="Termux-API" scheme="https://ming.theyan.gs/tags/Termux-API/"/>
+    
+    <category term="ImageMagick" scheme="https://ming.theyan.gs/tags/ImageMagick/"/>
+    
+    <category term="termux-job-scheduler" scheme="https://ming.theyan.gs/tags/termux-job-scheduler/"/>
+    
+    <category term="termux-wallpaper" scheme="https://ming.theyan.gs/tags/termux-wallpaper/"/>
+    
+    <category term="F-Dorid" scheme="https://ming.theyan.gs/tags/F-Dorid/"/>
+    
+    <category term="convert" scheme="https://ming.theyan.gs/tags/convert/"/>
+    
+    <category term="magick" scheme="https://ming.theyan.gs/tags/magick/"/>
+    
+    <category term="cronie" scheme="https://ming.theyan.gs/tags/cronie/"/>
+    
+    <category term="apt" scheme="https://ming.theyan.gs/tags/apt/"/>
+    
+    <category term="pkg" scheme="https://ming.theyan.gs/tags/pkg/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Best Practices for VPC IP Address Allocation</title>
+    <link href="https://ming.theyan.gs/2022/09/Best%20Practices%20for%20VPC%20IP%20Address%20Allocation/index.html"/>
+    <id>https://ming.theyan.gs/2022/09/Best%20Practices%20for%20VPC%20IP%20Address%20Allocation/index.html</id>
+    <published>2022-09-13T12:13:23.000Z</published>
+    <updated>2022-09-22T15:13:35.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>如今公有云用的越来越多，各个区域、不同可用区，还有各种特殊服务，再加上也许还有自建 IDC，还有办公网内网。我的传统是会将这些内网打通的。所以，各个节点网络的 IP 地址分配策略（方案）就成了一个绕不开的话题。</p><span id="more"></span><h2 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h2><ul><li>region: 公有云厂商每个 region（我喜欢叫做节点）里可以创建多个 VPC</li><li>zone: 每个 region 会有三个或更多的可用区（zone），每个可用区可以看作是一个数据中心（IDC）</li><li>subnet: subnet(子网) 会在某个可用区（zone）里创建。</li></ul><h3 id="VPC-分配策略"><a href="#VPC-分配策略" class="headerlink" title="VPC 分配策略"></a>VPC 分配策略</h3><p>我常用的一些 VPC 创建管理策略：</p><ul><li>生产(Product)、测试(testing)和 Stage 环境（如果有的话）一般会单独一个 VPC</li><li>infrastracture 的相关机器（比如 Gitlab、VPN server、日志处理和监控报警等）也会一个单独的 VPC（规模相对较小）</li></ul><h3 id="VPC-下-subnet-的策略"><a href="#VPC-下-subnet-的策略" class="headerlink" title="VPC 下 subnet 的策略"></a>VPC 下 subnet 的策略</h3><ul><li>公有云厂商一般会建议每个 VPC 至少要跨两个可用区（为了冗余，避免某个可用区挂掉导致所有服务不可用），我一般会跨三个可用区。</li><li>公有云厂商会建议 VPC 下的子网（subnet）分成公网子网（配公网 IP）和私网子网（不配公网 IP）。</li></ul><h3 id="VPC-中的-IP-分配"><a href="#VPC-中的-IP-分配" class="headerlink" title="VPC 中的 IP 分配"></a>VPC 中的 IP 分配</h3><h4 id="私网地址"><a href="#私网地址" class="headerlink" title="私网地址"></a>私网地址</h4><p>这里指的是在 <a href="https://tools.ietf.org/html/rfc1918">RFC 1918</a> 里定义的“私有地址空间（Private Address Space）”，各大公有云厂商允许分配给 VPC 的 IP 地址只能是这其中的。</p><ol><li>10.0.0.0&#x2F;8（从 10.0.0.0 到 10.255.255.255）</li><li>172.16.0.0&#x2F;12（从 172.16.0.0 到 172.31.255.255）</li><li>192.168.0.0&#x2F;16（从 192.168.0.0 到 192.168.255.255）</li></ol><h4 id="VPC-和-subnet-的-IP-分配要求"><a href="#VPC-和-subnet-的-IP-分配要求" class="headerlink" title="VPC 和 subnet 的 IP 分配要求"></a>VPC 和 subnet 的 IP 分配要求</h4><ul><li>每个 VPC 要分一段（上面提到的）私网地址</li><li>VPC 下的每个 subnet 也要独占一段其 VPC 占有的私网地址中的一段</li></ul><h2 id="IP-分配策略"><a href="#IP-分配策略" class="headerlink" title="IP 分配策略"></a>IP 分配策略</h2><h3 id="VPC"><a href="#VPC" class="headerlink" title="VPC"></a>VPC</h3><ol><li>根据 VPC 的数量多少选用 10 段、172 段还是 192 段的 IP</li><li>每个 VPC 根据需求大小选一个或多个 C 段地址，当然更小也是可以的，比如半个 C 段（比如有些 infrastructure）。</li></ol><h3 id="subnet"><a href="#subnet" class="headerlink" title="subnet"></a>subnet</h3><p>以最简单的 VPC 配置四个 C 段地址为例（我常用是一个 VPC 两个 C 段），假设其是 <strong>10.0.0.0&#x2F;22</strong>（也就是 10.0.0.0&#x2F;24、10.0.1.0&#x2F;24、10.0.2.0&#x2F;24 和 10.0.3.0&#x2F;24 四个 C 段），那么：</p><p>找三个可用区，</p><ul><li>分别建立一个私网子网，分配 IP 地址段：<ul><li>10.0.0.0&#x2F;24</li><li>10.0.1.0&#x2F;24</li><li>10.0.2.0&#x2F;24</li></ul></li><li>分别建立一个公网子网，分配 IP 地址段：<ul><li>10.0.3.0&#x2F;26</li><li>10.0.3.64&#x2F;26</li><li>10.0.3.128&#x2F;26</li></ul></li></ul><p>可以看出这个 VPC 还剩一段 IP：10.0.3.192&#x2F;26，这一段就留作冗余。</p><p>注意：</p><ul><li>VPC 的 internet gateway 要放到公网子网里</li><li>VPC 的 SNAT 设备要放到公网子网里</li><li>VPC 的公网子网的 default gateway 指向的是 internet gateway</li><li>VPC 的私网子网的 default gateway 指向的是 SNAT 设备</li></ul><h2 id="待续"><a href="#待续" class="headerlink" title="待续"></a>待续</h2><p>本方案并没有考虑 IPv6 的情况，以后有机会更新的时候，会把 IPv6 的支持考虑进去。</p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;如今公有云用的越来越多，各个区域、不同可用区，还有各种特殊服务，再加上也许还有自建 IDC，还有办公网内网。我的传统是会将这些内网打通的。所以，各个节点网络的 IP 地址分配策略（方案）就成了一个绕不开的话题。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="VPC" scheme="https://ming.theyan.gs/tags/VPC/"/>
+    
+    <category term="Best Practice" scheme="https://ming.theyan.gs/tags/Best-Practice/"/>
+    
+    <category term="Subnet" scheme="https://ming.theyan.gs/tags/Subnet/"/>
+    
+    <category term="IP Allocation" scheme="https://ming.theyan.gs/tags/IP-Allocation/"/>
+    
+    <category term="公有云" scheme="https://ming.theyan.gs/tags/%E5%85%AC%E6%9C%89%E4%BA%91/"/>
+    
+    <category term="最佳实践" scheme="https://ming.theyan.gs/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>中小企业多 IDC 之间的内网打通方案</title>
+    <link href="https://ming.theyan.gs/2022/08/%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A%E5%A4%9A%20IDC%20%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%85%E7%BD%91%E6%89%93%E9%80%9A%E6%96%B9%E6%A1%88/index.html"/>
+    <id>https://ming.theyan.gs/2022/08/%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A%E5%A4%9A%20IDC%20%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%85%E7%BD%91%E6%89%93%E9%80%9A%E6%96%B9%E6%A1%88/index.html</id>
+    <published>2022-08-03T13:33:42.000Z</published>
+    <updated>2022-08-12T15:11:23.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>这个问题我觉得中小公司有需求，但是大公司应该没这个需求，大公司肯定都找第三方直接 MPLS 之类的商业全套解决方案了。但是对于缺钱的中小企业，我觉得还是有借鉴意义的。</p><span id="more"></span><p>这篇文章本来是要讲“中小企业维护海外服务器的 VPN 方案”的，但讲着讲着，发现大部分内容，都是讲的“内网打通”。:(</p><p>这个方案准确讲是来自我在某个前司（前司比较多：）的一段工作经历，他们业务跑在海外公有云（AWS）上，技术团队在国内，连服务器需要先拨 VPN，直接拨经常断，所以我就折腾了这么一个方案出来，我在那里的一年多时间，完全没有出过问题。</p><h2 id="方案细节"><a href="#方案细节" class="headerlink" title="方案细节"></a>方案细节</h2><h3 id="方案概况"><a href="#方案概况" class="headerlink" title="方案概况"></a>方案概况</h3><p>正所谓：一图胜千文。所以，请看图：</p><p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/Backbone_network.jpg" alt="内网拓扑图"></p><p>注意：这里为了脱敏，我把一些真正的公网 IP 地址和公司产品的名字以及一些我认为是隐私的信息隐去了。</p><p>另外，上图其实可以和我的另外一篇文章：<a href="/2021/03/How%20to%20build%20IPsec%20tunnel%20between%20checkpoint%20and%20AWS%20ec2%20at%20cn-north-1/index.html">怎样在 checkpoint 设备和 AWS 北京的 EC2 之间搭建 IPsec 隧道</a> 结合起来看。</p><p>所以，这个图其实是个“内网打通”的示意图。</p><h3 id="关键点"><a href="#关键点" class="headerlink" title="关键点"></a>关键点</h3><h4 id="海外节点之间的（内网）互联"><a href="#海外节点之间的（内网）互联" class="headerlink" title="海外节点之间的（内网）互联"></a>海外节点之间的（内网）互联</h4><p>各大公有云厂商，都有成熟的产品来处理内部的各个 VPC 之间的内网互通，比如如上图所示，aws 的相关产品，就叫 “transit gateway”，阿里云也有类似的产品，好像叫“云企业网”还是什么别的。Azure 和 GCP 就不太了解，但肯定有类似产品。</p><p>所以，这个问题的答案就是：</p><ul><li>如果是厂商内部，直接使用厂商的产品即可。跨账号的 VPC 之间也支持（内网打通）哟，但是要注意内网 IP 别冲突了</li><li>如果是厂商之间、或者是厂商和自建 IDC 之间，那么推荐用 WireGuard 打通即可。</li></ul><h4 id="国内节点之间的（内网）互联"><a href="#国内节点之间的（内网）互联" class="headerlink" title="国内节点之间的（内网）互联"></a>国内节点之间的（内网）互联</h4><p>答案其实跟海外的一样：</p><ul><li>厂商内部，直接用厂商的产品</li><li>跨厂商或跟 IDC 之间，用 WireGuard</li></ul><p>当然，这里也有例外，比如上图所示：北京 office 和 AWS 北京节点之间，就是用 IPSec 而不是 WireGuard 打通的（具体怎么打通，前面有提到的一篇文章中有详细记载）。为什么这样呢？那主要是因为公司给北京办公室配置了设备呀，checkpoint 的防火墙！这货不支持 WireGuard。故而只能在 AWS 北京节点起台 ec2，装个 IPSec 服务，然后两者打通。</p><h3 id="方案的“缺点”"><a href="#方案的“缺点”" class="headerlink" title="方案的“缺点”"></a>方案的“缺点”</h3><p>这个方案就是路由表的维护需要仔细又仔细。其实并不难，主要是复杂，需要细心，维护时尽量对着图来做，配完多做测试。</p><h3 id="补充一下-VPN-接入方案"><a href="#补充一下-VPN-接入方案" class="headerlink" title="补充一下 VPN 接入方案"></a>补充一下 VPN 接入方案</h3><p>前面有提到这个方案也可以用做 VPN 优化的。首先我们看看优化之前我们的 VPN 架构是怎么样的。</p><p>之前，VPN server 都是在海外的公有云节点上，国内连一个是慢，而最重要的是不稳定，非常容易被封。</p><p>而（内网打通）之后，我的 VPN 方案我推荐其主要接入点放在国内同一家厂商据用户最近的接入点（如上图例就是 aws 北京接入点，再准确点就是 IPSec 那台 EC2），然后再在海外每个节点保留一个冗余接入点即可。注意：这些 VPN 接入点的认证都是统一的。</p><p>这样一来从（VPN）主接入点来说，用户从国内（大概率是从北京）连过来，不容易被干扰，大概率不会被封，而同一厂商国内节点到海外节点之间数据链路也会比较稳定通畅，也不容易被干扰、被封。所以，整条链路不一定有多快，但肯定是要稳定的多得多得多。</p><h2 id="方案的局限性"><a href="#方案的局限性" class="headerlink" title="方案的局限性"></a>方案的局限性</h2><h3 id="节点维护的复杂性"><a href="#节点维护的复杂性" class="headerlink" title="节点维护的复杂性"></a>节点维护的复杂性</h3><p>想想如果新加入一个节点，会需要做哪些操作。</p><p>通常，我们会把新的节点和已有的所有节点直连，当然，跨境的节点之间例外。而做 WireGuard 点对点配置，加一个对端点，需要改整个的配置，所以，理论上在一个点上改 WireGuard 配置时，上面的所有 WireGuard 链接都会受影响（因为大致需要重启 WireGuard 服务）。</p><h3 id="路由选择的复杂性"><a href="#路由选择的复杂性" class="headerlink" title="路由选择的复杂性"></a>路由选择的复杂性</h3><p>还有一个，就是路由选择的可能的坑，比如节点 A、B 和 C 之间，两两互通，那么从 A 到 C，路由 A-&gt;C 和 A-&gt;B-&gt;C 都是可以的，而且一般情况下自然是直连也就是 A-&gt;C 更好，所以我们这里的方案也是 A-&gt;C。说了“一般情况”，那么肯定就还有“例外”吧，对的，像国内家庭宽带到海外节点之间，就是典型的例外情况，这种情况下直连远不如走国内的厂商中转一下。那么，像我们这样把这种例外情况下就不做直连，路由也直接走中转不就得了？这也不是绝对的，事情是变化的，也许这一时刻这条路由更优，下一时刻又是另外一条路由更优。:- 对啦，我想说的就是，远期有时间的时候，可以考虑下把路由扔给 OSPF 来管理，这样逼格完全就不一是一个层次了！:)</p><h2 id="最优雅的内网互通方案"><a href="#最优雅的内网互通方案" class="headerlink" title="最优雅的内网互通方案"></a>最优雅的内网互通方案</h2><p>其实其实，说到“内网互联的方案”的我最最理想的情况，还是类似于自建 zerotier 的方案。自己搭建PLANT，然后每个节点找台网关机器接入自己的 zerotier 网络，这就完了，所有节点也就互通了。而且路由当能直通的时候，节点之间是直通的，当节点之间不能互通的时候，可以通过 PLANT 来互通。这才是内网互通的最优雅解决方案。下回有空谢谢这个。不过最好还是得哪个贵司给我个机会让我实践一下。:O</p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;这个问题我觉得中小公司有需求，但是大公司应该没这个需求，大公司肯定都找第三方直接 MPLS 之类的商业全套解决方案了。但是对于缺钱的中小企业，我觉得还是有借鉴意义的。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="IPSec" scheme="https://ming.theyan.gs/tags/IPSec/"/>
+    
+    <category term="aws" scheme="https://ming.theyan.gs/tags/aws/"/>
+    
+    <category term="VPC" scheme="https://ming.theyan.gs/tags/VPC/"/>
+    
+    <category term="公有云" scheme="https://ming.theyan.gs/tags/%E5%85%AC%E6%9C%89%E4%BA%91/"/>
+    
+    <category term="checkpoint" scheme="https://ming.theyan.gs/tags/checkpoint/"/>
+    
+    <category term="VPN" scheme="https://ming.theyan.gs/tags/VPN/"/>
+    
+    <category term="中小企业" scheme="https://ming.theyan.gs/tags/%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A/"/>
+    
+    <category term="方案" scheme="https://ming.theyan.gs/tags/%E6%96%B9%E6%A1%88/"/>
+    
+    <category term="transit gateway" scheme="https://ming.theyan.gs/tags/transit-gateway/"/>
+    
+    <category term="WireGuard" scheme="https://ming.theyan.gs/tags/WireGuard/"/>
+    
+    <category term="OSPF" scheme="https://ming.theyan.gs/tags/OSPF/"/>
+    
+    <category term="Zerotier" scheme="https://ming.theyan.gs/tags/Zerotier/"/>
+    
+    <category term="PLANT" scheme="https://ming.theyan.gs/tags/PLANT/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>为了在家用起来 google nest mini 的旁路由方案</title>
+    <link href="https://ming.theyan.gs/2022/07/%E4%B8%BA%E4%BA%86%E5%9C%A8%E5%AE%B6%E7%94%A8%E8%B5%B7%E6%9D%A5%20google%20nest%20mini%20%E7%9A%84%E6%97%81%E8%B7%AF%E7%94%B1%E6%96%B9%E6%A1%88/index.html"/>
+    <id>https://ming.theyan.gs/2022/07/%E4%B8%BA%E4%BA%86%E5%9C%A8%E5%AE%B6%E7%94%A8%E8%B5%B7%E6%9D%A5%20google%20nest%20mini%20%E7%9A%84%E6%97%81%E8%B7%AF%E7%94%B1%E6%96%B9%E6%A1%88/index.html</id>
+    <published>2022-07-07T13:42:23.000Z</published>
+    <updated>2022-07-11T11:47:38.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>为了把从美国带回来的在家吃灰了几个月的 Google 智能音箱(Google Nest Mini)用起来。而之前由于家里都是终端设备自己搞定科学上网的需求，家里并没有全局的科学上网方案。但这一次由于要用 Google Nest Mini，则必须要搞个设备，搭科学上网环境了。</p><span id="more"></span><h2 id="方案细节"><a href="#方案细节" class="headerlink" title="方案细节"></a>方案细节</h2><h3 id="设备"><a href="#设备" class="headerlink" title="设备"></a>设备</h3><p>家里还有个吃灰几年的极路由三（HiWiFi HC5861），用的是联发科的架构（MediaTek MT7620A），这一次打算将其用起来，作为科学上网的设备。</p><p>于是将其刷上最新的 OpenWRT。具体过程就不说了。</p><p>然后因为我所有的设备，但凡支持，都会起 zerotier，于是这太极三也装上了 zerotier，并加入我的网络（跟我的 vps 以及其他设备在同一个虚拟的 zerotier 网段）</p><h3 id="方案变迁"><a href="#方案变迁" class="headerlink" title="方案变迁"></a>方案变迁</h3><h4 id="socks-proxy-V2Ray-方案"><a href="#socks-proxy-V2Ray-方案" class="headerlink" title="socks proxy(V2Ray) 方案"></a>socks proxy(V2Ray) 方案</h4><p>因为设备连接 WiFi 时大都会允许设置一个 proxy，所以，在最初的方案里，我是想让这台极三充当一个 socks proxy 的角色，当需要科学上网的设备（这里就是 Google Nest Mini）通过 WiFi 接入家庭网络的时候，将 proxy 指过来，这样实现设备的科学上网。</p><p>这个方案也简单，只需要在极三上起一个 V2Ray 服务，这个服务的入站（inbound）只需要开一个整个局域网共享的 socks proxy 的支持就可以了，出站（outbound）当然是对接海外 vps 上的 V2Ray 服务。</p><p>最后，这个方案的环境弄好了，结果配 Google Nest Mini 的时候发现无法让其使用 socks proxy，故而最后这个方案没有用起来。</p><h4 id="zerotier-透明代理-方案"><a href="#zerotier-透明代理-方案" class="headerlink" title="zerotier+透明代理 方案"></a>zerotier+透明代理 方案</h4><p>这个方案是想设备（Google Nest Mini）用 WiFi 来连科学上网设备极三，然后在极三上用 iptables 把所有流量转发到海外 vps 的 zerotier 那个网卡所在的 IP 地址的 socks proxy 端口（V2Ray 服务支持）上。</p><p>这个方案的问题在于我极三的 WiFi 我用来连家里的 WiFi 了，再要起一个 sid 接受 WiFi 连接呢，配置起来比较麻烦，而且，可能会影响家里原来 WiFi 的信号（因为 WiFi 会互相干扰）。</p><p>最后，这个方案虽然也没被放弃，但是极三上的 zerotier 却是配好了。</p><h4 id="旁路由-透明代理方案"><a href="#旁路由-透明代理方案" class="headerlink" title="旁路由+透明代理方案"></a>旁路由+透明代理方案</h4><p>这是最终实施并生效的方案。</p><p>大致情况如下：</p><ul><li>极路由三上跑 V2Ray 服务<ul><li>入站启用透明代理和 socks 代理（不是必须的）</li><li>路由配置成私有地址和中国国内的网站直连，其他走科学上网。</li><li>出站配直连和走海外 vps 上的 V2Ray 服务（我用的是 websocket 方式）</li></ul></li><li>主路由的 DHCP 设置里<ul><li>绑定极路由三的 mac 地址和一个固定 IP</li><li>绑定设备 Google Nest Mini 的 mac 地址和另外一个固定 IP，并强制推送网关地址为极路由三的 IP 地址（上一步配置的）</li></ul></li></ul><h3 id="实施步骤及具体配置"><a href="#实施步骤及具体配置" class="headerlink" title="实施步骤及具体配置"></a>实施步骤及具体配置</h3><h4 id="极三上安装-V2Ray"><a href="#极三上安装-V2Ray" class="headerlink" title="极三上安装 V2Ray"></a>极三上安装 V2Ray</h4><p>这其实是个难点。极三上能装软件的空间只有 10M，结果直接 <code>opkg install v2ray-core</code> 出来的可执行文件 v2ray 直接有 20+M，显然不能直接装。幸好有大佬把 v2ray-core port 到了 OpenWRT 上[^1]，他编了个 v2ray-core-mini 勉强可用。具体在极三上：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line">wget \</span><br><span class="line">  https://github.com/kuoruan/openwrt-v2ray/releases/download/v4.45.2-1/v2ray-core-mini_4.45.2-1_mipsel_24kc.ipk</span><br><span class="line">opkg install v2ray-core-mini*.ipk</span><br><span class="line"><span class="built_in">rm</span> v2ray-core-mini*.ipk</span><br></pre></td></tr></table></figure><p>然后还要一些数据（因为 v2ray-core-mini 包里不含 geoip.dat 和 geosite.dat 等数据文件，这些文件太大了），我们这里手工下载了一个 geosite.dat，这个就够了，那个 geoip.dat 有二十多兆，太大了。</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/bin</span><br><span class="line">wget https://github.com/v2fly/domain-list-community/releases/download/20230403032550/dlc.dat</span><br><span class="line"><span class="built_in">mv</span> dlc.dat geosite.dat</span><br></pre></td></tr></table></figure><p>最好还装上 V2Ray 服务的 luci 包，这样就可以在 web 上直接配置了。注意：有个叫 luci-i18n-v2ray-zh-cn 的中文语言包我没装，主要是为了节省空间，这个也不是必须的。</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line">wget https://github.com/kuoruan/luci-app-v2ray/releases/download/v1.5.6-1/luci-app-v2ray_1.5.6_all.ipk</span><br><span class="line">opkg install luci-app-v2ray*.ipk</span><br><span class="line"><span class="built_in">rm</span> luci-app-v2ray*.ipk</span><br></pre></td></tr></table></figure><h4 id="极三的（网络）上联配置"><a href="#极三的（网络）上联配置" class="headerlink" title="极三的（网络）上联配置"></a>极三的（网络）上联配置</h4><p>极三可以用 wan 口去接主路由的 lan 口，但我这里是用的 WiFi 去连的主路由的 WiFi，这种方式使极三上的网。后面的 dhcp 配置里会有所体现。</p><h4 id="极三上配置-V2Ray"><a href="#极三上配置-V2Ray" class="headerlink" title="极三上配置 V2Ray"></a>极三上配置 V2Ray</h4><p>弄清楚逻辑以后配置部分也没啥可讲的。就是：</p><ul><li>两个入站（socks 和 dokodemo_door，前者不是必须的，因为我们这个方案里没有用到）</li><li>几个出站（最主要的是两个：freedom 和 vmess，这两个一个是直连，还有一个是连海外 VPS 上的 V2Ray）</li><li>一些路由，比如私网直连、geosite:cn（中国的网站） 直连。</li></ul><p>注意：</p><ul><li>路由规则里不能使用 geoip: 开头的写法，因为我们的数据文件里没放 geoip.dat，同理，geosite: 是可以的。</li><li>透明代理（dokodemo_door）的设置里，proxy mode 选 default dokodemo</li></ul><h4 id="主路由上的配置"><a href="#主路由上的配置" class="headerlink" title="主路由上的配置"></a>主路由上的配置</h4><p>主路由也是 OpenWRT，主要是修改其 DHCP 配置，</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> &gt;&gt; /etc/config/dhcp &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">config host</span></span><br><span class="line"><span class="string">  option name &#x27;gee3-5g&#x27;</span></span><br><span class="line"><span class="string">  option mac &#x27;00:00:00:FF:FF:FF&#x27;</span></span><br><span class="line"><span class="string">  option ip &#x27;10.0.0.254&#x27;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">config host</span></span><br><span class="line"><span class="string">  option name &#x27;google-nest-mini&#x27;</span></span><br><span class="line"><span class="string">  option mac &#x27;00:00:00:FF:FF:FE&#x27;</span></span><br><span class="line"><span class="string">  option ip &#x27;10.0.0.253&#x27;</span></span><br><span class="line"><span class="string">  option tag &#x27;2gw&#x27;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">config tag &#x27;2gw&#x27;</span></span><br><span class="line"><span class="string">  list dhcp_option &#x27;3,10.0.0.254&#x27;</span></span><br><span class="line"><span class="string">  option force &#x27;1&#x27;</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line">/etc/init.d/dnsmasq restart <span class="comment"># restart dhcp server</span></span><br></pre></td></tr></table></figure><p>注意：</p><ul><li>“00:00:00:FF:FF:FF” 和 “00:00:00:FF:FF:FE” 分别是极三和 Google Nest Mini 的 mac 地址（瞎写的，真实的数据是隐私）</li><li>“10.0.0.254” 和 “10.0.0.253” 分别是极三和 Google Nest Mini 的 IP 地址（这也是杜撰的，真实的 IP 是隐私）</li><li>主路由的正常推的网关地址应该是 “10.0.0.1”（这里给 Google Nest Mini 推送了旁路由，IP 地址是 10.0.0.254）</li></ul><h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><ul><li><a href="https://github.com/v2fly/v2ray-core">Project V</a></li></ul><p>[^1]:<a href="https://github.com/kuoruan/openwrt-v2ray">V2Ray for OpenWrt</a></p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;为了把从美国带回来的在家吃灰了几个月的 Google 智能音箱(Google Nest Mini)用起来。而之前由于家里都是终端设备自己搞定科学上网的需求，家里并没有全局的科学上网方案。但这一次由于要用 Google Nest Mini，则必须要搞个设备，搭科学上网环境了。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="OpenWRT" scheme="https://ming.theyan.gs/tags/OpenWRT/"/>
+    
+    <category term="Zerotier" scheme="https://ming.theyan.gs/tags/Zerotier/"/>
+    
+    <category term="Google Nest Mini" scheme="https://ming.theyan.gs/tags/Google-Nest-Mini/"/>
+    
+    <category term="智能音箱" scheme="https://ming.theyan.gs/tags/%E6%99%BA%E8%83%BD%E9%9F%B3%E7%AE%B1/"/>
+    
+    <category term="旁路由" scheme="https://ming.theyan.gs/tags/%E6%97%81%E8%B7%AF%E7%94%B1/"/>
+    
+    <category term="极路由" scheme="https://ming.theyan.gs/tags/%E6%9E%81%E8%B7%AF%E7%94%B1/"/>
+    
+    <category term="透明代理" scheme="https://ming.theyan.gs/tags/%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86/"/>
+    
+    <category term="dokodemo_door" scheme="https://ming.theyan.gs/tags/dokodemo-door/"/>
+    
+    <category term="v2ray-core-mini" scheme="https://ming.theyan.gs/tags/v2ray-core-mini/"/>
+    
+    <category term="v2ray-core" scheme="https://ming.theyan.gs/tags/v2ray-core/"/>
+    
+    <category term="V2Ray" scheme="https://ming.theyan.gs/tags/V2Ray/"/>
+    
+    <category term="HiWiFi" scheme="https://ming.theyan.gs/tags/HiWiFi/"/>
+    
+    <category term="HC5861" scheme="https://ming.theyan.gs/tags/HC5861/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>OpenSSH 8.8 以后版本跟老版的兼容性问题</title>
+    <link href="https://ming.theyan.gs/2022/06/OpenSSH%208.8%20%E4%BB%A5%E5%90%8E%E7%89%88%E6%9C%AC%E8%B7%9F%E8%80%81%E7%89%88%E7%9A%84%E5%85%BC%E5%AE%B9%E6%80%A7%E9%97%AE%E9%A2%98/index.html"/>
+    <id>https://ming.theyan.gs/2022/06/OpenSSH%208.8%20%E4%BB%A5%E5%90%8E%E7%89%88%E6%9C%AC%E8%B7%9F%E8%80%81%E7%89%88%E7%9A%84%E5%85%BC%E5%AE%B9%E6%80%A7%E9%97%AE%E9%A2%98/index.html</id>
+    <published>2022-06-14T14:33:15.000Z</published>
+    <updated>2022-06-15T12:15:27.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>最近发现 ssh 到自己的路由器，发现连不上，报错：</p><blockquote><p>Unable to negotiate with 10.0.0.1 port 22: no matching host key type found. Their offer: ssh-rsa</p></blockquote><p><strong><em>NOTE:</em></strong> 上面的 “10.0.0.1” 是服务器的 IP 地址</p><span id="more"></span><h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><p>网上查了下，发现是 OpenSSH 新版本的锅。OpenSSH 8.8 开始，缺省不再支持使用 SHA-1 hash 算法的 RSA 签名。</p><p>其实这个变动对稍稍新一点的 OpenSSH 服务器（据说 7.2 及以后版本）没有问题，因为其除了 SHA-1 外，还支持 SHA-256、SHA-512 等更强壮的算法。ssh-rsa 的密钥会自动使用更强壮的 hash 算法了。</p><p>但是对一些较老的 OpenSSH 服务器（7.2 以前版本），则就有问题了，因为其对 ssh-rsa 只支持 SHA-1 一种 hash 算法。但此时客户端又不支持这种算法，故而连接会失败。系统上面的错误。</p><h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><p>ssh 连接有问题的服务器时，加上两个参数即可。如：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ssh \</span><br><span class="line">  -oHostKeyAlgorithms=+ssh-rsa \</span><br><span class="line">  -oPubKeyAcceptedAlgorithms=+ssh-rsa \</span><br><span class="line">  10.0.0.1</span><br><span class="line"><span class="comment"># 假设 ssh 服务器 IP 地址是 10.0.0.1</span></span><br></pre></td></tr></table></figure><h2 id="todo-list"><a href="#todo-list" class="headerlink" title="todo list"></a>todo list</h2><ul><li>更新自己的密钥对，使用<code>ssh-keygen -o -a 100 -t ed25519 -f ~/.ssh/pk4ym_ed25519 -C &quot;m@theyan.gs&quot;</code></li><li>把新的公钥部署到服务器上去，包括 github</li></ul><h2 id="附件"><a href="#附件" class="headerlink" title="附件"></a>附件</h2><ul><li><a href="https://www.openssh.com/txt/release-8.8?ref=ikarus-sg">OpenSSh 8.8 的 release notes</a></li></ul>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;最近发现 ssh 到自己的路由器，发现连不上，报错：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Unable to negotiate with 10.0.0.1 port 22: no matching host key type found. Their offer: ssh-rsa&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;NOTE:&lt;/em&gt;&lt;/strong&gt; 上面的 “10.0.0.1” 是服务器的 IP 地址&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="OpenSSH" scheme="https://ming.theyan.gs/tags/OpenSSH/"/>
+    
+    <category term="ssh" scheme="https://ming.theyan.gs/tags/ssh/"/>
+    
+    <category term="ssh-rsa" scheme="https://ming.theyan.gs/tags/ssh-rsa/"/>
+    
+    <category term="SHA-1" scheme="https://ming.theyan.gs/tags/SHA-1/"/>
+    
+    <category term="rsa-sha2-512" scheme="https://ming.theyan.gs/tags/rsa-sha2-512/"/>
+    
+    <category term="rsa-sha2-256" scheme="https://ming.theyan.gs/tags/rsa-sha2-256/"/>
+    
+    <category term="HostKeyAlgorithms" scheme="https://ming.theyan.gs/tags/HostKeyAlgorithms/"/>
+    
+    <category term="PubKeyAcceptedAlgorithms" scheme="https://ming.theyan.gs/tags/PubKeyAcceptedAlgorithms/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>从官网扒某儿童频道的一些音频资源</title>
+    <link href="https://ming.theyan.gs/2022/05/%E4%BB%8E%E5%AE%98%E7%BD%91%E6%89%92%E6%9F%90%E5%84%BF%E7%AB%A5%E9%A2%91%E9%81%93%E7%9A%84%E4%B8%80%E4%BA%9B%E9%9F%B3%E9%A2%91%E8%B5%84%E6%BA%90/index.html"/>
+    <id>https://ming.theyan.gs/2022/05/%E4%BB%8E%E5%AE%98%E7%BD%91%E6%89%92%E6%9F%90%E5%84%BF%E7%AB%A5%E9%A2%91%E9%81%93%E7%9A%84%E4%B8%80%E4%BA%9B%E9%9F%B3%E9%A2%91%E8%B5%84%E6%BA%90/index.html</id>
+    <published>2022-05-02T12:33:52.000Z</published>
+    <updated>2022-05-09T13:25:13.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>乐乐的倾听者的音频资源又需要更新了，于是跟我提了几个需求，让我去“下”（下载）某个著名儿童频道主播播讲的节目（有故事还有其他）。</p><span id="more"></span><h2 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h2><p>这个主播有官网，但是官网上没有资源，只有 app 和公众号（可能还有在喜马拉雅的）的二维码。</p><p>但是发现了其还是有一个移动版的“官网”（域名是 m. 开头的），这个网站跟官网貌似没有同步更新，上面还能直接听节目。</p><p>大致看了下页面源代码，很快就扒出了音频资源的下载链接，在命令行用 wget 抓了一下，居然也没有反盗链，实在是良心！</p><h2 id="具体脚本"><a href="#具体脚本" class="headerlink" title="具体脚本"></a>具体脚本</h2><p>先要准备环境（我是在 MacOS，所以用了 Homebrew）</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Command Line Tools (CLT) for Xcode</span></span><br><span class="line">xcode-select --install</span><br><span class="line"><span class="comment"># Homebrew installation</span></span><br><span class="line">/bin/bash -c \ </span><br><span class="line">  <span class="string">&quot;<span class="subst">$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)</span>&quot;</span></span><br><span class="line"><span class="comment"># Install curl, jq, wget</span></span><br><span class="line">brew install curl jq wget</span><br></pre></td></tr></table></figure><p>下面开始抓取并声称下载资源的命令行。</p><h3 id="历史课"><a href="#历史课" class="headerlink" title="历史课"></a>历史课</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">curl <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?mid=7268&amp;aid=516&amp;mids=&quot;</span> -o audiolist_qianer_history.json</span><br><span class="line"><span class="built_in">cat</span> audiolist_qianer_history.json | jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line"><span class="comment"># or</span></span><br><span class="line"><span class="comment"># curl &quot;https://m.xxx.xxx/api/media/audiolist.ashx?mid=7268&amp;aid=516&amp;mids=&quot; | jq -r &#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br></pre></td></tr></table></figure><h3 id="世界地理"><a href="#世界地理" class="headerlink" title="世界地理"></a>世界地理</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=486&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br></pre></td></tr></table></figure><h3 id="成语启蒙"><a href="#成语启蒙" class="headerlink" title="成语启蒙"></a>成语启蒙</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=250&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br></pre></td></tr></table></figure><h3 id="世界历史"><a href="#世界历史" class="headerlink" title="世界历史"></a>世界历史</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=477&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br></pre></td></tr></table></figure><h3 id="学诗词"><a href="#学诗词" class="headerlink" title="学诗词"></a>学诗词</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=8&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=88&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=89&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=90&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=91&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=92&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=93&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=337&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=342&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=341&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=340&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=339&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br></pre></td></tr></table></figure><h3 id="名人传"><a href="#名人传" class="headerlink" title="名人传"></a>名人传</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=360&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=449&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br></pre></td></tr></table></figure><h3 id="三十六计"><a href="#三十六计" class="headerlink" title="三十六计"></a>三十六计</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -s <span class="string">&quot;https://m.xxx.xxx/api/media/audiolist.ashx?aid=485&quot;</span> | \</span><br><span class="line">    jq -r <span class="string">&#x27;.list[] | &quot;wget -O \&quot;\(.title).mp3\&quot; \(.url)&quot;&#x27;</span></span><br></pre></td></tr></table></figure><p>最后记得把命令输出的命令行代码拷贝出来，再粘贴出来执行一下。资源就会都下载到当前目录下了。</p><h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>需要这些资源又不想自己下载的可以找我。</p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;乐乐的倾听者的音频资源又需要更新了，于是跟我提了几个需求，让我去“下”（下载）某个著名儿童频道主播播讲的节目（有故事还有其他）。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="下载" scheme="https://ming.theyan.gs/tags/%E4%B8%8B%E8%BD%BD/"/>
+    
+    <category term="音频" scheme="https://ming.theyan.gs/tags/%E9%9F%B3%E9%A2%91/"/>
+    
+    <category term="儿童" scheme="https://ming.theyan.gs/tags/%E5%84%BF%E7%AB%A5/"/>
+    
+    <category term="故事" scheme="https://ming.theyan.gs/tags/%E6%95%85%E4%BA%8B/"/>
+    
+    <category term="历史" scheme="https://ming.theyan.gs/tags/%E5%8E%86%E5%8F%B2/"/>
+    
+    <category term="地理" scheme="https://ming.theyan.gs/tags/%E5%9C%B0%E7%90%86/"/>
+    
+    <category term="成语" scheme="https://ming.theyan.gs/tags/%E6%88%90%E8%AF%AD/"/>
+    
+    <category term="名人传" scheme="https://ming.theyan.gs/tags/%E5%90%8D%E4%BA%BA%E4%BC%A0/"/>
+    
+    <category term="诗词" scheme="https://ming.theyan.gs/tags/%E8%AF%97%E8%AF%8D/"/>
+    
+    <category term="三十六计" scheme="https://ming.theyan.gs/tags/%E4%B8%89%E5%8D%81%E5%85%AD%E8%AE%A1/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>某个外包公司的面试总结</title>
+    <link href="https://ming.theyan.gs/2022/04/%E6%9F%90%E4%B8%AA%E5%A4%96%E5%8C%85%E5%85%AC%E5%8F%B8%E7%9A%84%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/index.html"/>
+    <id>https://ming.theyan.gs/2022/04/%E6%9F%90%E4%B8%AA%E5%A4%96%E5%8C%85%E5%85%AC%E5%8F%B8%E7%9A%84%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/index.html</id>
+    <published>2022-04-12T14:23:35.000Z</published>
+    <updated>2022-04-17T12:32:31.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>无非就是“又”失业了，重新开始找工作，原本还不想招惹外包公司，无奈行情不好，外包工作也是工作呀，于是乎，就定了某个外包公司的面试，第一面：外包公司的技术面。</p><span id="more"></span><h2 id="心得体会"><a href="#心得体会" class="headerlink" title="心得体会"></a>心得体会</h2><p>主要问题都是跟 aws 有关系，这个岗位的甲方是个外企，肯定重度使用 aws。而且还在用 aws 的 eks 服务。</p><p>感觉面试官的视野还是很重要的。</p><h2 id="几个具体问题"><a href="#几个具体问题" class="headerlink" title="几个具体问题"></a>几个具体问题</h2><p>有个细节：腾讯会议面试，面试官几个人，可能是三个，首先特意让我把视频打开，于是我打开了，但是对方并没有打开。好吧，我是求职者，不对等也正常。</p><p>但为什么面试需要让面试者打开视频呢？这个不太明白，也许相关 HR 会比较清楚这一点。</p><h3 id="关于-eks-的-ingress"><a href="#关于-eks-的-ingress" class="headerlink" title="关于 eks 的 ingress"></a>关于 eks 的 ingress</h3><p>问我 eks 里的服务通过 ingress 暴露出去，然后数据包是怎么从外网到 pod 的。</p><p>这个题我答的不好，前东家其实差不多就是这个架构：nginx-ingress，然后外面是 aws 的 LB，我一直在解释外网流量到 aws 的 LB 设备之后然后是转到 eks 集群的 node 节点的某个 tcp 端口，我的意思是，其实服务最终是通过 nodeport 透出去的。</p><p>上面我说的这个大概是基本上没太大问题的，但是人家问的应该不是这个。:(</p><p>其实上面我提到的 nodeport 透出去的服务正是 nginx-ingress（或者是 nginx-ingress-controller，具体忘了，我得再看看 nginx-ingress）</p><h3 id="关于被-nginx-反代的服务如何获得客户端的真实-IP-的问题"><a href="#关于被-nginx-反代的服务如何获得客户端的真实-IP-的问题" class="headerlink" title="关于被 nginx 反代的服务如何获得客户端的真实 IP 的问题"></a>关于被 nginx 反代的服务如何获得客户端的真实 IP 的问题</h3><p>这个其实我比较熟悉，http 基本协议嘛。</p><p>我说这个简单，在反代的 nginx 配置里将 client ip 直接写入一个特定的 http 头，然后真实的服务里再把这个头取出来即可。</p><p>其实这个回答完全没毛病，我之前有项目就是这么干的。但面试官却感觉好像抓住了什么一样拼命问我到底是哪个 http 头？搞得我都有点上头了，我于是说：“哪个头不一样吗，只要跟后端协商好了就行了”。还被追问，还问一般标准是哪个头，于是我只能说 X-Forwarded-For，于是面试官认可了。</p><p>我其实没有细说为什么要另外弄一个头，这是因为客户端访问服务，中间可能会过 n 层代理，理论上每一层都会且必须要往 X-Forwarded-For 里写东西，但实际上，守规矩的人有，但绝对不是全部！于是我们的逻辑就是单独再搞一个 http 头，算是有点私有协议的意思，自己用，这样感觉比直接用 X-Forwarded-For 更靠谱一些。</p><h3 id="Jenkins-怎么做代码触发自动构建（CI）"><a href="#Jenkins-怎么做代码触发自动构建（CI）" class="headerlink" title="Jenkins 怎么做代码触发自动构建（CI）"></a>Jenkins 怎么做代码触发自动构建（CI）</h3><p>某个面试官问的，我当时回答：我不知道。我真不知道，或者我们曾经也有用过这种功能，但因为具体不是我配的，我就没了解到。但我知道，这个是绝度可以实现的，大致猜想是通过 webhook 之类的东西来做就可以。</p><p>我又说，我们有时并没有用 Jenkins，面试官就逼问：“没有 Jenkins 怎么做 CI&#x2F;CD 呢？”，我当时就笑了，说：“我的好几个前司，项目的 CI&#x2F;CD 是直接在 gitlab 里做的。”（他可能不太清楚 gitlab 本身就有 CI&#x2F;CD 的功能）。而我恰恰由于要维护这个，曾经大概看过相关配置。</p><p>估计他也不知道 github-action 之类的东西吧。</p><h3 id="关于-serverless"><a href="#关于-serverless" class="headerlink" title="关于 serverless"></a>关于 serverless</h3><p>我回答说之前的某司，我用过 aws 上的什么服务来着（我真是这么说的，我忘了那个叫 Lambda 了），用那个写了个 python 程序，定时执行一些操作。那个我理解就是 serverless</p><h3 id="用过多少-aws-的服务"><a href="#用过多少-aws-的服务" class="headerlink" title="用过多少 aws 的服务"></a>用过多少 aws 的服务</h3><p>于是我就说了一堆，但的确好多服务我忘了名字了，我只能简单介绍下这个服务是干啥的。我估计我用的好多服务面试官们也没用过，：）。这个很正常，就像他们用过的服务有些我也没用过一样。</p><h3 id="eks-中的服务暴露出来的几种方法"><a href="#eks-中的服务暴露出来的几种方法" class="headerlink" title="eks 中的服务暴露出来的几种方法"></a>eks 中的服务暴露出来的几种方法</h3><p>我居然只回答出 nodeport 和 ingress 两种，连 LB 设备这个都忘了。:(</p><h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的结果，自然是挂了呀。:(</p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;无非就是“又”失业了，重新开始找工作，原本还不想招惹外包公司，无奈行情不好，外包工作也是工作呀，于是乎，就定了某个外包公司的面试，第一面：外包公司的技术面。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="面试总结" scheme="https://ming.theyan.gs/tags/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/"/>
+    
+    <category term="外包公司" scheme="https://ming.theyan.gs/tags/%E5%A4%96%E5%8C%85%E5%85%AC%E5%8F%B8/"/>
+    
+    <category term="aws" scheme="https://ming.theyan.gs/tags/aws/"/>
+    
+    <category term="eks" scheme="https://ming.theyan.gs/tags/eks/"/>
+    
+    <category term="Jenkins" scheme="https://ming.theyan.gs/tags/Jenkins/"/>
+    
+    <category term="ingress" scheme="https://ming.theyan.gs/tags/ingress/"/>
+    
+    <category term="X-Forwarded-For" scheme="https://ming.theyan.gs/tags/X-Forwarded-For/"/>
+    
+    <category term="CI/CD" scheme="https://ming.theyan.gs/tags/CI-CD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>利用 ttl 连接获取神马（Whatsminer）矿机的 root 权限</title>
+    <link href="https://ming.theyan.gs/2022/03/%E5%88%A9%E7%94%A8%20ttl%20%E8%BF%9E%E6%8E%A5%E8%8E%B7%E5%8F%96%E7%A5%9E%E9%A9%AC%E7%9F%BF%E6%9C%BA%E7%9A%84%20root%20%E6%9D%83%E9%99%90/index.html"/>
+    <id>https://ming.theyan.gs/2022/03/%E5%88%A9%E7%94%A8%20ttl%20%E8%BF%9E%E6%8E%A5%E8%8E%B7%E5%8F%96%E7%A5%9E%E9%A9%AC%E7%9F%BF%E6%9C%BA%E7%9A%84%20root%20%E6%9D%83%E9%99%90/index.html</id>
+    <published>2022-03-14T11:24:18.000Z</published>
+    <updated>2022-03-15T12:24:44.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>最近在美丽国矿场帮忙，顺便修下矿机。</p><p>本来心里有些想法，需要有设备（计算设备、网络设备）来实现，无奈手头没有资源。后来修神马矿机的时候发现其系统是基于 OpenWRT 的！于是就想如果能拿到 root 权限的话，是不是就能利用现有系统来做很多事情了？于是就开始研究怎么 root 其控制板（其实还有其他难点，比如控制板怎么取电？还要给控制板找一个盒子）。</p><h2 id="连接方法"><a href="#连接方法" class="headerlink" title="连接方法"></a>连接方法</h2><span id="more"></span><p>前同事、硬件玩儿家、大佬陈总给了我一个关键性信息：用 ttl 连接控制板可以直接获得 root 权限！</p><p>然后我就开始找设备，正好同事为了维修，早就采购的有 ch341a 编程器，于是我又让其帮忙采购了一包杜邦线就 OK 了。</p><p>这里其实没有什么太多的技巧，就是用杜邦线把 ch341a 的几个 pin 脚接到神马矿机控制板的几个 pin 脚上，再把 ch341a 的 usb 头插进电脑，最后再用模拟终端软件打开，如果没有问题，则会直接进 root 环境。</p><h3 id="请看截图"><a href="#请看截图" class="headerlink" title="请看截图"></a>请看截图</h3><p>连接方法也简单：</p><ul><li>就是 RX 和 TX 互相接；</li><li>gnd 接 gnd；</li></ul><ol><li>控制板</li></ol><p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/WechatIMG91.jpeg" alt="控制板上的连接方法"></p><p>注意：这里没有用杜邦线（因为当时杜邦线还没采购回来，所以用的是风扇的电源线），但这个图能清楚显示出接的是控制板上的哪几个 pin 脚</p><ol><li>ch341a 编程器(非杜邦线)</li></ol><p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/WechatIMG92.jpeg" alt="ch341a 编程器上的连接方法"></p><p>注意：这图里也没有用杜邦线</p><ol><li>ch341a 编程器插到电脑上</li></ol><p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/IMG_20220629_103740.jpg" alt="ch341a 编程器插到电脑上"></p><ol><li>矿机、ch341a 编程器和电脑</li></ol><p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/IMG_20220629_103716.jpg" alt="矿机、ch341a 编程器和电脑"></p><ol><li>获得 root 权限后的界面</li></ol><p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/IMG_20220629_103733.jpg" alt="获得 root 权限后的界面"></p><h2 id="电脑端配置"><a href="#电脑端配置" class="headerlink" title="电脑端配置"></a>电脑端配置</h2><p>我在 MacOS 未成功，最后用的是 Windows + Putty 配置成功了，连接的端口看下“设备管理器”，连接的其他配置参数为：115200,8,无,1,无</p><h2 id="测试过的系统软件版本"><a href="#测试过的系统软件版本" class="headerlink" title="测试过的系统软件版本"></a>测试过的系统软件版本</h2><p>这个不是所有版本的控制板都可行的。猜想应该是早期工程师用来调试用的，后来把这个关掉了。据我测试的版本来说：</p><ul><li>20200409.20.REL 可以</li><li>H6OS-V10-20210520.22.REL 不行</li><li>H6OS-V10-20210325.22.REL 不行</li><li>H3-V10-20200609.22.REL 可以！</li></ul>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;最近在美丽国矿场帮忙，顺便修下矿机。&lt;/p&gt;
+&lt;p&gt;本来心里有些想法，需要有设备（计算设备、网络设备）来实现，无奈手头没有资源。后来修神马矿机的时候发现其系统是基于 OpenWRT 的！于是就想如果能拿到 root 权限的话，是不是就能利用现有系统来做很多事情了？于是就开始研究怎么 root 其控制板（其实还有其他难点，比如控制板怎么取电？还要给控制板找一个盒子）。&lt;/p&gt;
+&lt;h2 id=&quot;连接方法&quot;&gt;&lt;a href=&quot;#连接方法&quot; class=&quot;headerlink&quot; title=&quot;连接方法&quot;&gt;&lt;/a&gt;连接方法&lt;/h2&gt;</summary>
+    
+    
+    
+    
+    <category term="root" scheme="https://ming.theyan.gs/tags/root/"/>
+    
+    <category term="whatsminer" scheme="https://ming.theyan.gs/tags/whatsminer/"/>
+    
+    <category term="神马矿机" scheme="https://ming.theyan.gs/tags/%E7%A5%9E%E9%A9%AC%E7%9F%BF%E6%9C%BA/"/>
+    
+    <category term="M21" scheme="https://ming.theyan.gs/tags/M21/"/>
+    
+    <category term="M20" scheme="https://ming.theyan.gs/tags/M20/"/>
+    
+    <category term="M30" scheme="https://ming.theyan.gs/tags/M30/"/>
+    
+    <category term="OpenWRT" scheme="https://ming.theyan.gs/tags/OpenWRT/"/>
+    
+    <category term="hack" scheme="https://ming.theyan.gs/tags/hack/"/>
+    
+    <category term="ttl" scheme="https://ming.theyan.gs/tags/ttl/"/>
+    
+    <category term="ch341a" scheme="https://ming.theyan.gs/tags/ch341a/"/>
+    
+    <category term="编程器" scheme="https://ming.theyan.gs/tags/%E7%BC%96%E7%A8%8B%E5%99%A8/"/>
+    
+    <category term="杜邦线" scheme="https://ming.theyan.gs/tags/%E6%9D%9C%E9%82%A6%E7%BA%BF/"/>
+    
+    <category term="putty" scheme="https://ming.theyan.gs/tags/putty/"/>
+    
+    <category term="cp2102" scheme="https://ming.theyan.gs/tags/cp2102/"/>
+    
+    <category term="pl2303" scheme="https://ming.theyan.gs/tags/pl2303/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Flash xiaomi.eu for Redmi K40</title>
+    <link href="https://ming.theyan.gs/2022/02/flash%20xiaomi.eu%20for%20redmi%20k40/index.html"/>
+    <id>https://ming.theyan.gs/2022/02/flash%20xiaomi.eu%20for%20redmi%20k40/index.html</id>
+    <published>2022-02-01T13:43:27.000Z</published>
+    <updated>2022-02-02T13:42:32.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="envirnment"><a href="#envirnment" class="headerlink" title="envirnment"></a>envirnment</h2><p>首先是环境准备，我用的是 MacOS，这里都是 MacOS 适用。</p><span id="more"></span><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">brew install android-platform-tools</span><br><span class="line"><span class="comment"># brew install android-file-transfer</span></span><br><span class="line">brew install openjdk@11</span><br><span class="line">sudo <span class="built_in">ln</span> -sfn /usr/local/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;export PATH=&quot;/usr/local/opt/openjdk@11/bin:$PATH&quot;&#x27;</span> &gt;&gt; ~/.zshrc</span><br><span class="line"><span class="built_in">export</span> PATH=<span class="string">&quot;/usr/local/opt/openjdk@11/bin:<span class="variable">$PATH</span>&quot;</span><span class="string">&#x27;</span></span><br></pre></td></tr></table></figure><h2 id="unlook-the-bootloader"><a href="#unlook-the-bootloader" class="headerlink" title="unlook the bootloader"></a>unlook the bootloader</h2><p>官方工具只支持 windows，而我用的是 MacOS，所以我就用了一个叫 <a href="https://github.com/francescotescari/XiaoMiToolV2">XiaoMiToolV2</a> 的东西。因为其 release 的版本过老，需要重新自己编译，具体使用步骤如下：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/francescotescari/XiaoMiToolV2</span><br><span class="line"><span class="built_in">cd</span> XiaoMiToolV2</span><br><span class="line"><span class="built_in">cp</span> /usr/local/bin/adb res/tools/</span><br><span class="line"><span class="built_in">cp</span> /usr/local/bin/fastboot res/tools/</span><br><span class="line">sudo ./gradlew build</span><br><span class="line">sudo ./gradlew run</span><br></pre></td></tr></table></figure><h2 id="flash-rom-via-fastboot"><a href="#flash-rom-via-fastboot" class="headerlink" title="flash rom via fastboot"></a>flash rom via fastboot</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">adb reboot fastboot</span><br><span class="line"><span class="built_in">mkdir</span> temp</span><br><span class="line"><span class="built_in">cd</span> temp</span><br><span class="line">unzip unzip ../xiaomi.eu_multi_HMK40_POCOF3_V13.0.3.0.SKHCNXM_v13-12-fastboot.zip -d .</span><br><span class="line">./macos_fastboot_first_install_with_data_format.sh</span><br></pre></td></tr></table></figure><h2 id="links"><a href="#links" class="headerlink" title="links"></a>links</h2><ul><li><a href="https://xiaomi.eu/community/threads/how-to-install-xiaomi-eu-rom-for-redmi-k40-poco-f3-mi-11x.61851/">https://xiaomi.eu/community/threads/how-to-install-xiaomi-eu-rom-for-redmi-k40-poco-f3-mi-11x.61851/</a></li></ul>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;envirnment&quot;&gt;&lt;a href=&quot;#envirnment&quot; class=&quot;headerlink&quot; title=&quot;envirnment&quot;&gt;&lt;/a&gt;envirnment&lt;/h2&gt;&lt;p&gt;首先是环境准备，我用的是 MacOS，这里都是 MacOS 适用。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="Android" scheme="https://ming.theyan.gs/tags/Android/"/>
+    
+    <category term="xiaomi.eu" scheme="https://ming.theyan.gs/tags/xiaomi-eu/"/>
+    
+    <category term="adb" scheme="https://ming.theyan.gs/tags/adb/"/>
+    
+    <category term="Redmi_K40" scheme="https://ming.theyan.gs/tags/Redmi-K40/"/>
+    
+    <category term="Poco_F3" scheme="https://ming.theyan.gs/tags/Poco-F3/"/>
+    
+    <category term="fastboot" scheme="https://ming.theyan.gs/tags/fastboot/"/>
+    
+    <category term="XiaoMiToolV2" scheme="https://ming.theyan.gs/tags/XiaoMiToolV2/"/>
+    
+    <category term="bootloader" scheme="https://ming.theyan.gs/tags/bootloader/"/>
+    
+    <category term="unlock" scheme="https://ming.theyan.gs/tags/unlock/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MIUI13 精简优化系统自带的 app</title>
+    <link href="https://ming.theyan.gs/2022/01/MIUI13%20%E7%B2%BE%E7%AE%80%E4%BC%98%E5%8C%96%E7%B3%BB%E7%BB%9F%E8%87%AA%E5%B8%A6%E7%9A%84%20app/index.html"/>
+    <id>https://ming.theyan.gs/2022/01/MIUI13%20%E7%B2%BE%E7%AE%80%E4%BC%98%E5%8C%96%E7%B3%BB%E7%BB%9F%E8%87%AA%E5%B8%A6%E7%9A%84%20app/index.html</id>
+    <published>2022-01-26T11:23:25.000Z</published>
+    <updated>2022-01-27T12:12:23.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>最近换了个红米 K40 的手机，刷机需要等 7 天，在等待过程中，系统自带的 MIUI 12.5 OTA 升级成了 MIUI 13，同样，在 MIUI 13 下也做了很多系统自带 app 的优化（删除）工作，特此记录，等过了 7 天刷成 miaomi.eu 后或再 OTA 升级后直接重用。</p><span id="more"></span><h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><ul><li>手机打开 develop 菜单</li><li>打开 usb 调试功能</li><li>电脑上安装 adb 软件</li><li>……</li></ul><p>这些都是基本操作，就不赘述了。</p><h2 id="show-me-the-code"><a href="#show-me-the-code" class="headerlink" title="show me the code"></a>show me the code</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">adb shell pm uninstall --user 0 com.miui.systemAdSolution</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.analytics</span><br><span class="line">adb shell pm uninstall --user 0 com.xiaomi.gamecenter.sdk.service</span><br><span class="line">adb shell pm uninstall --user 0 com.xiaomi.gamecenter</span><br><span class="line">adb shell pm uninstall --user 0 com.sohu.inputmethod.sogou.xiaomi</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.player</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.video</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.notes</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.translation.youdao</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.translation.kingsoft</span><br><span class="line">adb shell pm uninstall --user 0 com.android.email</span><br><span class="line">adb shell pm uninstall --user 0 com.xiaomi.scanner</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.hybrid</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.bugreport</span><br><span class="line">adb shell pm uninstall --user 0 com.milink.service</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.gallery</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.yellowpage</span><br><span class="line">adb shell pm uninstall --user 0 com.xiaomi.midrop</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.virtualsim</span><br><span class="line">adb shell pm uninstall --user 0 com.xiaomi.payment</span><br><span class="line">adb shell pm uninstall --user 0 com.mipay.wallet</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.voiceassist</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.touchassistant</span><br><span class="line">adb shell pm uninstall --user 0 com.xiaomi.mitunes</span><br><span class="line">adb shell pm uninstall --user 0 com.xiaomi.pass</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.klo.bugreport</span><br><span class="line">adb shell pm uninstall --user 0 org.mipay.android.manager</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.voicetrigger</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.personalassistant</span><br><span class="line">adb shell pm uninstall --user 0 com.xiaomi.aiasst.vision</span><br><span class="line">adb shell pm uninstall --user 0 com.xiaomi.aiasst.service</span><br><span class="line"><span class="comment"># com.miui.analytics 如果被删除，重启又会被自动安装上，发现禁用好像效果还不错</span></span><br><span class="line">adb shell pm disable-user --user 0  com.miui.analytics</span><br><span class="line">adb shell pm uninstall --user 0 com.xiaomi.migameservice</span><br><span class="line">adb shell pm uninstall --user 0 com.miui.miservice</span><br></pre></td></tr></table></figure>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;最近换了个红米 K40 的手机，刷机需要等 7 天，在等待过程中，系统自带的 MIUI 12.5 OTA 升级成了 MIUI 13，同样，在 MIUI 13 下也做了很多系统自带 app 的优化（删除）工作，特此记录，等过了 7 天刷成 miaomi.eu 后或再 OTA 升级后直接重用。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="MIUI" scheme="https://ming.theyan.gs/tags/MIUI/"/>
+    
+    <category term="MUI13" scheme="https://ming.theyan.gs/tags/MUI13/"/>
+    
+    <category term="Redmi" scheme="https://ming.theyan.gs/tags/Redmi/"/>
+    
+    <category term="K40" scheme="https://ming.theyan.gs/tags/K40/"/>
+    
+    <category term="Xiaomi" scheme="https://ming.theyan.gs/tags/Xiaomi/"/>
+    
+    <category term="xiaomi.eu" scheme="https://ming.theyan.gs/tags/xiaomi-eu/"/>
+    
+    <category term="红米" scheme="https://ming.theyan.gs/tags/%E7%BA%A2%E7%B1%B3/"/>
+    
+    <category term="小米" scheme="https://ming.theyan.gs/tags/%E5%B0%8F%E7%B1%B3/"/>
+    
+    <category term="adb" scheme="https://ming.theyan.gs/tags/adb/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>sync repo from Github to Gitee using github action</title>
+    <link href="https://ming.theyan.gs/2021/12/sync_repo_from_github_to_gitee_using_github_action/index.html"/>
+    <id>https://ming.theyan.gs/2021/12/sync_repo_from_github_to_gitee_using_github_action/index.html</id>
+    <published>2021-12-20T11:23:16.000Z</published>
+    <updated>2021-12-22T12:31:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>早年在 github 上做了个 repo 用作图床，但是由于种种原因，大陆访问 github.com 的速度感人，故而想把（图床）数据在大陆的 gitee.com 上也同步一份，然后用 gitee.com 上的图床来给大家访问。</p><span id="more"></span><p>网上搜了下，有用 gitee 的“镜像仓库”的功能的，但这个功能需要申请开通，直接否掉。然后其他基本都是用 github action 来实现，这个我也是认同的。不过好多人都是直接用的别人做好的项目来实现的，由于我一是觉得这个东西不复杂没必要用别人封装好的东西（因为他封装好的好些东西我不一定需要），再个感觉虽然别人也开源但我也没那闲功夫整天 review 别人的代码，所以我就想不用别人现成的东西，自己整。</p><h2 id="具体方案"><a href="#具体方案" class="headerlink" title="具体方案"></a>具体方案</h2><h3 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h3><h4 id="公私钥一对"><a href="#公私钥一对" class="headerlink" title="公私钥一对"></a>公私钥一对</h4><p>没有的话可以生成：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t ed25519 -f id_ed25519_github2gitee -C <span class="string">&quot;for sync from github to gitee&quot;</span>;</span><br><span class="line"><span class="comment"># 按两次回车键以输入空的 passphrase</span></span><br><span class="line"><span class="comment"># 私钥在 id_ed25519_github2gitee 里</span></span><br><span class="line"><span class="comment"># 公钥在 id_ed25519_github2gitee.pub 里</span></span><br></pre></td></tr></table></figure><h4 id="github-账号及图床仓库"><a href="#github-账号及图床仓库" class="headerlink" title="github 账号及图床仓库"></a>github 账号及图床仓库</h4><p>这里假设是 xxxxgithub 和 imagehostgithub</p><h3 id="gitee-测"><a href="#gitee-测" class="headerlink" title="gitee 测"></a>gitee 测</h3><ul><li>新建账号（假设是：xxxxgitee）</li><li>新建仓库（假设是：imagehostgitee）</li><li>上传公钥（<a href="https://gitee.com/profile/sshkeys%EF%BC%89">https://gitee.com/profile/sshkeys）</a></li></ul><h3 id="github-测"><a href="#github-测" class="headerlink" title="github 测"></a>github 测</h3><h4 id="上传私钥"><a href="#上传私钥" class="headerlink" title="上传私钥"></a>上传私钥</h4><p>在 Settings-&gt;Secrets 配置一个叫 GITEE_PRIVATE_KEY 的 Repository secrets，内容就是前面准备的私钥（文件 id_ed25519_github2gitee 里）</p><h4 id="配置-github-action"><a href="#配置-github-action" class="headerlink" title="配置 github action"></a>配置 github action</h4><p>新建文件 .github&#x2F;workflows&#x2F;sync2gitee.yml，内容如下：</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">sync2gitee</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">master</span></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">repo-sync:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v2</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">persist-credentials:</span> <span class="literal">false</span></span><br><span class="line">      </span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">sync</span> <span class="string">github</span> <span class="string">-&gt;</span> <span class="string">gitee</span></span><br><span class="line">        <span class="attr">env:</span></span><br><span class="line">          <span class="attr">SSH_KEY:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.GITEE_PRIVATE_KEY</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">GITHUB_REPO:</span> <span class="string">&quot;https://github.com/xxxxgithub/imagehostgithub.git&quot;</span></span><br><span class="line">          <span class="attr">GITEE_REPO:</span> <span class="string">&quot;git@gitee.com:xxxxgitee/imagehostgitee.git&quot;</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line"><span class="string">          mkdir -p ~/.ssh/</span></span><br><span class="line"><span class="string">          echo &quot;$SSH_KEY&quot; | tr -d &#x27;\r&#x27; &gt; ~/.ssh/id_rsa</span></span><br><span class="line"><span class="string">          chmod 600 ~/.ssh/id_rsa</span></span><br><span class="line"><span class="string">          ssh-keyscan github.com &gt;&gt; ~/.ssh/known_hosts</span></span><br><span class="line"><span class="string">          ssh-keyscan gitee.com &gt;&gt; ~/.ssh/known_hosts</span></span><br><span class="line"><span class="string">          git config --global user.name &quot;xxxxgitee&quot;</span></span><br><span class="line"><span class="string"></span>          </span><br><span class="line">          <span class="string">git</span> <span class="string">clone</span> <span class="string">--mirror</span> <span class="string">&quot;$GITHUB_REPO&quot;</span> <span class="string">&amp;&amp;</span> <span class="string">cd</span> <span class="string">`basename</span> <span class="string">&quot;$GITHUB_REPO&quot;</span><span class="string">`</span></span><br><span class="line">          <span class="string">git</span> <span class="string">remote</span> <span class="string">set-url</span> <span class="string">--push</span> <span class="string">origin</span> <span class="string">&quot;$GITEE_REPO&quot;</span></span><br><span class="line">          <span class="string">git</span> <span class="string">fetch</span> <span class="string">-p</span> <span class="string">origin</span></span><br><span class="line">          <span class="string">git</span> <span class="string">for-each-ref</span> <span class="string">--format</span> <span class="string">&#x27;delete %(refname)&#x27;</span> <span class="string">refs/pull</span> <span class="string">|</span> <span class="string">git</span> <span class="string">update-ref</span> <span class="string">--stdin</span></span><br><span class="line">          <span class="string">git</span> <span class="string">push</span> <span class="string">--mirror</span></span><br></pre></td></tr></table></figure><p>保存，提交，就应该会触发同步。在 github 里 repo 下的 Actions 里可以看下结果</p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;早年在 github 上做了个 repo 用作图床，但是由于种种原因，大陆访问 github.com 的速度感人，故而想把（图床）数据在大陆的 gitee.com 上也同步一份，然后用 gitee.com 上的图床来给大家访问。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="github" scheme="https://ming.theyan.gs/tags/github/"/>
+    
+    <category term="gitee" scheme="https://ming.theyan.gs/tags/gitee/"/>
+    
+    <category term="repository" scheme="https://ming.theyan.gs/tags/repository/"/>
+    
+    <category term="sync" scheme="https://ming.theyan.gs/tags/sync/"/>
+    
+    <category term="同步" scheme="https://ming.theyan.gs/tags/%E5%90%8C%E6%AD%A5/"/>
+    
+    <category term="图床" scheme="https://ming.theyan.gs/tags/%E5%9B%BE%E5%BA%8A/"/>
+    
+    <category term="action" scheme="https://ming.theyan.gs/tags/action/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>用 Kindle 来追网文之三</title>
+    <link href="https://ming.theyan.gs/2021/11/%E7%94%A8%20Kindle%20%E6%9D%A5%E8%BF%BD%E7%BD%91%E6%96%87%E4%B9%8B%E4%B8%89/index.html"/>
+    <id>https://ming.theyan.gs/2021/11/%E7%94%A8%20Kindle%20%E6%9D%A5%E8%BF%BD%E7%BD%91%E6%96%87%E4%B9%8B%E4%B8%89/index.html</id>
+    <published>2021-11-02T11:11:32.000Z</published>
+    <updated>2022-05-23T14:18:23.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>之前学 python 做爬虫爬书时水过两篇文章（加上本篇，一共三篇）：</p><ul><li><a href="/2020/05/%E7%94%A8kindle%E8%BF%BD%E7%BD%91%E6%96%87/index.html" title="用 Kindle 来追网文">用 kindle 追网文</a> </li><li><a href="/2020/07/%E7%94%A8%20Kindle%20%E8%BF%BD%E7%BD%91%E6%96%87_2/index.html" title="用 Kindle 来追网文之二">用 Kindle 追网文之二</a></li><li><a href="/2021/11/%E7%94%A8%20Kindle%20%E6%9D%A5%E8%BF%BD%E7%BD%91%E6%96%87%E4%B9%8B%E4%B8%89/index.html" title="用 Kindle 来追网文之三">用 Kindle 来追网文之三</a></li></ul><p>当下，由于种种原因要切源到：m.uuks.org，所以有了第三篇水文：）</p><span id="more"></span><h2 id="show-me-the-code"><a href="#show-me-the-code" class="headerlink" title="show me the code"></a>show me the code</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> os.path</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> importlib <span class="keyword">import</span> reload</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime</span><br><span class="line"><span class="keyword">from</span> bs4 <span class="keyword">import</span> BeautifulSoup</span><br><span class="line"><span class="keyword">from</span> pyinstapaper.instapaper <span class="keyword">import</span> Instapaper, Folder, Bookmark</span><br><span class="line"></span><br><span class="line">INSTAPAPER_KEY = <span class="string">&#x27;*****************&#x27;</span></span><br><span class="line">INSTAPAPER_SECRET = <span class="string">&#x27;**************&#x27;</span></span><br><span class="line">INSTAPAPER_LOGIN = <span class="string">&#x27;u@x.com&#x27;</span></span><br><span class="line">INSTAPAPER_PASSWORD = <span class="string">&#x27;password&#x27;</span></span><br><span class="line"></span><br><span class="line">base_url = <span class="string">&#x27;http://m.uuks.org&#x27;</span></span><br><span class="line">novel_list = [</span><br><span class="line">    <span class="string">&quot;苏厨&quot;</span>, <span class="string">&quot;绍宋&quot;</span>, <span class="string">&quot;从 1983 开始&quot;</span>, <span class="string">&quot;全职艺术家&quot;</span>, <span class="string">&quot;大明镇海王&quot;</span>, <span class="string">&quot;奶爸学园&quot;</span></span><br><span class="line">]</span><br><span class="line">novel_url = [</span><br><span class="line">    <span class="string">&#x27;392_392855&#x27;</span>, <span class="string">&#x27;511_511286&#x27;</span>, <span class="string">&#x27;441_441819&#x27;</span>, <span class="string">&#x27;32802&#x27;</span>, <span class="string">&#x27;519_519302&#x27;</span>, <span class="string">&quot;33250&quot;</span></span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">instapaper = Instapaper(INSTAPAPER_KEY, INSTAPAPER_SECRET)</span><br><span class="line">instapaper.login(INSTAPAPER_LOGIN, INSTAPAPER_PASSWORD)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">add_bookmark_instapaper</span>(<span class="params">title, url</span>):</span><br><span class="line">    data = &#123;</span><br><span class="line">        <span class="string">&#x27;time&#x27;</span>: time.time(),</span><br><span class="line">        <span class="string">&#x27;progress_timestamp&#x27;</span>: <span class="number">0</span>,</span><br><span class="line">        <span class="string">&#x27;title&#x27;</span>: title,</span><br><span class="line">        <span class="string">&#x27;url&#x27;</span>: url</span><br><span class="line">    &#125;</span><br><span class="line">    bookmark = Bookmark(instapaper, **data)</span><br><span class="line">    bookmark.add()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">fetch_novel</span>(<span class="params">novel_list, novel_url</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;job running&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> os.path.isfile(<span class="string">&#x27;url.pkl&#x27;</span>):</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;url.pkl&#x27;</span>, <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            last_url = pickle.load(f)</span><br><span class="line">        f.close()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment">#last_url=[[],[],[],[]]</span></span><br><span class="line">        last_url = [[]] * <span class="built_in">len</span>(novel_list)</span><br><span class="line"></span><br><span class="line">    url_archive = []</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(novel_list)):</span><br><span class="line">        <span class="built_in">print</span>(novel_list[j])</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            old_url = last_url[j]</span><br><span class="line">        <span class="keyword">except</span> IndexError:</span><br><span class="line">            old_url = []</span><br><span class="line">        url = base_url + <span class="string">&#x27;/b/&#x27;</span> + novel_url[j] + <span class="string">&#x27;/&#x27;</span></span><br><span class="line">        head = &#123;&#125;</span><br><span class="line">        head[</span><br><span class="line">            <span class="string">&#x27;User-Agent&#x27;</span>] = <span class="string">&#x27;Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166  Safari/535.19&#x27;</span></span><br><span class="line">        page = requests.get(url)</span><br><span class="line">        soup = BeautifulSoup(page.content, <span class="string">&#x27;lxml&#x27;</span>)</span><br><span class="line">        soup_text = soup.select(</span><br><span class="line">            <span class="string">&#x27;#book-sp &gt; div.listbox &gt; div.list_cont &gt; div.book-detial &gt; div.ml-list &gt; ul a&#x27;</span></span><br><span class="line">        )</span><br><span class="line">        latest_url = []</span><br><span class="line">        latest_title = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(soup_text)):</span><br><span class="line"></span><br><span class="line">            latest_url.append(base_url + soup_text[i][<span class="string">&#x27;href&#x27;</span>])</span><br><span class="line">            latest_title.append(novel_list[j] + <span class="string">&#x27;---&#x27;</span> +</span><br><span class="line">                                 soup_text[i].string)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(latest_url)-<span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>):</span><br><span class="line">            <span class="keyword">if</span> latest_url[k] <span class="keyword">in</span> old_url:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="built_in">print</span>(latest_title[k], latest_url[k])</span><br><span class="line">            add_bookmark_instapaper(latest_title[k], latest_url[k])</span><br><span class="line"></span><br><span class="line">        old_url = latest_url</span><br><span class="line">        url_archive.append(old_url)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;url.pkl&#x27;</span>, <span class="string">&#x27;wb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        pickle.dump(url_archive, f)</span><br><span class="line">    f.close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">bookmarks = instapaper.get_bookmarks(<span class="string">&#x27;unread&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> ct, bookmark <span class="keyword">in</span> <span class="built_in">enumerate</span>(bookmarks):</span><br><span class="line">    <span class="built_in">print</span>(bookmark.title)</span><br><span class="line">    bookmark.archive()</span><br><span class="line">    bookmark.delete()</span><br><span class="line"></span><br><span class="line">fetch_novel(novel_list, novel_url)</span><br></pre></td></tr></table></figure>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h2&gt;&lt;p&gt;之前学 python 做爬虫爬书时水过两篇文章（加上本篇，一共三篇）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;/2020/05/%E7%94%A8kindle%E8%BF%BD%E7%BD%91%E6%96%87/index.html&quot; title=&quot;用 Kindle 来追网文&quot;&gt;用 kindle 追网文&lt;/a&gt; &lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/2020/07/%E7%94%A8%20Kindle%20%E8%BF%BD%E7%BD%91%E6%96%87_2/index.html&quot; title=&quot;用 Kindle 来追网文之二&quot;&gt;用 Kindle 追网文之二&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/2021/11/%E7%94%A8%20Kindle%20%E6%9D%A5%E8%BF%BD%E7%BD%91%E6%96%87%E4%B9%8B%E4%B8%89/index.html&quot; title=&quot;用 Kindle 来追网文之三&quot;&gt;用 Kindle 来追网文之三&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当下，由于种种原因要切源到：m.uuks.org，所以有了第三篇水文：）&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="Kindle" scheme="https://ming.theyan.gs/tags/Kindle/"/>
+    
+    <category term="Python" scheme="https://ming.theyan.gs/tags/Python/"/>
+    
+    <category term="Python3" scheme="https://ming.theyan.gs/tags/Python3/"/>
+    
+    <category term="Instapaper" scheme="https://ming.theyan.gs/tags/Instapaper/"/>
+    
+    <category term="爬虫" scheme="https://ming.theyan.gs/tags/%E7%88%AC%E8%99%AB/"/>
+    
+    <category term="网络小说" scheme="https://ming.theyan.gs/tags/%E7%BD%91%E7%BB%9C%E5%B0%8F%E8%AF%B4/"/>
+    
+    <category term="UU看书" scheme="https://ming.theyan.gs/tags/UU%E7%9C%8B%E4%B9%A6/"/>
+    
+    <category term="uuks.org" scheme="https://ming.theyan.gs/tags/uuks-org/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>问运维团队 leader 的一些（技术）问题</title>
+    <link href="https://ming.theyan.gs/2021/06/%E9%97%AE%E8%BF%90%E7%BB%B4%E5%9B%A2%E9%98%9F%20leader%20%E7%9A%84%E4%B8%80%E4%BA%9B%EF%BC%88%E6%8A%80%E6%9C%AF%EF%BC%89%E9%97%AE%E9%A2%98/index.html"/>
+    <id>https://ming.theyan.gs/2021/06/%E9%97%AE%E8%BF%90%E7%BB%B4%E5%9B%A2%E9%98%9F%20leader%20%E7%9A%84%E4%B8%80%E4%BA%9B%EF%BC%88%E6%8A%80%E6%9C%AF%EF%BC%89%E9%97%AE%E9%A2%98/index.html</id>
+    <published>2021-06-11T11:32:12.000Z</published>
+    <updated>2021-06-21T11:45:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>最近去北京出了一趟差，结果一去就被总部抓差到总部运维团队那里帮了两个星期（其实不止两个星期）的忙，说是帮忙其实算不上，应该说我是被抓丁参与了一个大的“项目”。</p><span id="more"></span><p>这个项目就是帮助梳理运维团队现在的为了 sla 和（成本）压降的方案，并参与帮他们招一个 leader，50+ 团队的 leader，一个运维总监。</p><p>这里我重点是说我参与面试运维总监的这个事儿，这么高 level 的岗位，拉我一工程师来参与面试，能聊什么呢？于是我非常自觉地把我的时间缩到 30 分钟之内，同时又在运维工作的一些方向上各找了几个简单基础的细节问题，打算试试这些大佬候选人的基础成色。</p><h2 id="我的问题及效果"><a href="#我的问题及效果" class="headerlink" title="我的问题及效果"></a>我的问题及效果</h2><h3 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h3><p>首先我聊的是 Linux 发行版，再聊 kernel 版本，这也不是每个人都聊的，要看其简历上是否有过 Linux 系统管理员的经验，到这里有人就已经毛了。</p><p>大家基本上都是红帽系：CentOS 用的比较多，但当我引出来红帽系（就说 CentOS 吧）的 kernel 版本不标准，他们把好多高版本的特性 backport 到老（低）版本。其实这个就有点流氓，Linux 主要是是指 kernel，结果你 CentOS 里 uname 看到的版本跟别的版本看到的不是一回事。关于这个事情，没有一个候选人意识到过。</p><h4 id="进程管理"><a href="#进程管理" class="headerlink" title="进程管理"></a>进程管理</h4><h5 id="孤儿进程和僵尸进程是什么？应该怎么处理？"><a href="#孤儿进程和僵尸进程是什么？应该怎么处理？" class="headerlink" title="孤儿进程和僵尸进程是什么？应该怎么处理？"></a>孤儿进程和僵尸进程是什么？应该怎么处理？</h5><p>本想如果能聊，再问问 daemon 程序呢。结果，没有一个人能有机会让我扯出 daemon 的问题。</p><h4 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h4><h5 id="Linux-文件系统中的软链接和硬链接，有啥区别，占硬盘空间吗？"><a href="#Linux-文件系统中的软链接和硬链接，有啥区别，占硬盘空间吗？" class="headerlink" title="Linux 文件系统中的软链接和硬链接，有啥区别，占硬盘空间吗？"></a>Linux 文件系统中的软链接和硬链接，有啥区别，占硬盘空间吗？</h5><p>结果是：大都知道软链接，也大致知道其特点，但对硬链接了解不多，对后面的问题自然也就不清楚了。</p><h4 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h4><p>这个没问</p><h3 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h3><h4 id="rfc1918-中定义的-Private-Address-Space"><a href="#rfc1918-中定义的-Private-Address-Space" class="headerlink" title="rfc1918 中定义的 Private Address Space"></a>rfc1918 中定义的 Private Address Space</h4><p>成想有张口就来的再问问 100.64 的事情的，结果，就这几个段的地址，没有一个候选人能准确无误的回答出来，当然，也还是有好几位只是也许是口误说 172.16.0.0-172.32. 而在我的提示下马上又更正了。<br>这个问题我要求完全准确其实可能要求有点高，像那几位仅是 172.16. 那个段口误的，基本上来说可以得满分了。但我但凡说起 100.64. 这个段的事情，无人知晓</p><h4 id="OSI-七层模型中的二层（链路层）、三层（网络层）、四层（传输层）、七层（应用层）分别是什么？有啥区别？有什么协议？"><a href="#OSI-七层模型中的二层（链路层）、三层（网络层）、四层（传输层）、七层（应用层）分别是什么？有啥区别？有什么协议？" class="headerlink" title="OSI 七层模型中的二层（链路层）、三层（网络层）、四层（传输层）、七层（应用层）分别是什么？有啥区别？有什么协议？"></a>OSI 七层模型中的二层（链路层）、三层（网络层）、四层（传输层）、七层（应用层）分别是什么？有啥区别？有什么协议？</h4><p>这个问题相对答得好一点。</p><h3 id="安全相关（或者说是应用）"><a href="#安全相关（或者说是应用）" class="headerlink" title="安全相关（或者说是应用）"></a>安全相关（或者说是应用）</h3><h4 id="HTTPs"><a href="#HTTPs" class="headerlink" title="HTTPs"></a>HTTPs</h4><p>几乎没有候选人知道客户端和服务器是怎么交互的，当然不知道也是正常的，当然我就诱导，HTTPs 是怎样保证安全（当然杠精这里可以怼我说 HTTPs 并不能保证安全）的呢？然后又说起对成加密和非对称加密，我问在 HTTPs 客户端和服务器的交互中用到了对称加密和非对称加密了吗？用到的话是哪里用到了？</p><p>结果：全军覆没。</p><p>可能是现在主流把安全团队从运维团队里划出去的后遗症吧。</p><h3 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h3><p>这个也没问，这个其实可以挑个简单的问题问下：比如说索引为什么会加快查询的速度什么的</p><h3 id="公有云"><a href="#公有云" class="headerlink" title="公有云"></a>公有云</h3><p>我准备问的问题是 AWS 里 VPC 中 public subnet 和 private subnet 的区别，这个也没普遍问，因为很多都没用过 AWS，而且，这个问题对于整个团队的大领导来说的确太琐碎太细了，如果没有做过基于 aws 的相关架构设计啥的具体工作的，的确都不一定知道。</p><h3 id="kubernetes"><a href="#kubernetes" class="headerlink" title="kubernetes"></a>kubernetes</h3><p>我想问的是暴露服务到集群外的方式，居然有很多人不知道，那我只能评价说他完全不懂 kubernetes，当然，也有人能完全答对的。</p><p>更有意思的是，有人能答出这几种方式，但当我追问 ingress 方式到底是怎样实现将服务暴露出去的呢？被我问住了，我感觉这典型就是不求甚解，学（kubernetes）的时候并没有带脑袋去想，而只是说我要背下来。</p><h3 id="逻辑思维（概率相关）"><a href="#逻辑思维（概率相关）" class="headerlink" title="逻辑思维（概率相关）"></a>逻辑思维（概率相关）</h3><p>这种题我准备了两道：</p><ul><li>已知函数 r64 会按百分之六十和百分之四十的概率返回整数 0 和 1，求函数 r55 使其按百分之五十和百分之五十的概率返回整数 0 和 1。</li><li>已知函数 r2，会按同样的概率返回整数 0 和 1，求函数 r3，使其按同样的概率返回整数 0、1 和 2</li></ul><p>准确讲，这两个题都不难，难得是这样突然袭击候选人完全没准备可能会蒙，所以，我其实只是想知道大致的思路。结论：5 分钟之类没有人答对的，无论是第一题还是第二题。原本想第二题如果有人答得好再引申问下知道 r<sub>n</sub>，求 r<sub>m</sub>（n, m 都是正整数），但遗憾的是，没有人让我有机会聊这些……</p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;缘起&quot;&gt;&lt;a href=&quot;#缘起&quot; class=&quot;headerlink&quot; title=&quot;缘起&quot;&gt;&lt;/a&gt;缘起&lt;/h2&gt;&lt;p&gt;最近去北京出了一趟差，结果一去就被总部抓差到总部运维团队那里帮了两个星期（其实不止两个星期）的忙，说是帮忙其实算不上，应该说我是被抓丁参与了一个大的“项目”。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="interview" scheme="https://ming.theyan.gs/tags/interview/"/>
+    
+    <category term="rfc1918" scheme="https://ming.theyan.gs/tags/rfc1918/"/>
+    
+    <category term="tcp/ip" scheme="https://ming.theyan.gs/tags/tcp-ip/"/>
+    
+    <category term="孤儿进程" scheme="https://ming.theyan.gs/tags/%E5%AD%A4%E5%84%BF%E8%BF%9B%E7%A8%8B/"/>
+    
+    <category term="僵尸进程" scheme="https://ming.theyan.gs/tags/%E5%83%B5%E5%B0%B8%E8%BF%9B%E7%A8%8B/"/>
+    
+    <category term="运维总监" scheme="https://ming.theyan.gs/tags/%E8%BF%90%E7%BB%B4%E6%80%BB%E7%9B%91/"/>
+    
+    <category term="面试题" scheme="https://ming.theyan.gs/tags/%E9%9D%A2%E8%AF%95%E9%A2%98/"/>
+    
+  </entry>
+  
+</feed>

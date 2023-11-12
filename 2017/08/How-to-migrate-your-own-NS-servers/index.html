@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="缘起我厂原来的权威 DNS 服务器放在阿里云上的（三个完全不同的节点每个节点一台），但现在这几个节点要撤了，所以这些个权威 DNS 服务器必须要要迁往别处了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How to migrate your own NS servers">
+<meta property="og:url" content="https://ming.theyan.gs/2017/08/How-to-migrate-your-own-NS-servers/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="缘起我厂原来的权威 DNS 服务器放在阿里云上的（三个完全不同的节点每个节点一台），但现在这几个节点要撤了，所以这些个权威 DNS 服务器必须要要迁往别处了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-08-12T05:03:44.000Z">
+<meta property="article:modified_time" content="2017-08-12T05:03:44.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="DNS">
+<meta property="article:tag" content="NS">
+<meta property="article:tag" content="glue record">
+<meta property="article:tag" content="registrar">
+<meta property="article:tag" content="registry">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2017/08/How-to-migrate-your-own-NS-servers/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2017/08/How-to-migrate-your-own-NS-servers/index.html","path":"2017/08/How-to-migrate-your-own-NS-servers/index.html","title":"How to migrate your own NS servers"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>How to migrate your own NS servers | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%98%E8%B5%B7"><span class="nav-number">1.</span> <span class="nav-text">缘起</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E8%83%8C%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">技术背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS%E6%9E%B6%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">DNS架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#glue-record"><span class="nav-number">2.2.</span> <span class="nav-text">glue record</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E6%96%BD%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.</span> <span class="nav-text">实施步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%85%E5%86%B5%E8%AF%B4%E6%98%8E"><span class="nav-number">3.1.</span> <span class="nav-text">情况说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.2.</span> <span class="nav-text">具体步骤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="nav-number">4.</span> <span class="nav-text">常见问题</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2017/08/How-to-migrate-your-own-NS-servers/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="How to migrate your own NS servers | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          How to migrate your own NS servers
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-08-12 13:03:44" itemprop="dateCreated datePublished" datetime="2017-08-12T13:03:44+08:00">2017-08-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>我厂原来的权威 DNS 服务器放在阿里云上的（三个完全不同的节点每个节点一台），但现在这几个节点要撤了，所以这些个权威 DNS 服务器必须要要迁往别处了。</p>
+<span id="more"></span>
+
+<h2 id="技术背景"><a href="#技术背景" class="headerlink" title="技术背景"></a>技术背景</h2><h3 id="DNS架构"><a href="#DNS架构" class="headerlink" title="DNS架构"></a>DNS架构</h3><p>DNS 的结构管理就像一个倒着的大树，上一级的权威服务器上可以把自己下一级的管理权通过 DNS 纪录里的 NS 纪录（NS 这里是 nameserver 的意思）指派给别的服务器（这个服务器就叫做“权威服务器”）</p>
+<h3 id="glue-record"><a href="#glue-record" class="headerlink" title="glue record"></a>glue record</h3><p>由于往往会把类似于 xxx.com 这种域的 NS 纪录指向 ns1.xxx.com、ns2.xxx.com 这种纪录，而这种纪录最终指向的 IP 地址，又是需要通过 ns1.xxx.com、ns2.xxx.com 这两台机器来解析，这样就陷入了死循环，为了避免这种问题的发生，.com 和 .net 域出了一种新的策略：所以成为 NS 纪录的域名（类似上面例子中的 ns1.xxx.com 和 ns2.xxx.com），必须先要注册到 Verisign 的库里，也就是说，需要先能在 <a target="_blank" rel="noopener" href="https://www.verisign.com/en_US/domain-names/whois/index.xhtml">Verisign 的这里</a> （点“Name Server”再输入查询）查的到的域名，才能作为某个域的 NS 纪录。Verisign 这个库里的这些纪录，就叫做“glue record”。</p>
+<p>至于怎么修改 glue record 或者注册新的 glue record，理论上来讲，需要通过你自己域名的 registrar 的系统。</p>
+<p>问题又来了，谁是你的域名的 registrar 呢？一般来讲，如果你没迁移过域名托管的话，那么你在哪里注册的域名，你的 registrar 就是谁，比如 GoDaddy。</p>
+<p>这里顺便鄙视一下国内很多 registrar：维护 glue record 需要先续费 5 年，掉钱眼儿里去了吧！</p>
+<h2 id="实施步骤"><a href="#实施步骤" class="headerlink" title="实施步骤"></a>实施步骤</h2><h3 id="情况说明"><a href="#情况说明" class="headerlink" title="情况说明"></a>情况说明</h3><ul>
+<li>我司使用的域有好多，但 NS 纪录都是指向的 ns1.xa.com、ns2.xa.com 和 ns3.xa.com。</li>
+<li>由于 xa.com 这个域名的 registrar 在国内，需要续费 5 年才能使用 glue record 功能，所以果断另外启用 registrar 在国外的另外一个域名 xb.com 来做 glue record：ns1.xb.com、ns2.xb.com 和 ns3.xb.com。最后 NS 纪录也会用这三个域名</li>
+</ul>
+<h3 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h3><p>原理弄明白了，做起来就要简单有条理很多：</p>
+<ol>
+<li>首先是先部署好新的 DNS 服务器（三台），并将域名：ns1.xb.com、ns2.xb.com 和 ns3.xb.com 分别指向新的 DNS 服务器</li>
+<li>修改我司域所有 6 台权威服务器的 NS 纪录，加入三条：ns1.xb.com、ns2.xb.com 和 ns3.xb.com；同时在域 xb.com 的 registrar 的系统里加上新的 glue record：ns1.xb.com、ns2.xb.com 和 ns3.xb.com</li>
+<li>等 DNS 解析记录收敛的差不多（客户端查 NS 纪录能出所有老的和新的 6 台 DNS 服务器）；这时，在 <a target="_blank" rel="noopener" href="https://www.verisign.com/en_US/domain-names/whois/index.xhtml">Verisign 的库里</a> （点“Name Server”再输入查询）能查询到 ns1.xb.com、ns2.xb.com 和 ns3.xb.com 了</li>
+<li>在 registrar （上级）的系统里修改我司域的 NameServer 由 ns1.xa.com、ns2.xa.com 和 ns3.xa.com 到 ns1.xb.com、ns2.xb.com 和 ns3.xb.com</li>
+<li>等上级（registrar）里关于我司域的 NameServer 的纪录改为 ns1.xb.com、ns2.xb.com 和 ns3.xb.com 之后</li>
+<li>修改我司域所有 6 台权威服务器上的 NS 纪录，删除掉 ns1.xa.com、ns2.xa.com 和 ns3.xa.com 三台，留下 ns1.xb.com、ns2.xb.com 和 ns3.xb.com 三台</li>
+<li>在三台老 DNS 服务器的 query log，发现差不多没有请求过来以后，把服务停掉即可。</li>
+</ol>
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><ol>
+<li>千万不能直接在权威服务器上修改 ns1.xa.com、ns2.xa.com 和 ns3.xa.com 指向新 DNS 服务器</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/DNS/" rel="tag"># DNS</a>
+              <a href="/tags/NS/" rel="tag"># NS</a>
+              <a href="/tags/glue-record/" rel="tag"># glue record</a>
+              <a href="/tags/registrar/" rel="tag"># registrar</a>
+              <a href="/tags/registry/" rel="tag"># registry</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/07/Linux%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90%E4%B8%AD%E7%9A%84IP%E5%9C%B0%E5%9D%80%E9%80%89%E6%8B%A9%E2%80%9C%E4%BA%B2%E5%92%8C%E6%80%A7%E2%80%9D%E9%97%AE%E9%A2%98/index.html" rel="prev" title="Linux域名解析中的IP地址选择“亲和性”问题">
+                  <i class="fa fa-angle-left"></i> Linux域名解析中的IP地址选择“亲和性”问题
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/08/%E7%94%A8%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%94%9F%E6%88%90%E5%AD%97%E7%AC%A6%E7%BB%84%E6%88%90%E7%9A%84%E4%BA%8C%E7%BB%B4%E7%A0%81/index.html" rel="next" title="用命令行生成字符组成的二维码">
+                  用命令行生成字符组成的二维码 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

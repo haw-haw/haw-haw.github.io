@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="背景老板有个移动办公的 APP 在公司使用无线网络时老报“超时”错误，于是就让解决这个问题。我们为了定位问题，做了几个测试：  使用办公无线网络使用此 APP，错误可以重复、稳定复现 使用 4G 或在家使用此 APP，没有任何问题 把手机用 usb 连上电脑，让数据走电脑的有线来访问服务器，结果发现 APP 没有问题 把手机连上办公室其他 wifi 设备，发现使用 APP 也没有问题  最后，还是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="怎样在macOS上抓iPhone的数据包">
+<meta property="og:url" content="https://ming.theyan.gs/2017/06/%E6%80%8E%E6%A0%B7%E5%9C%A8macOS%E4%B8%8A%E6%8A%93iPhone%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="背景老板有个移动办公的 APP 在公司使用无线网络时老报“超时”错误，于是就让解决这个问题。我们为了定位问题，做了几个测试：  使用办公无线网络使用此 APP，错误可以重复、稳定复现 使用 4G 或在家使用此 APP，没有任何问题 把手机用 usb 连上电脑，让数据走电脑的有线来访问服务器，结果发现 APP 没有问题 把手机连上办公室其他 wifi 设备，发现使用 APP 也没有问题  最后，还是">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-06-03T10:30:58.000Z">
+<meta property="article:modified_time" content="2017-06-03T10:30:58.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="macOS">
+<meta property="article:tag" content="iPhone">
+<meta property="article:tag" content="Xcode">
+<meta property="article:tag" content="rvictl">
+<meta property="article:tag" content="tcpdump">
+<meta property="article:tag" content="Wireshark">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2017/06/%E6%80%8E%E6%A0%B7%E5%9C%A8macOS%E4%B8%8A%E6%8A%93iPhone%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2017/06/%E6%80%8E%E6%A0%B7%E5%9C%A8macOS%E4%B8%8A%E6%8A%93iPhone%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85/index.html","path":"2017/06/怎样在macOS上抓iPhone的数据包/index.html","title":"怎样在macOS上抓iPhone的数据包"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>怎样在macOS上抓iPhone的数据包 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%96%B9%E6%A1%88"><span class="nav-number">2.</span> <span class="nav-text">方案</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.</span> <span class="nav-text">具体步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85"><span class="nav-number">3.1.</span> <span class="nav-text">软件安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%96%E5%BE%97%E8%AE%BE%E5%A4%87UDID"><span class="nav-number">3.2.</span> <span class="nav-text">取得设备UDID</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%A0%E5%B0%84%E8%99%9A%E6%8B%9F%E7%BD%91%E7%BB%9C%E8%AE%BE%E5%A4%87"><span class="nav-number">3.3.</span> <span class="nav-text">映射虚拟网络设备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AC%E5%8C%85"><span class="nav-number">3.4.</span> <span class="nav-text">听包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%A0%E6%8E%89%E8%99%9A%E6%8B%9F%E7%BD%91%E7%BB%9C%E8%AE%BE%E5%A4%87"><span class="nav-number">3.5.</span> <span class="nav-text">删掉虚拟网络设备</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%8E%E8%AF%9D"><span class="nav-number">4.</span> <span class="nav-text">后话</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2017/06/%E6%80%8E%E6%A0%B7%E5%9C%A8macOS%E4%B8%8A%E6%8A%93iPhone%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="怎样在macOS上抓iPhone的数据包 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          怎样在macOS上抓iPhone的数据包
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-06-03 18:30:58" itemprop="dateCreated datePublished" datetime="2017-06-03T18:30:58+08:00">2017-06-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Network/" itemprop="url" rel="index"><span itemprop="name">Network</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>老板有个移动办公的 APP 在公司使用无线网络时老报“超时”错误，于是就让解决这个问题。我们为了定位问题，做了几个测试：</p>
+<ol>
+<li>使用办公无线网络使用此 APP，错误可以重复、稳定复现</li>
+<li>使用 4G 或在家使用此 APP，没有任何问题</li>
+<li>把手机用 usb 连上电脑，让数据走电脑的有线来访问服务器，结果发现 APP 没有问题</li>
+<li>把手机连上办公室其他 wifi 设备，发现使用 APP 也没有问题</li>
+</ol>
+<p>最后，还是要听手机上的网络数据包来分析问题。</p>
+<a id="more"></a>
+<h1 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h1><p>业界听手机数据包的几种方案，大都不太合适，因为基本原理就是把数据包先扔到电脑上，这样就能在电脑上来听包了，但这样的话，我们的数据都是走电脑到达服务器的，这样的场景我们测试了，从电脑的有线网络走是没有问题的！</p>
+<p>当然，也不是所有的方案都不合适，这样的话也就不会有这篇文章了：）Xcode 的 xcode command line tools 中的工具 rvictl 就非常适合我们的场景。</p>
+<h1 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h1><h2 id="软件安装"><a href="#软件安装" class="headerlink" title="软件安装"></a>软件安装</h2><p>安装 Xcode，然后安装 Xcode command line tools，这就不多说了。</p>
+<h2 id="取得设备UDID"><a href="#取得设备UDID" class="headerlink" title="取得设备UDID"></a>取得设备UDID</h2><ol>
+<li>iPhone 用数据线连上 macOS</li>
+<li>在 macOS 上打开 iTunes</li>
+<li>在 iPhone 这个设备上，Settings-&gt;Summary 中，右侧页面中找到 UDID 值（如果找不到，多次点击 ECID、Moel Identifier 或 Serial Number 即可找到）</li>
+</ol>
+<h2 id="映射虚拟网络设备"><a href="#映射虚拟网络设备" class="headerlink" title="映射虚拟网络设备"></a>映射虚拟网络设备</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rvictl -s &lt;udid&gt;;</span><br><span class="line"><span class="comment"># 这里的 &lt;udid&gt; 即为上一步看到的设备 UDID</span></span><br></pre></td></tr></table></figure>
+<p>成功后会发现在 macOS 系统下多出一个网络设备：rvi0，这便是 iPhone 的“网络设备”在 macOS 上的映射，要听 iPhone 的数据包，直接听这个设备的包即可。</p>
+<h2 id="听包"><a href="#听包" class="headerlink" title="听包"></a>听包</h2><p>这一步简单了，直接打开 Wireshark，然后选 rvi0 设备抓包就好了。或者是先用 tcpdump 对 rvi0 抓包，最后再用 Wireshark 分析。</p>
+<p>附上 tcpdump 的命令行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo tcpdump -nn -i rvi0 -vvv -X -s 1024 -w iphone.wifi.pcap;</span><br><span class="line"><span class="comment"># 这里的 iphone.wifi.pcap 为数据包保存的数据文件</span></span><br><span class="line"><span class="comment"># 弄完可以扔给 Wireshark 分析</span></span><br></pre></td></tr></table></figure>
+<p>开始听包后，直接操作手机使用 APP，尽量使得错误复现，多重复几次以后，Ctrl+C 终止掉听包程序 tcpdump，记得 iphone.wifi.pcap 可用于 Wireshark 分析</p>
+<h2 id="删掉虚拟网络设备"><a href="#删掉虚拟网络设备" class="headerlink" title="删掉虚拟网络设备"></a>删掉虚拟网络设备</h2><p>最后记得删除掉映射的网络设备</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rvictl -x &lt;udid&gt;;</span><br><span class="line"><span class="comment"># 这里的 &lt;udid&gt; 即为前面 iTunes 上看到的设备 UDID</span></span><br></pre></td></tr></table></figure>
+<h1 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h1><p>关于老板的这个问题解决了没有呢？虽然这不是这篇文章的重点，既然开头用这个作为引子引出本文，这里还是再点一下。最终只是确认了无线网络有问题，iPhone 通过 AP 往服务器回的 ACK 的包到达 AP 时已经被延时 1s 多了，但是 iPhone 上看到的数据包是及时发出去的。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/macOS/" rel="tag"># macOS</a>
+              <a href="/tags/iPhone/" rel="tag"># iPhone</a>
+              <a href="/tags/Xcode/" rel="tag"># Xcode</a>
+              <a href="/tags/rvictl/" rel="tag"># rvictl</a>
+              <a href="/tags/tcpdump/" rel="tag"># tcpdump</a>
+              <a href="/tags/Wireshark/" rel="tag"># Wireshark</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/04/%E4%BD%BF%E7%94%A8racadm%E8%BF%9C%E7%A8%8B%E9%85%8D%E7%BD%AEidrac%E5%8D%A1%E8%87%AA%E5%B7%B1%E9%80%9A%E8%BF%87smtp%E6%8A%A5%E8%AD%A6/index.html" rel="prev" title="使用racadm远程配置idrac卡自己通过smtp报警">
+                  <i class="fa fa-angle-left"></i> 使用racadm远程配置idrac卡自己通过smtp报警
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/07/Linux%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90%E4%B8%AD%E7%9A%84IP%E5%9C%B0%E5%9D%80%E9%80%89%E6%8B%A9%E2%80%9C%E4%BA%B2%E5%92%8C%E6%80%A7%E2%80%9D%E9%97%AE%E9%A2%98/index.html" rel="next" title="Linux域名解析中的IP地址选择“亲和性”问题">
+                  Linux域名解析中的IP地址选择“亲和性”问题 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

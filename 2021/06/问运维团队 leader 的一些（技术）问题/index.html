@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="缘起最近去北京出了一趟差，结果一去就被总部抓差到总部运维团队那里帮了两个星期（其实不止两个星期）的忙，说是帮忙其实算不上，应该说我是被抓丁参与了一个大的“项目”。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="问运维团队 leader 的一些（技术）问题">
+<meta property="og:url" content="https://ming.theyan.gs/2021/06/%E9%97%AE%E8%BF%90%E7%BB%B4%E5%9B%A2%E9%98%9F%20leader%20%E7%9A%84%E4%B8%80%E4%BA%9B%EF%BC%88%E6%8A%80%E6%9C%AF%EF%BC%89%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="缘起最近去北京出了一趟差，结果一去就被总部抓差到总部运维团队那里帮了两个星期（其实不止两个星期）的忙，说是帮忙其实算不上，应该说我是被抓丁参与了一个大的“项目”。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-06-11T11:32:12.000Z">
+<meta property="article:modified_time" content="2021-06-21T11:45:12.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="interview">
+<meta property="article:tag" content="rfc1918">
+<meta property="article:tag" content="tcp&#x2F;ip">
+<meta property="article:tag" content="孤儿进程">
+<meta property="article:tag" content="僵尸进程">
+<meta property="article:tag" content="运维总监">
+<meta property="article:tag" content="面试题">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2021/06/%E9%97%AE%E8%BF%90%E7%BB%B4%E5%9B%A2%E9%98%9F%20leader%20%E7%9A%84%E4%B8%80%E4%BA%9B%EF%BC%88%E6%8A%80%E6%9C%AF%EF%BC%89%E9%97%AE%E9%A2%98/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2021/06/%E9%97%AE%E8%BF%90%E7%BB%B4%E5%9B%A2%E9%98%9F%20leader%20%E7%9A%84%E4%B8%80%E4%BA%9B%EF%BC%88%E6%8A%80%E6%9C%AF%EF%BC%89%E9%97%AE%E9%A2%98/index.html","path":"2021/06/问运维团队 leader 的一些（技术）问题/index.html","title":"问运维团队 leader 的一些（技术）问题"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>问运维团队 leader 的一些（技术）问题 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%98%E8%B5%B7"><span class="nav-number">1.</span> <span class="nav-text">缘起</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E6%95%88%E6%9E%9C"><span class="nav-number">2.</span> <span class="nav-text">我的问题及效果</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux"><span class="nav-number">2.1.</span> <span class="nav-text">Linux</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86"><span class="nav-number">2.1.1.</span> <span class="nav-text">进程管理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AD%A4%E5%84%BF%E8%BF%9B%E7%A8%8B%E5%92%8C%E5%83%B5%E5%B0%B8%E8%BF%9B%E7%A8%8B%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E5%A4%84%E7%90%86%EF%BC%9F"><span class="nav-number">2.1.1.1.</span> <span class="nav-text">孤儿进程和僵尸进程是什么？应该怎么处理？</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-number">2.1.2.</span> <span class="nav-text">文件系统</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Linux-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E8%BD%AF%E9%93%BE%E6%8E%A5%E5%92%8C%E7%A1%AC%E9%93%BE%E6%8E%A5%EF%BC%8C%E6%9C%89%E5%95%A5%E5%8C%BA%E5%88%AB%EF%BC%8C%E5%8D%A0%E7%A1%AC%E7%9B%98%E7%A9%BA%E9%97%B4%E5%90%97%EF%BC%9F"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">Linux 文件系统中的软链接和硬链接，有啥区别，占硬盘空间吗？</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="nav-number">2.1.3.</span> <span class="nav-text">内存管理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C"><span class="nav-number">2.2.</span> <span class="nav-text">网络</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#rfc1918-%E4%B8%AD%E5%AE%9A%E4%B9%89%E7%9A%84-Private-Address-Space"><span class="nav-number">2.2.1.</span> <span class="nav-text">rfc1918 中定义的 Private Address Space</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#OSI-%E4%B8%83%E5%B1%82%E6%A8%A1%E5%9E%8B%E4%B8%AD%E7%9A%84%E4%BA%8C%E5%B1%82%EF%BC%88%E9%93%BE%E8%B7%AF%E5%B1%82%EF%BC%89%E3%80%81%E4%B8%89%E5%B1%82%EF%BC%88%E7%BD%91%E7%BB%9C%E5%B1%82%EF%BC%89%E3%80%81%E5%9B%9B%E5%B1%82%EF%BC%88%E4%BC%A0%E8%BE%93%E5%B1%82%EF%BC%89%E3%80%81%E4%B8%83%E5%B1%82%EF%BC%88%E5%BA%94%E7%94%A8%E5%B1%82%EF%BC%89%E5%88%86%E5%88%AB%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F%E6%9C%89%E5%95%A5%E5%8C%BA%E5%88%AB%EF%BC%9F%E6%9C%89%E4%BB%80%E4%B9%88%E5%8D%8F%E8%AE%AE%EF%BC%9F"><span class="nav-number">2.2.2.</span> <span class="nav-text">OSI 七层模型中的二层（链路层）、三层（网络层）、四层（传输层）、七层（应用层）分别是什么？有啥区别？有什么协议？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E7%9B%B8%E5%85%B3%EF%BC%88%E6%88%96%E8%80%85%E8%AF%B4%E6%98%AF%E5%BA%94%E7%94%A8%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">安全相关（或者说是应用）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTPs"><span class="nav-number">2.3.1.</span> <span class="nav-text">HTTPs</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">2.4.</span> <span class="nav-text">数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%AC%E6%9C%89%E4%BA%91"><span class="nav-number">2.5.</span> <span class="nav-text">公有云</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kubernetes"><span class="nav-number">2.6.</span> <span class="nav-text">kubernetes</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E6%80%9D%E7%BB%B4%EF%BC%88%E6%A6%82%E7%8E%87%E7%9B%B8%E5%85%B3%EF%BC%89"><span class="nav-number">2.7.</span> <span class="nav-text">逻辑思维（概率相关）</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2021/06/%E9%97%AE%E8%BF%90%E7%BB%B4%E5%9B%A2%E9%98%9F%20leader%20%E7%9A%84%E4%B8%80%E4%BA%9B%EF%BC%88%E6%8A%80%E6%9C%AF%EF%BC%89%E9%97%AE%E9%A2%98/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="问运维团队 leader 的一些（技术）问题 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          问运维团队 leader 的一些（技术）问题
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-06-11 19:32:12" itemprop="dateCreated datePublished" datetime="2021-06-11T19:32:12+08:00">2021-06-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2021-06-21 19:45:12" itemprop="dateModified" datetime="2021-06-21T19:45:12+08:00">2021-06-21</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>最近去北京出了一趟差，结果一去就被总部抓差到总部运维团队那里帮了两个星期（其实不止两个星期）的忙，说是帮忙其实算不上，应该说我是被抓丁参与了一个大的“项目”。</p>
+<span id="more"></span>
+
+<p>这个项目就是帮助梳理运维团队现在的为了 sla 和（成本）压降的方案，并参与帮他们招一个 leader，50+ 团队的 leader，一个运维总监。</p>
+<p>这里我重点是说我参与面试运维总监的这个事儿，这么高 level 的岗位，拉我一工程师来参与面试，能聊什么呢？于是我非常自觉地把我的时间缩到 30 分钟之内，同时又在运维工作的一些方向上各找了几个简单基础的细节问题，打算试试这些大佬候选人的基础成色。</p>
+<h2 id="我的问题及效果"><a href="#我的问题及效果" class="headerlink" title="我的问题及效果"></a>我的问题及效果</h2><h3 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h3><p>首先我聊的是 Linux 发行版，再聊 kernel 版本，这也不是每个人都聊的，要看其简历上是否有过 Linux 系统管理员的经验，到这里有人就已经毛了。</p>
+<p>大家基本上都是红帽系：CentOS 用的比较多，但当我引出来红帽系（就说 CentOS 吧）的 kernel 版本不标准，他们把好多高版本的特性 backport 到老（低）版本。其实这个就有点流氓，Linux 主要是是指 kernel，结果你 CentOS 里 uname 看到的版本跟别的版本看到的不是一回事。关于这个事情，没有一个候选人意识到过。</p>
+<h4 id="进程管理"><a href="#进程管理" class="headerlink" title="进程管理"></a>进程管理</h4><h5 id="孤儿进程和僵尸进程是什么？应该怎么处理？"><a href="#孤儿进程和僵尸进程是什么？应该怎么处理？" class="headerlink" title="孤儿进程和僵尸进程是什么？应该怎么处理？"></a>孤儿进程和僵尸进程是什么？应该怎么处理？</h5><p>本想如果能聊，再问问 daemon 程序呢。结果，没有一个人能有机会让我扯出 daemon 的问题。</p>
+<h4 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h4><h5 id="Linux-文件系统中的软链接和硬链接，有啥区别，占硬盘空间吗？"><a href="#Linux-文件系统中的软链接和硬链接，有啥区别，占硬盘空间吗？" class="headerlink" title="Linux 文件系统中的软链接和硬链接，有啥区别，占硬盘空间吗？"></a>Linux 文件系统中的软链接和硬链接，有啥区别，占硬盘空间吗？</h5><p>结果是：大都知道软链接，也大致知道其特点，但对硬链接了解不多，对后面的问题自然也就不清楚了。</p>
+<h4 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h4><p>这个没问</p>
+<h3 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h3><h4 id="rfc1918-中定义的-Private-Address-Space"><a href="#rfc1918-中定义的-Private-Address-Space" class="headerlink" title="rfc1918 中定义的 Private Address Space"></a>rfc1918 中定义的 Private Address Space</h4><p>成想有张口就来的再问问 100.64 的事情的，结果，就这几个段的地址，没有一个候选人能准确无误的回答出来，当然，也还是有好几位只是也许是口误说 172.16.0.0-172.32. 而在我的提示下马上又更正了。<br>这个问题我要求完全准确其实可能要求有点高，像那几位仅是 172.16. 那个段口误的，基本上来说可以得满分了。但我但凡说起 100.64. 这个段的事情，无人知晓</p>
+<h4 id="OSI-七层模型中的二层（链路层）、三层（网络层）、四层（传输层）、七层（应用层）分别是什么？有啥区别？有什么协议？"><a href="#OSI-七层模型中的二层（链路层）、三层（网络层）、四层（传输层）、七层（应用层）分别是什么？有啥区别？有什么协议？" class="headerlink" title="OSI 七层模型中的二层（链路层）、三层（网络层）、四层（传输层）、七层（应用层）分别是什么？有啥区别？有什么协议？"></a>OSI 七层模型中的二层（链路层）、三层（网络层）、四层（传输层）、七层（应用层）分别是什么？有啥区别？有什么协议？</h4><p>这个问题相对答得好一点。</p>
+<h3 id="安全相关（或者说是应用）"><a href="#安全相关（或者说是应用）" class="headerlink" title="安全相关（或者说是应用）"></a>安全相关（或者说是应用）</h3><h4 id="HTTPs"><a href="#HTTPs" class="headerlink" title="HTTPs"></a>HTTPs</h4><p>几乎没有候选人知道客户端和服务器是怎么交互的，当然不知道也是正常的，当然我就诱导，HTTPs 是怎样保证安全（当然杠精这里可以怼我说 HTTPs 并不能保证安全）的呢？然后又说起对成加密和非对称加密，我问在 HTTPs 客户端和服务器的交互中用到了对称加密和非对称加密了吗？用到的话是哪里用到了？</p>
+<p>结果：全军覆没。</p>
+<p>可能是现在主流把安全团队从运维团队里划出去的后遗症吧。</p>
+<h3 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h3><p>这个也没问，这个其实可以挑个简单的问题问下：比如说索引为什么会加快查询的速度什么的</p>
+<h3 id="公有云"><a href="#公有云" class="headerlink" title="公有云"></a>公有云</h3><p>我准备问的问题是 AWS 里 VPC 中 public subnet 和 private subnet 的区别，这个也没普遍问，因为很多都没用过 AWS，而且，这个问题对于整个团队的大领导来说的确太琐碎太细了，如果没有做过基于 aws 的相关架构设计啥的具体工作的，的确都不一定知道。</p>
+<h3 id="kubernetes"><a href="#kubernetes" class="headerlink" title="kubernetes"></a>kubernetes</h3><p>我想问的是暴露服务到集群外的方式，居然有很多人不知道，那我只能评价说他完全不懂 kubernetes，当然，也有人能完全答对的。</p>
+<p>更有意思的是，有人能答出这几种方式，但当我追问 ingress 方式到底是怎样实现将服务暴露出去的呢？被我问住了，我感觉这典型就是不求甚解，学（kubernetes）的时候并没有带脑袋去想，而只是说我要背下来。</p>
+<h3 id="逻辑思维（概率相关）"><a href="#逻辑思维（概率相关）" class="headerlink" title="逻辑思维（概率相关）"></a>逻辑思维（概率相关）</h3><p>这种题我准备了两道：</p>
+<ul>
+<li>已知函数 r64 会按百分之六十和百分之四十的概率返回整数 0 和 1，求函数 r55 使其按百分之五十和百分之五十的概率返回整数 0 和 1。</li>
+<li>已知函数 r2，会按同样的概率返回整数 0 和 1，求函数 r3，使其按同样的概率返回整数 0、1 和 2</li>
+</ul>
+<p>准确讲，这两个题都不难，难得是这样突然袭击候选人完全没准备可能会蒙，所以，我其实只是想知道大致的思路。结论：5 分钟之类没有人答对的，无论是第一题还是第二题。原本想第二题如果有人答得好再引申问下知道 r<sub>n</sub>，求 r<sub>m</sub>（n, m 都是正整数），但遗憾的是，没有人让我有机会聊这些……</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/interview/" rel="tag"># interview</a>
+              <a href="/tags/rfc1918/" rel="tag"># rfc1918</a>
+              <a href="/tags/tcp-ip/" rel="tag"># tcp/ip</a>
+              <a href="/tags/%E5%AD%A4%E5%84%BF%E8%BF%9B%E7%A8%8B/" rel="tag"># 孤儿进程</a>
+              <a href="/tags/%E5%83%B5%E5%B0%B8%E8%BF%9B%E7%A8%8B/" rel="tag"># 僵尸进程</a>
+              <a href="/tags/%E8%BF%90%E7%BB%B4%E6%80%BB%E7%9B%91/" rel="tag"># 运维总监</a>
+              <a href="/tags/%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="tag"># 面试题</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/Building%20a%20wiki%20using%20confluence%20via%20docker/index.html" rel="prev" title="Building a wiki using confluence via docker">
+                  <i class="fa fa-angle-left"></i> Building a wiki using confluence via docker
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/11/%E7%94%A8%20Kindle%20%E6%9D%A5%E8%BF%BD%E7%BD%91%E6%96%87%E4%B9%8B%E4%B8%89/index.html" rel="next" title="用 Kindle 来追网文之三">
+                  用 Kindle 来追网文之三 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

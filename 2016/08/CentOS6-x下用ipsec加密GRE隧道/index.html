@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="楔子前面的文章：Linux下用GRE隧道直接联通两个私网里讲了怎样用在两个独立的私网间打洞(GRE tunnel)来直接连通两个不同的私网，进阶需求就是希望能把这个tunnel加密一下。否则，有心的坏人可能会在外部线路上窃听到很多敏感的信息。因此，本文将要讲的，算是前一文章的进阶部分：给打洞的隧道加密！ Why “GRE over IPSec”光是说加密隧道的话，方案有好几种：  IPSec tu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS6.x下用ipsec加密GRE隧道">
+<meta property="og:url" content="https://ming.theyan.gs/2016/08/CentOS6-x%E4%B8%8B%E7%94%A8ipsec%E5%8A%A0%E5%AF%86GRE%E9%9A%A7%E9%81%93/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="楔子前面的文章：Linux下用GRE隧道直接联通两个私网里讲了怎样用在两个独立的私网间打洞(GRE tunnel)来直接连通两个不同的私网，进阶需求就是希望能把这个tunnel加密一下。否则，有心的坏人可能会在外部线路上窃听到很多敏感的信息。因此，本文将要讲的，算是前一文章的进阶部分：给打洞的隧道加密！ Why “GRE over IPSec”光是说加密隧道的话，方案有好几种：  IPSec tu">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-08-30T06:24:17.000Z">
+<meta property="article:modified_time" content="2019-04-04T23:47:06.998Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="IPSec">
+<meta property="article:tag" content="GRE">
+<meta property="article:tag" content="tunnel">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2016/08/CentOS6-x%E4%B8%8B%E7%94%A8ipsec%E5%8A%A0%E5%AF%86GRE%E9%9A%A7%E9%81%93/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2016/08/CentOS6-x%E4%B8%8B%E7%94%A8ipsec%E5%8A%A0%E5%AF%86GRE%E9%9A%A7%E9%81%93/index.html","path":"2016/08/CentOS6-x下用ipsec加密GRE隧道/index.html","title":"CentOS6.x下用ipsec加密GRE隧道"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>CentOS6.x下用ipsec加密GRE隧道 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A5%94%E5%AD%90"><span class="nav-number">1.</span> <span class="nav-text">楔子</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Why-%E2%80%9CGRE-over-IPSec%E2%80%9D"><span class="nav-number">1.1.</span> <span class="nav-text">Why “GRE over IPSec”</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">2.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.</span> <span class="nav-text">具体步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">3.1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A3%E5%B8%B8%E6%89%93%E6%B4%9E"><span class="nav-number">3.2.</span> <span class="nav-text">正常打洞</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GRE-over-IPSEC"><span class="nav-number">3.3.</span> <span class="nav-text">GRE over IPSEC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEGWA"><span class="nav-number">3.3.1.</span> <span class="nav-text">配置GWA</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEGWB"><span class="nav-number">3.3.2.</span> <span class="nav-text">配置GWB</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Iptables"><span class="nav-number">3.4.</span> <span class="nav-text">Iptables</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="nav-number">3.5.</span> <span class="nav-text">启动服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E6%B5%8B%E8%AF%95"><span class="nav-number">3.6.</span> <span class="nav-text">简单测试</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2016/08/CentOS6-x%E4%B8%8B%E7%94%A8ipsec%E5%8A%A0%E5%AF%86GRE%E9%9A%A7%E9%81%93/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="CentOS6.x下用ipsec加密GRE隧道 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CentOS6.x下用ipsec加密GRE隧道
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-08-30 14:24:17" itemprop="dateCreated datePublished" datetime="2016-08-30T14:24:17+08:00">2016-08-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2019-04-05 07:47:06" itemprop="dateModified" datetime="2019-04-05T07:47:06+08:00">2019-04-05</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="楔子"><a href="#楔子" class="headerlink" title="楔子"></a>楔子</h1><p>前面的文章：<a href="/2016/08/Linux下用GRE隧道直接联通两个私网/" title="Title">Linux下用GRE隧道直接联通两个私网</a>里讲了怎样用在两个独立的私网间打洞(GRE tunnel)来直接连通两个不同的私网，进阶需求就是希望能把这个tunnel加密一下。否则，有心的坏人可能会在外部线路上窃听到很多敏感的信息。因此，本文将要讲的，算是前一文章的进阶部分：<strong>给打洞的隧道加密</strong>！</p>
+<h2 id="Why-“GRE-over-IPSec”"><a href="#Why-“GRE-over-IPSec”" class="headerlink" title="Why “GRE over IPSec”"></a>Why “GRE over IPSec”</h2><p>光是说加密隧道的话，方案有好几种：</p>
+<ul>
+<li>IPSec tunnel</li>
+<li>GRE over IPSec</li>
+<li>IPSec over GRE</li>
+<li>……</li>
+</ul>
+<p>我们为什么选用<strong>GRE over IPSec</strong>呢？<br>跟单纯的<strong>IPSec tunnel</strong>比，优势在于：</p>
+<ul>
+<li>方案更灵活，我们可以灵活的把要加密的流量路由到GRE隧道上</li>
+<li>而且IPSec不支持多播，像OSPF或其他高大上的路由协议没法玩儿</li>
+</ul>
+<p>跟<strong>IPSec over GRE</strong>比：</p>
+<ul>
+<li>更安全。整个上公网的流量都是加密的，但从外部根本都不知道跑的是GRE协议。</li>
+</ul>
+<p>接下来，我们主要就是要讲的方案是：<strong>GRE over IPSec</strong><br><a id="more"></a></p>
+<h1 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h1><table>
+<thead>
+<tr>
+<th>对象</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NETA</td>
+<td>10.0.0.0/24的一个私网，网关是GWA</td>
+</tr>
+<tr>
+<td>NETB</td>
+<td>10.0.1.0/24的一个私网，网关是GWB</td>
+</tr>
+<tr>
+<td>NETC</td>
+<td>节点都能互通的一个网络，可以认为是公网</td>
+</tr>
+<tr>
+<td>GWA</td>
+<td>ip:10.0.0.1(NETA)、1.1.1.1(NETC)，CentOS6.x</td>
+</tr>
+<tr>
+<td>GWB</td>
+<td>ip:10.0.1.1(NETB)、2.2.2.2(NETC)，CentOS6.x</td>
+</tr>
+<tr>
+<td>greB</td>
+<td>GWA上的虚拟网络接口，GRE隧道名</td>
+</tr>
+<tr>
+<td>greA</td>
+<td>GWB上的虚拟网络接口，GRE隧道名</td>
+</tr>
+<tr>
+<td>eth0</td>
+<td>GWA连NETA、GWB连NETB的网络设备名</td>
+</tr>
+<tr>
+<td>eth1</td>
+<td>GWA和GWB连NETC的网络设备名</td>
+</tr>
+</tbody>
+</table>
+<h1 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h1><h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>分别在GWA和GWB两台机上执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">yum -y install libreswan iptables;</span><br><span class="line">rm -rf /etc/ipsec.d/*db; <span class="comment"># 删除原有自带的db文件</span></span><br><span class="line">ipsec initnss; <span class="comment"># 重新初始化db</span></span><br><span class="line">checonfig ipsec on; <span class="comment"># 这一步也可以后面再做</span></span><br></pre></td></tr></table></figure>
+<h2 id="正常打洞"><a href="#正常打洞" class="headerlink" title="正常打洞"></a>正常打洞</h2><p>GWA上执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt; EOF | tee /etc/sysconfig/network-scripts/ifcfg-greB</span><br><span class="line">DEVICE=greB</span><br><span class="line">ONBOOT=yes</span><br><span class="line">TYPE=GRE</span><br><span class="line">PEER_OUTER_IPADDR=2.2.2.2</span><br><span class="line">PEER_INNER_IPADDR=10.0.1.0/24</span><br><span class="line">MY_OUTER_IPADDR=1.1.1.1</span><br><span class="line">MY_INNER_IPADDR=10.0.0.1</span><br><span class="line">KEY=http://haw-haw.org</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ifup greB;</span><br></pre></td></tr></table></figure>
+<p>同样，在GWB上执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt; EOF | tee /etc/sysconfig/network-scripts/ifcfg-greA</span><br><span class="line">DEVICE=greA</span><br><span class="line">ONBOOT=yes</span><br><span class="line">TYPE=GRE</span><br><span class="line">PEER_OUTER_IPADDR=1.1.1.1</span><br><span class="line">PEER_INNER_IPADDR=10.0.0.0/24</span><br><span class="line">MY_OUTER_IPADDR=2.2.2.2</span><br><span class="line">MY_INNER_IPADDR=10.0.1.1</span><br><span class="line">KEY=http://haw-haw.org</span><br><span class="line">BOOTPROTO=none</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ifup greA;</span><br></pre></td></tr></table></figure>
+<p>这样，其实打洞就基本上已经完成了，现在从NETA和NETB的网络里随便找两台机器，都应该能互通了。</p>
+<h2 id="GRE-over-IPSEC"><a href="#GRE-over-IPSEC" class="headerlink" title="GRE over IPSEC"></a>GRE over IPSEC</h2><h3 id="配置GWA"><a href="#配置GWA" class="headerlink" title="配置GWA"></a>配置GWA</h3><p>在GWA上执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">ipsec newhostkey \</span><br><span class="line">--configdir /etc/ipsec.d \</span><br><span class="line">--random /dev/urandom \</span><br><span class="line">--output /etc/ipsec.d/GWA.secrets \</span><br><span class="line">--verbose;</span><br><span class="line"><span class="comment"># 上面的"--random /dev/urandom"的参数比用缺省的效率要高很多！</span></span><br><span class="line">ipsec showhostkey --left;</span><br><span class="line"><span class="comment"># 记下输出中“leftrsasigkey=”这一行</span></span><br><span class="line"><span class="comment"># 这将用于本机(GWA)的/etc/ipsec.d/greB.conf文件中</span></span><br><span class="line">ipsec showhostkey --right;</span><br><span class="line"><span class="comment"># 记下输出中“rightrsasigkey=”这一行</span></span><br><span class="line"><span class="comment"># 这将用于对端机器(GWB)的/etc/ipsec.d/greA.conf文件中</span></span><br><span class="line">vim /etc/ipsec.d/greB.conf <span class="comment"># 建立配置文件greB.conf</span></span><br></pre></td></tr></table></figure>
+<p>内容如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">conn greB</span><br><span class="line">    type=transport</span><br><span class="line">    left=10.0.0.1</span><br><span class="line">    leftrsasigkey=......</span><br><span class="line">    leftprotoport=gre</span><br><span class="line">    right=10.0.1.1</span><br><span class="line">    rightrsasigkey=......</span><br><span class="line">    rightprotoport=gre</span><br><span class="line">    authby=rsasig</span><br><span class="line">    auto=start</span><br></pre></td></tr></table></figure>
+<p>注意：</p>
+<ul>
+<li>这里的greB是随便取的，只是因为GWA上的隧道设备名为greB，所以就沿用了这个名字</li>
+<li>leftrsasigkey=是来自于上面<em>ipsec showhostkey –left</em>命令</li>
+<li>rightrsasigkey=是来自于GWB上执行命令<em>ipsec showhostkey –right</em>的结果</li>
+</ul>
+<h3 id="配置GWB"><a href="#配置GWB" class="headerlink" title="配置GWB"></a>配置GWB</h3><p>依葫芦画瓢，在GWB上执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">ipsec newhostkey \</span><br><span class="line">--configdir /etc/ipsec.d \</span><br><span class="line">--random /dev/urandom \</span><br><span class="line">--output /etc/ipsec.d/GWB.secrets \</span><br><span class="line">--verbose;</span><br><span class="line">ipsec showhostkey --left;</span><br><span class="line"><span class="comment"># 记下输出中“leftrsasigkey=”这一行</span></span><br><span class="line"><span class="comment"># 这将用于本机(GWB)的/etc/ipsec.d/greA.conf文件中</span></span><br><span class="line">ipsec showhostkey --right;</span><br><span class="line"><span class="comment"># 记下输出中“rightrsasigkey=”这一行</span></span><br><span class="line"><span class="comment"># 这将用于对端机器(GWA)的/etc/ipsec.d/greB.conf文件中</span></span><br><span class="line">vim /etc/ipsec.d/greA.conf</span><br><span class="line"><span class="comment"># 建立配置文件greA.conf，因为tunnel设备名叫greA</span></span><br></pre></td></tr></table></figure>
+<p>内容如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">conn greA</span><br><span class="line">    type=transport</span><br><span class="line">    left=10.0.1.1</span><br><span class="line">    leftrsasigkey=......</span><br><span class="line">    leftprotoport=gre</span><br><span class="line">    right=10.0.0.1</span><br><span class="line">    rightrsasigkey=......</span><br><span class="line">    rightprotoport=gre</span><br><span class="line">    authby=rsasig</span><br><span class="line">    auto=start</span><br></pre></td></tr></table></figure>
+<p>注意：</p>
+<ul>
+<li>这里的greA是随便取的，只是因为GWB上的隧道设备名为greA，所以就沿用了这个名字</li>
+<li>leftrsasigkey=是来自于上面<em>ipsec showhostkey –left</em>命令</li>
+<li>rightrsasigkey=是来自于GWA上执行命令<em>ipsec showhostkey –right</em>的结果</li>
+</ul>
+<h2 id="Iptables"><a href="#Iptables" class="headerlink" title="Iptables"></a>Iptables</h2><p>本来在前面正常GRE打洞测步骤里其实也有iptables相关设置，这里就都整合到这一部分统一说了</p>
+<p>在GWA和GWB上分别执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">iptables -A INPUT -i eth1 -p gre -j ACCEPT;</span><br><span class="line">iptables -A INPUT -i eth1 -p udp \</span><br><span class="line">    -m state --state NEW \</span><br><span class="line">    -m udp \</span><br><span class="line">    -m multiport --dports 50,51,500,4500 \</span><br><span class="line">    -j ACCEPT;</span><br><span class="line">iptables -A INPUT -i eth1 -p tcp \</span><br><span class="line">    -m state --state NEW \</span><br><span class="line">    -m tcp \</span><br><span class="line">    -m multiport --dports 50,51 \</span><br><span class="line">    -j ACCEPT;</span><br><span class="line">iptables -t mangle -A FORWARD \</span><br><span class="line">    -p tcp -m tcp --tcp-flags SYN,RST SYN \</span><br><span class="line">    -j TCPMSS --clamp-mss-to-pmtu;</span><br><span class="line">/etc/init.d/iptables save; <span class="comment"># 将iptables规则存入配置文件</span></span><br></pre></td></tr></table></figure>
+<h2 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h2><p>分别在GWA和GWB的机器上执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">/etc/init.d/ipsec start;</span><br><span class="line">ipsec auto --add greB; <span class="comment"># 仅GWA上执行</span></span><br><span class="line">ipsec auto --up greB; <span class="comment"># 仅GWA上执行</span></span><br><span class="line">ipsec auto --add greA; <span class="comment"># 仅GWB上执行</span></span><br><span class="line">ipsec auto --up greA; <span class="comment"># 仅GWB上执行</span></span><br><span class="line">chkconfig ipsec on;</span><br><span class="line"><span class="comment"># 如果前面没有执行这句的这里执行一下，</span></span><br><span class="line"><span class="comment"># 以后ipsec就会随机器启动起起来，</span></span><br><span class="line"><span class="comment"># 而且不再需要ipsec auto --add和ipsec auto --up了</span></span><br></pre></td></tr></table></figure>
+<h2 id="简单测试"><a href="#简单测试" class="headerlink" title="简单测试"></a>简单测试</h2><p>要检验是否成功设置，可以分别在GWA和GWB上听包：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -nn -i eth1 host 1.1.1.1 and host 2.2.2.2;</span><br></pre></td></tr></table></figure>
+<p>会发现包都是ESP加密过的了。</p>
+<p>然后分别在GWA和GWB上干掉ipsec对greB和greA的加密干掉</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ipsec auto --delete greB; <span class="comment"># 仅在GWA上执行</span></span><br><span class="line">ipsec auto --delete greA; <span class="comment"># 仅在GWB上执行</span></span><br></pre></td></tr></table></figure>
+<p>然后再重复上面的听包命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -nn -i eth1 host 1.1.1.1 and host 2.2.2.2;</span><br></pre></td></tr></table></figure>
+<p>会发现加密包没有了，取而代之是GRE包，而且明显能看到GRE包里封装的内容。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/IPSec/" rel="tag"># IPSec</a>
+              <a href="/tags/GRE/" rel="tag"># GRE</a>
+              <a href="/tags/tunnel/" rel="tag"># tunnel</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/08/CentOS7%E4%B8%8Bdocker%E7%94%A8%E5%8E%9F%E7%94%9F%E6%96%B9%E6%B3%95%E4%BD%BF%E7%94%A8%E5%AE%BF%E4%B8%BB%E6%9C%BA%E6%89%80%E5%9C%A8%E7%BD%91%E7%BB%9C/index.html" rel="prev" title="CentOS7下docker用原生方法使用宿主机所在网络">
+                  <i class="fa fa-angle-left"></i> CentOS7下docker用原生方法使用宿主机所在网络
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/08/Linux%E4%B8%8B%E7%94%A8GRE%E9%9A%A7%E9%81%93%E7%9B%B4%E6%8E%A5%E8%81%94%E9%80%9A%E4%B8%A4%E4%B8%AA%E7%A7%81%E7%BD%91/index.html" rel="next" title="Linux下用GRE隧道直接联通两个私网">
+                  Linux下用GRE隧道直接联通两个私网 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

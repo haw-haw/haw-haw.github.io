@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Intro某日办公室要断电维护，作为 IT 狗需要在断电之前把办公室的服务器都停掉，来电后再把这些服务器启起来，其中有台服务器，跑的是 CoreOS 系统，上面一堆的 docker container。系统起来后，我发现这些 docker container，一个都不通，显然，踩着大坑了……">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pipework在CoreOS上的一个小bug">
+<meta property="og:url" content="https://ming.theyan.gs/2016/12/Pipework%E5%9C%A8CoreOS%E4%B8%8A%E7%9A%84%E4%B8%80%E4%B8%AA%E5%B0%8Fbug/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="Intro某日办公室要断电维护，作为 IT 狗需要在断电之前把办公室的服务器都停掉，来电后再把这些服务器启起来，其中有台服务器，跑的是 CoreOS 系统，上面一堆的 docker container。系统起来后，我发现这些 docker container，一个都不通，显然，踩着大坑了……">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-12-31T10:38:13.000Z">
+<meta property="article:modified_time" content="2019-04-04T23:47:07.009Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="Pipework">
+<meta property="article:tag" content="CoreOS">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="ip">
+<meta property="article:tag" content="brctl">
+<meta property="article:tag" content="iproute2">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2016/12/Pipework%E5%9C%A8CoreOS%E4%B8%8A%E7%9A%84%E4%B8%80%E4%B8%AA%E5%B0%8Fbug/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2016/12/Pipework%E5%9C%A8CoreOS%E4%B8%8A%E7%9A%84%E4%B8%80%E4%B8%AA%E5%B0%8Fbug/index.html","path":"2016/12/Pipework在CoreOS上的一个小bug/index.html","title":"Pipework在CoreOS上的一个小bug"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Pipework在CoreOS上的一个小bug | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Intro"><span class="nav-number">1.</span> <span class="nav-text">Intro</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">1.1.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%B0%E8%B1%A1"><span class="nav-number">1.2.</span> <span class="nav-text">现象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.3.</span> <span class="nav-text">原因</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">分析问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A4%9A%E8%AF%B4%E4%B8%80%E5%8F%A5"><span class="nav-number">3.</span> <span class="nav-text">多说一句</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Appendix"><span class="nav-number">4.</span> <span class="nav-text">Appendix</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2016/12/Pipework%E5%9C%A8CoreOS%E4%B8%8A%E7%9A%84%E4%B8%80%E4%B8%AA%E5%B0%8Fbug/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Pipework在CoreOS上的一个小bug | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Pipework在CoreOS上的一个小bug
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-12-31 18:38:13" itemprop="dateCreated datePublished" datetime="2016-12-31T18:38:13+08:00">2016-12-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2019-04-05 07:47:07" itemprop="dateModified" datetime="2019-04-05T07:47:07+08:00">2019-04-05</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="Intro"><a href="#Intro" class="headerlink" title="Intro"></a>Intro</h1><p>某日办公室要断电维护，作为 IT 狗需要在断电之前把办公室的服务器都停掉，来电后再把这些服务器启起来，其中有台服务器，跑的是 CoreOS 系统，上面一堆的 docker container。系统起来后，我发现这些 docker container，一个都不通，显然，踩着大坑了……</p>
+<a id="more"></a>
+<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><ul>
+<li>CoreOS stable (1185.5.0)</li>
+<li>4.7.3-coreos-r3</li>
+<li>ip utility, iproute2-ss150210</li>
+<li>Pipework 20150123</li>
+</ul>
+<h2 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h2><p>简言之，就是用 net=none 启动的 docker 实例，用 Pipework 配置 ip 地址后 ping 不通，用代码表示是这样的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">docker run -i -t -d \</span><br><span class="line">	--name=<span class="built_in">test</span> \</span><br><span class="line">	-h <span class="built_in">test</span> \</span><br><span class="line">	--net none \</span><br><span class="line">	centos:6;</span><br><span class="line">sudo pipework br0 \</span><br><span class="line">	-i eth0 \</span><br><span class="line">	<span class="built_in">test</span> \</span><br><span class="line">	10.0.0.3/24@10.0.0.1;</span><br><span class="line"><span class="comment"># br0 是桥，ip 地址是 10.0.0.2</span></span><br><span class="line"><span class="comment"># enp0s25 是直接在 10.0.0.0/24 网段的物理设备</span></span><br><span class="line"><span class="comment"># enp0s25 同时是桥 br0 的一个 interface</span></span><br><span class="line"><span class="comment"># eth0 是 docker 的网卡设备名</span></span><br><span class="line"><span class="comment"># 这个测试 docker 的 ip 地址是 10.0.0.3</span></span><br><span class="line"><span class="comment"># 10.0.0.0/24 的网关是 10.0.0.1</span></span><br></pre></td></tr></table></figure>
+<p>结果 10.0.0.0/24 段的其他机器上 ping 不通 10.0.0.3，</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it <span class="built_in">test</span> /bin/bash</span><br></pre></td></tr></table></figure>
+<p>进入 docker 实例 test 内部以后也 ping 不通网关 10.0.0.1</p>
+<h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><p>最早怀疑是 proxy_arp 的问题，但实际证明不是，最后发现是由于 docker 建立的 veth 设备（宿主机这端的）没有正确添加到桥设备 br0 里去，从而导致怎么都不通。</p>
+<p>解决起来也很简单，直接用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo brctl addif br0 vethlxxx</span><br><span class="line"><span class="comment"># vethlxxx 是这个 docker 实例在宿主机侧的网络设备</span></span><br></pre></td></tr></table></figure>
+<p>然后就通了。</p>
+<h1 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h1><p>找到表面原因容易，可为什么没能正确把 vethlxxx 设备加到桥设备 br0 里去呢？也不是第一次跑 Pipework 了，以前一直是好的。</p>
+<p>看了看 Pipework 的代码，并调试执行了几遍，发现这个问题不是百分百出现的，只是有很大一部分概率。</p>
+<p>最后大概定位问题在 Pipework 的这几句代码上：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(ip link <span class="built_in">set</span> <span class="string">"<span class="variable">$LOCAL_IFNAME</span>"</span> master <span class="string">"<span class="variable">$IFNAME</span>"</span> &gt; /dev/null 2&gt;&amp;1) \</span><br><span class="line">	|| (brctl addif <span class="string">"<span class="variable">$IFNAME</span>"</span> <span class="string">"<span class="variable">$LOCAL_IFNAME</span>"</span>)</span><br></pre></td></tr></table></figure>
+<p>和后面的</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip link <span class="built_in">set</span> <span class="string">"<span class="variable">$LOCAL_IFNAME</span>"</span> up</span><br></pre></td></tr></table></figure>
+<p>为什么这么说呢，因为在附录的那个链接里，有段话说道：</p>
+<blockquote>
+<p>To add an interface (e.g. eth0) into the bridge, its state must be up:</p>
+</blockquote>
+<p>这也就是说将某个 interface 加入到桥设备之前，必须要先保证这个 interface 的状态是 up 的，但显然在 Pipework 这份代码里不是这样的，这里是先加入到 br0，然后再将这个 interface 设置为 up 的。</p>
+<p>为了证明这个，写了一段 bash 脚本，来模拟这个情况，具体如下（文件名叫 test.sh）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> -x</span><br><span class="line"></span><br><span class="line">IFNAME=<span class="string">"brtest"</span></span><br><span class="line">MTU=1500</span><br><span class="line"></span><br><span class="line">(ip link add dev <span class="string">"<span class="variable">$IFNAME</span>"</span> <span class="built_in">type</span> bridge ) \</span><br><span class="line">	|| (brctl addbr <span class="string">"<span class="variable">$IFNAME</span>"</span>)</span><br><span class="line">ip link <span class="built_in">set</span> <span class="string">"<span class="variable">$IFNAME</span>"</span> up</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> &#123;10..90&#125;; <span class="keyword">do</span></span><br><span class="line">	LOCAL_IFNAME=<span class="string">"vethltest<span class="variable">$&#123;i&#125;</span>"</span></span><br><span class="line">	GUEST_IFNAME=<span class="string">"vethgtest<span class="variable">$&#123;i&#125;</span>"</span></span><br><span class="line">	ip link add name <span class="string">"<span class="variable">$LOCAL_IFNAME</span>"</span> \</span><br><span class="line">		mtu <span class="string">"<span class="variable">$MTU</span>"</span> <span class="built_in">type</span> veth \</span><br><span class="line">		peer name <span class="string">"<span class="variable">$GUEST_IFNAME</span>"</span> \</span><br><span class="line">		mtu <span class="string">"<span class="variable">$MTU</span>"</span></span><br><span class="line"><span class="comment">#	ip link show "$LOCAL_IFNAME"</span></span><br><span class="line">	<span class="keyword">if</span> ((<span class="variable">$&#123;i&#125;</span>%2)); <span class="keyword">then</span></span><br><span class="line">		ip link <span class="built_in">set</span> <span class="string">"<span class="variable">$LOCAL_IFNAME</span>"</span> down</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		ip link <span class="built_in">set</span> <span class="string">"<span class="variable">$LOCAL_IFNAME</span>"</span> up</span><br><span class="line">	<span class="keyword">fi</span></span><br><span class="line">	(ip link <span class="built_in">set</span> <span class="string">"<span class="variable">$LOCAL_IFNAME</span>"</span> master <span class="string">"<span class="variable">$IFNAME</span>"</span>) \</span><br><span class="line">		|| (brctl addif <span class="string">"<span class="variable">$IFNAME</span>"</span> <span class="string">"<span class="variable">$LOCAL_IFNAME</span>"</span>)</span><br><span class="line">	ip link <span class="built_in">set</span> <span class="string">"<span class="variable">$LOCAL_IFNAME</span>"</span> up</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+<p>在 CoreOS 上执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod +x test.sh <span class="comment"># 这句执行一遍即可</span></span><br><span class="line">sudo ./test.sh</span><br></pre></td></tr></table></figure>
+<p>最后再</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brctl show brtest</span><br></pre></td></tr></table></figure>
+<p>看结果，发现：</p>
+<ul>
+<li>vethltest${i}（i 为偶数的设备）都被正确添加到 brtest 里</li>
+<li>vethltest${i}（i 为奇数的设备）有一些没有被正确添加到 brtest 里</li>
+</ul>
+<p>结论：</p>
+<p>在我所测试的平台（CoreOS）上，Pipework 是有问题的，原因来自于调用的命令 ip（来自于软件包 iproute2）</p>
+<h1 id="多说一句"><a href="#多说一句" class="headerlink" title="多说一句"></a>多说一句</h1><p>随后我把测试程序 test.sh 拷贝到一台 CentOS 7 上跑，发现 CentOS 7 没有这个问题。</p>
+<h1 id="Appendix"><a href="#Appendix" class="headerlink" title="Appendix"></a>Appendix</h1><p>参考了一些网上的文档：</p>
+<ul>
+<li><a href="https://wiki.archlinux.org/index.php/Network_bridge" target="_blank" rel="noopener">Network bridge</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Pipework/" rel="tag"># Pipework</a>
+              <a href="/tags/CoreOS/" rel="tag"># CoreOS</a>
+              <a href="/tags/docker/" rel="tag"># docker</a>
+              <a href="/tags/ip/" rel="tag"># ip</a>
+              <a href="/tags/brctl/" rel="tag"># brctl</a>
+              <a href="/tags/iproute2/" rel="tag"># iproute2</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/12/%E4%B8%BA-iOS-%E5%9C%A8-CentOS6-x-%E4%B8%8A%E6%90%AD%E5%BB%BA-IPSec-PSK-XAuth-VPN-%E6%9C%8D%E5%8A%A1%E5%99%A8/index.html" rel="prev" title="为 iOS 在 CentOS6.x 上搭建 IPSec(PSK+XAuth) VPN 服务器">
+                  <i class="fa fa-angle-left"></i> 为 iOS 在 CentOS6.x 上搭建 IPSec(PSK+XAuth) VPN 服务器
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/01/Dig-a-IPSec-s-tunnel-between-2-Linux-box-with-one-is-NATed-and-has-multinets/index.html" rel="next" title="Dig a IPSec's tunnel between 2 Linux box with one is NATed and has multinets">
+                  Dig a IPSec's tunnel between 2 Linux box with one is NATed and has multinets <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

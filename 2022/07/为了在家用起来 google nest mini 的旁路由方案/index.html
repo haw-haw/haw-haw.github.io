@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="缘起为了把从美国带回来的在家吃灰了几个月的 Google 智能音箱(Google Nest Mini)用起来。而之前由于家里都是终端设备自己搞定科学上网的需求，家里并没有全局的科学上网方案。但这一次由于要用 Google Nest Mini，则必须要搞个设备，搭科学上网环境了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="为了在家用起来 google nest mini 的旁路由方案">
+<meta property="og:url" content="https://ming.theyan.gs/2022/07/%E4%B8%BA%E4%BA%86%E5%9C%A8%E5%AE%B6%E7%94%A8%E8%B5%B7%E6%9D%A5%20google%20nest%20mini%20%E7%9A%84%E6%97%81%E8%B7%AF%E7%94%B1%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="缘起为了把从美国带回来的在家吃灰了几个月的 Google 智能音箱(Google Nest Mini)用起来。而之前由于家里都是终端设备自己搞定科学上网的需求，家里并没有全局的科学上网方案。但这一次由于要用 Google Nest Mini，则必须要搞个设备，搭科学上网环境了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-07-07T13:42:23.000Z">
+<meta property="article:modified_time" content="2022-07-11T11:47:38.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="OpenWRT">
+<meta property="article:tag" content="Zerotier">
+<meta property="article:tag" content="Google Nest Mini">
+<meta property="article:tag" content="智能音箱">
+<meta property="article:tag" content="旁路由">
+<meta property="article:tag" content="极路由">
+<meta property="article:tag" content="透明代理">
+<meta property="article:tag" content="dokodemo_door">
+<meta property="article:tag" content="v2ray-core-mini">
+<meta property="article:tag" content="v2ray-core">
+<meta property="article:tag" content="V2Ray">
+<meta property="article:tag" content="HiWiFi">
+<meta property="article:tag" content="HC5861">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2022/07/%E4%B8%BA%E4%BA%86%E5%9C%A8%E5%AE%B6%E7%94%A8%E8%B5%B7%E6%9D%A5%20google%20nest%20mini%20%E7%9A%84%E6%97%81%E8%B7%AF%E7%94%B1%E6%96%B9%E6%A1%88/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2022/07/%E4%B8%BA%E4%BA%86%E5%9C%A8%E5%AE%B6%E7%94%A8%E8%B5%B7%E6%9D%A5%20google%20nest%20mini%20%E7%9A%84%E6%97%81%E8%B7%AF%E7%94%B1%E6%96%B9%E6%A1%88/index.html","path":"2022/07/为了在家用起来 google nest mini 的旁路由方案/index.html","title":"为了在家用起来 google nest mini 的旁路由方案"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>为了在家用起来 google nest mini 的旁路由方案 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%98%E8%B5%B7"><span class="nav-number">1.</span> <span class="nav-text">缘起</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E7%BB%86%E8%8A%82"><span class="nav-number">2.</span> <span class="nav-text">方案细节</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87"><span class="nav-number">2.1.</span> <span class="nav-text">设备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E5%8F%98%E8%BF%81"><span class="nav-number">2.2.</span> <span class="nav-text">方案变迁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#socks-proxy-V2Ray-%E6%96%B9%E6%A1%88"><span class="nav-number">2.2.1.</span> <span class="nav-text">socks proxy(V2Ray) 方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#zerotier-%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86-%E6%96%B9%E6%A1%88"><span class="nav-number">2.2.2.</span> <span class="nav-text">zerotier+透明代理 方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%81%E8%B7%AF%E7%94%B1-%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86%E6%96%B9%E6%A1%88"><span class="nav-number">2.2.3.</span> <span class="nav-text">旁路由+透明代理方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E6%96%BD%E6%AD%A5%E9%AA%A4%E5%8F%8A%E5%85%B7%E4%BD%93%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.</span> <span class="nav-text">实施步骤及具体配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%81%E4%B8%89%E4%B8%8A%E5%AE%89%E8%A3%85-V2Ray"><span class="nav-number">2.3.1.</span> <span class="nav-text">极三上安装 V2Ray</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%81%E4%B8%89%E7%9A%84%EF%BC%88%E7%BD%91%E7%BB%9C%EF%BC%89%E4%B8%8A%E8%81%94%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.2.</span> <span class="nav-text">极三的（网络）上联配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%81%E4%B8%89%E4%B8%8A%E9%85%8D%E7%BD%AE-V2Ray"><span class="nav-number">2.3.3.</span> <span class="nav-text">极三上配置 V2Ray</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E8%B7%AF%E7%94%B1%E4%B8%8A%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.4.</span> <span class="nav-text">主路由上的配置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">3.</span> <span class="nav-text">附录</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2022/07/%E4%B8%BA%E4%BA%86%E5%9C%A8%E5%AE%B6%E7%94%A8%E8%B5%B7%E6%9D%A5%20google%20nest%20mini%20%E7%9A%84%E6%97%81%E8%B7%AF%E7%94%B1%E6%96%B9%E6%A1%88/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="为了在家用起来 google nest mini 的旁路由方案 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          为了在家用起来 google nest mini 的旁路由方案
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-07-07 21:42:23" itemprop="dateCreated datePublished" datetime="2022-07-07T21:42:23+08:00">2022-07-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-07-11 19:47:38" itemprop="dateModified" datetime="2022-07-11T19:47:38+08:00">2022-07-11</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>为了把从美国带回来的在家吃灰了几个月的 Google 智能音箱(Google Nest Mini)用起来。而之前由于家里都是终端设备自己搞定科学上网的需求，家里并没有全局的科学上网方案。但这一次由于要用 Google Nest Mini，则必须要搞个设备，搭科学上网环境了。</p>
+<span id="more"></span>
+
+<h2 id="方案细节"><a href="#方案细节" class="headerlink" title="方案细节"></a>方案细节</h2><h3 id="设备"><a href="#设备" class="headerlink" title="设备"></a>设备</h3><p>家里还有个吃灰几年的极路由三（HiWiFi HC5861），用的是联发科的架构（MediaTek MT7620A），这一次打算将其用起来，作为科学上网的设备。</p>
+<p>于是将其刷上最新的 OpenWRT。具体过程就不说了。</p>
+<p>然后因为我所有的设备，但凡支持，都会起 zerotier，于是这太极三也装上了 zerotier，并加入我的网络（跟我的 vps 以及其他设备在同一个虚拟的 zerotier 网段）</p>
+<h3 id="方案变迁"><a href="#方案变迁" class="headerlink" title="方案变迁"></a>方案变迁</h3><h4 id="socks-proxy-V2Ray-方案"><a href="#socks-proxy-V2Ray-方案" class="headerlink" title="socks proxy(V2Ray) 方案"></a>socks proxy(V2Ray) 方案</h4><p>因为设备连接 WiFi 时大都会允许设置一个 proxy，所以，在最初的方案里，我是想让这台极三充当一个 socks proxy 的角色，当需要科学上网的设备（这里就是 Google Nest Mini）通过 WiFi 接入家庭网络的时候，将 proxy 指过来，这样实现设备的科学上网。</p>
+<p>这个方案也简单，只需要在极三上起一个 V2Ray 服务，这个服务的入站（inbound）只需要开一个整个局域网共享的 socks proxy 的支持就可以了，出站（outbound）当然是对接海外 vps 上的 V2Ray 服务。</p>
+<p>最后，这个方案的环境弄好了，结果配 Google Nest Mini 的时候发现无法让其使用 socks proxy，故而最后这个方案没有用起来。</p>
+<h4 id="zerotier-透明代理-方案"><a href="#zerotier-透明代理-方案" class="headerlink" title="zerotier+透明代理 方案"></a>zerotier+透明代理 方案</h4><p>这个方案是想设备（Google Nest Mini）用 WiFi 来连科学上网设备极三，然后在极三上用 iptables 把所有流量转发到海外 vps 的 zerotier 那个网卡所在的 IP 地址的 socks proxy 端口（V2Ray 服务支持）上。</p>
+<p>这个方案的问题在于我极三的 WiFi 我用来连家里的 WiFi 了，再要起一个 sid 接受 WiFi 连接呢，配置起来比较麻烦，而且，可能会影响家里原来 WiFi 的信号（因为 WiFi 会互相干扰）。</p>
+<p>最后，这个方案虽然也没被放弃，但是极三上的 zerotier 却是配好了。</p>
+<h4 id="旁路由-透明代理方案"><a href="#旁路由-透明代理方案" class="headerlink" title="旁路由+透明代理方案"></a>旁路由+透明代理方案</h4><p>这是最终实施并生效的方案。</p>
+<p>大致情况如下：</p>
+<ul>
+<li>极路由三上跑 V2Ray 服务<ul>
+<li>入站启用透明代理和 socks 代理（不是必须的）</li>
+<li>路由配置成私有地址和中国国内的网站直连，其他走科学上网。</li>
+<li>出站配直连和走海外 vps 上的 V2Ray 服务（我用的是 websocket 方式）</li>
+</ul>
+</li>
+<li>主路由的 DHCP 设置里<ul>
+<li>绑定极路由三的 mac 地址和一个固定 IP</li>
+<li>绑定设备 Google Nest Mini 的 mac 地址和另外一个固定 IP，并强制推送网关地址为极路由三的 IP 地址（上一步配置的）</li>
+</ul>
+</li>
+</ul>
+<h3 id="实施步骤及具体配置"><a href="#实施步骤及具体配置" class="headerlink" title="实施步骤及具体配置"></a>实施步骤及具体配置</h3><h4 id="极三上安装-V2Ray"><a href="#极三上安装-V2Ray" class="headerlink" title="极三上安装 V2Ray"></a>极三上安装 V2Ray</h4><p>这其实是个难点。极三上能装软件的空间只有 10M，结果直接 <code>opkg install v2ray-core</code> 出来的可执行文件 v2ray 直接有 20+M，显然不能直接装。幸好有大佬把 v2ray-core port 到了 OpenWRT 上[^1]，他编了个 v2ray-core-mini 勉强可用。具体在极三上：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line">wget \</span><br><span class="line">  https://github.com/kuoruan/openwrt-v2ray/releases/download/v4.45.2-1/v2ray-core-mini_4.45.2-1_mipsel_24kc.ipk</span><br><span class="line">opkg install v2ray-core-mini*.ipk</span><br><span class="line"><span class="built_in">rm</span> v2ray-core-mini*.ipk</span><br></pre></td></tr></table></figure>
+
+<p>然后还要一些数据（因为 v2ray-core-mini 包里不含 geoip.dat 和 geosite.dat 等数据文件，这些文件太大了），我们这里手工下载了一个 geosite.dat，这个就够了，那个 geoip.dat 有二十多兆，太大了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/bin</span><br><span class="line">wget https://github.com/v2fly/domain-list-community/releases/download/20230403032550/dlc.dat</span><br><span class="line"><span class="built_in">mv</span> dlc.dat geosite.dat</span><br></pre></td></tr></table></figure>
+
+<p>最好还装上 V2Ray 服务的 luci 包，这样就可以在 web 上直接配置了。注意：有个叫 luci-i18n-v2ray-zh-cn 的中文语言包我没装，主要是为了节省空间，这个也不是必须的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line">wget https://github.com/kuoruan/luci-app-v2ray/releases/download/v1.5.6-1/luci-app-v2ray_1.5.6_all.ipk</span><br><span class="line">opkg install luci-app-v2ray*.ipk</span><br><span class="line"><span class="built_in">rm</span> luci-app-v2ray*.ipk</span><br></pre></td></tr></table></figure>
+
+<h4 id="极三的（网络）上联配置"><a href="#极三的（网络）上联配置" class="headerlink" title="极三的（网络）上联配置"></a>极三的（网络）上联配置</h4><p>极三可以用 wan 口去接主路由的 lan 口，但我这里是用的 WiFi 去连的主路由的 WiFi，这种方式使极三上的网。后面的 dhcp 配置里会有所体现。</p>
+<h4 id="极三上配置-V2Ray"><a href="#极三上配置-V2Ray" class="headerlink" title="极三上配置 V2Ray"></a>极三上配置 V2Ray</h4><p>弄清楚逻辑以后配置部分也没啥可讲的。就是：</p>
+<ul>
+<li>两个入站（socks 和 dokodemo_door，前者不是必须的，因为我们这个方案里没有用到）</li>
+<li>几个出站（最主要的是两个：freedom 和 vmess，这两个一个是直连，还有一个是连海外 VPS 上的 V2Ray）</li>
+<li>一些路由，比如私网直连、geosite:cn（中国的网站） 直连。</li>
+</ul>
+<p>注意：</p>
+<ul>
+<li>路由规则里不能使用 geoip: 开头的写法，因为我们的数据文件里没放 geoip.dat，同理，geosite: 是可以的。</li>
+<li>透明代理（dokodemo_door）的设置里，proxy mode 选 default dokodemo</li>
+</ul>
+<h4 id="主路由上的配置"><a href="#主路由上的配置" class="headerlink" title="主路由上的配置"></a>主路由上的配置</h4><p>主路由也是 OpenWRT，主要是修改其 DHCP 配置，</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> &gt;&gt; /etc/config/dhcp &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">config host</span></span><br><span class="line"><span class="string">  option name &#x27;gee3-5g&#x27;</span></span><br><span class="line"><span class="string">  option mac &#x27;00:00:00:FF:FF:FF&#x27;</span></span><br><span class="line"><span class="string">  option ip &#x27;10.0.0.254&#x27;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">config host</span></span><br><span class="line"><span class="string">  option name &#x27;google-nest-mini&#x27;</span></span><br><span class="line"><span class="string">  option mac &#x27;00:00:00:FF:FF:FE&#x27;</span></span><br><span class="line"><span class="string">  option ip &#x27;10.0.0.253&#x27;</span></span><br><span class="line"><span class="string">  option tag &#x27;2gw&#x27;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">config tag &#x27;2gw&#x27;</span></span><br><span class="line"><span class="string">  list dhcp_option &#x27;3,10.0.0.254&#x27;</span></span><br><span class="line"><span class="string">  option force &#x27;1&#x27;</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line">/etc/init.d/dnsmasq restart <span class="comment"># restart dhcp server</span></span><br></pre></td></tr></table></figure>
+
+<p>注意：</p>
+<ul>
+<li>“00:00:00:FF:FF:FF” 和 “00:00:00:FF:FF:FE” 分别是极三和 Google Nest Mini 的 mac 地址（瞎写的，真实的数据是隐私）</li>
+<li>“10.0.0.254” 和 “10.0.0.253” 分别是极三和 Google Nest Mini 的 IP 地址（这也是杜撰的，真实的 IP 是隐私）</li>
+<li>主路由的正常推的网关地址应该是 “10.0.0.1”（这里给 Google Nest Mini 推送了旁路由，IP 地址是 10.0.0.254）</li>
+</ul>
+<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/v2fly/v2ray-core">Project V</a></li>
+</ul>
+<p>[^1]:<a target="_blank" rel="noopener" href="https://github.com/kuoruan/openwrt-v2ray">V2Ray for OpenWrt</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/OpenWRT/" rel="tag"># OpenWRT</a>
+              <a href="/tags/Zerotier/" rel="tag"># Zerotier</a>
+              <a href="/tags/Google-Nest-Mini/" rel="tag"># Google Nest Mini</a>
+              <a href="/tags/%E6%99%BA%E8%83%BD%E9%9F%B3%E7%AE%B1/" rel="tag"># 智能音箱</a>
+              <a href="/tags/%E6%97%81%E8%B7%AF%E7%94%B1/" rel="tag"># 旁路由</a>
+              <a href="/tags/%E6%9E%81%E8%B7%AF%E7%94%B1/" rel="tag"># 极路由</a>
+              <a href="/tags/%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86/" rel="tag"># 透明代理</a>
+              <a href="/tags/dokodemo-door/" rel="tag"># dokodemo_door</a>
+              <a href="/tags/v2ray-core-mini/" rel="tag"># v2ray-core-mini</a>
+              <a href="/tags/v2ray-core/" rel="tag"># v2ray-core</a>
+              <a href="/tags/V2Ray/" rel="tag"># V2Ray</a>
+              <a href="/tags/HiWiFi/" rel="tag"># HiWiFi</a>
+              <a href="/tags/HC5861/" rel="tag"># HC5861</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/06/OpenSSH%208.8%20%E4%BB%A5%E5%90%8E%E7%89%88%E6%9C%AC%E8%B7%9F%E8%80%81%E7%89%88%E7%9A%84%E5%85%BC%E5%AE%B9%E6%80%A7%E9%97%AE%E9%A2%98/index.html" rel="prev" title="OpenSSH 8.8 以后版本跟老版的兼容性问题">
+                  <i class="fa fa-angle-left"></i> OpenSSH 8.8 以后版本跟老版的兼容性问题
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/08/%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A%E5%A4%9A%20IDC%20%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%85%E7%BD%91%E6%89%93%E9%80%9A%E6%96%B9%E6%A1%88/index.html" rel="next" title="中小企业多 IDC 之间的内网打通方案">
+                  中小企业多 IDC 之间的内网打通方案 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

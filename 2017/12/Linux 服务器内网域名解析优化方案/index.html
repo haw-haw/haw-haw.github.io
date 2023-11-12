@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="缘起这个项目的目的主要是为了解决 Linux服务器在本地解析域名中碰到的几个问题：  nameserver 中一部分有故障（包含宕机了）的问题 nameserver 中一部分性能有问题的问题 有 HA，但有时候服务切换没有期望得那样准确、迅速  主要为了解决以上三个问题，于是有了内网域名解析优化的需求。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux 服务器内网域名解析优化方案">
+<meta property="og:url" content="https://ming.theyan.gs/2017/12/Linux%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%86%85%E7%BD%91%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="缘起这个项目的目的主要是为了解决 Linux服务器在本地解析域名中碰到的几个问题：  nameserver 中一部分有故障（包含宕机了）的问题 nameserver 中一部分性能有问题的问题 有 HA，但有时候服务切换没有期望得那样准确、迅速  主要为了解决以上三个问题，于是有了内网域名解析优化的需求。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-12-10T07:51:20.000Z">
+<meta property="article:modified_time" content="2019-04-04T23:47:07.003Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="CentOS">
+<meta property="article:tag" content="Dnsmasq">
+<meta property="article:tag" content="resolv.conf">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2017/12/Linux%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%86%85%E7%BD%91%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2017/12/Linux%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%86%85%E7%BD%91%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88/index.html","path":"2017/12/Linux 服务器内网域名解析优化方案/index.html","title":"Linux 服务器内网域名解析优化方案"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Linux 服务器内网域名解析优化方案 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%98%E8%B5%B7"><span class="nav-number">1.</span> <span class="nav-text">缘起</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%B0%E6%9C%89%E7%8A%B6%E5%86%B5"><span class="nav-number">2.</span> <span class="nav-text">现有状况</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Dnsmasq-%E6%96%B9%E6%A1%88"><span class="nav-number">3.</span> <span class="nav-text">Dnsmasq 方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">3.1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE"><span class="nav-number">3.2.</span> <span class="nav-text">服务器配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dnsmasq-%E5%85%B7%E4%BD%93%E9%85%8D%E7%BD%AE"><span class="nav-number">3.3.</span> <span class="nav-text">Dnsmasq 具体配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E7%82%B9"><span class="nav-number">3.4.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-number">3.5.</span> <span class="nav-text">缺点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE-LB-%E8%AE%BE%E5%A4%87%E6%96%B9%E6%A1%88"><span class="nav-number">4.</span> <span class="nav-text">前置 LB 设备方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%B2%E6%9C%89-LB-%E8%AE%BE%E5%A4%87"><span class="nav-number">4.1.</span> <span class="nav-text">已有 LB 设备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B2%A1%E6%9C%89-LB-%E8%AE%BE%E5%A4%87"><span class="nav-number">4.2.</span> <span class="nav-text">没有 LB 设备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E7%82%B9-1"><span class="nav-number">4.3.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9-1"><span class="nav-number">4.4.</span> <span class="nav-text">缺点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BF%9C%E6%9C%9F%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88%E2%80%94%E8%A7%A3%E8%80%A6"><span class="nav-number">5.</span> <span class="nav-text">远期优化方案—解耦</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A4%87%E6%B3%A8"><span class="nav-number">6.</span> <span class="nav-text">备注</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2017/12/Linux%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%86%85%E7%BD%91%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90%E4%BC%98%E5%8C%96%E6%96%B9%E6%A1%88/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Linux 服务器内网域名解析优化方案 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux 服务器内网域名解析优化方案
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-12-10 15:51:20" itemprop="dateCreated datePublished" datetime="2017-12-10T15:51:20+08:00">2017-12-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2019-04-05 07:47:07" itemprop="dateModified" datetime="2019-04-05T07:47:07+08:00">2019-04-05</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h1><p>这个项目的目的主要是为了解决 Linux<br>服务器在本地解析域名中碰到的几个问题：</p>
+<ol>
+<li>nameserver 中一部分有故障（包含宕机了）的问题</li>
+<li>nameserver 中一部分性能有问题的问题</li>
+<li>有 HA，但有时候服务切换没有期望得那样准确、迅速</li>
+</ol>
+<p>主要为了解决以上三个问题，于是有了内网域名解析优化的需求。</p>
+<a id="more"></a>
+<h1 id="现有状况"><a href="#现有状况" class="headerlink" title="现有状况"></a>现有状况</h1><p>现有情况貌似是每个机房节点有两台 DNS<br>二层服务器（从第一层同步数据），也许配有 HA，也许没配<br>HA，这两台服务器提供本机房内部的服务器的 DNS 查询请求服务。</p>
+<h1 id="Dnsmasq-方案"><a href="#Dnsmasq-方案" class="headerlink" title="Dnsmasq 方案"></a>Dnsmasq 方案</h1><h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><blockquote>
+<p>Dnsmasq provides Domain Name System (DNS) forwarder, Dynamic Host Configuration Protocol (DHCP) server, router advertisement and network boot features for small computer networks, created as free software.[4][5]</p>
+<p>Dnsmasq has low requirements for system resources,[6][7] can run on Linux, BSDs, Android and OS X, and is included in most Linux distributions. Consequently it “is present in a lot of home routers and certain Internet of Things gadgets”[4] and is included in Android.[5]</p>
+</blockquote>
+<p>以上说明来自维基百科。</p>
+<p>此方案中用到的主要是一个重要参数：all-servers，这个参数是干嘛用的，请看官方文档的说法：</p>
+<p><strong>–all-servers</strong></p>
+<blockquote>
+<p>By default, when dnsmasq has more than one upstream server available,<br>it will send queries to just one server. Setting this flag forces<br>dnsmasq to send all queries to all available servers. The reply from<br>the server which answers first will be returned to the original<br>requester.</p>
+</blockquote>
+<p>仔细看，其实这一个参数就已经解决了前面提到的两个问题，他会让 dnsmasq<br>把收到的 DNS 查询请求同时并行发给多个上游 DNS<br>服务器，然后选取最快返回的结果返回给客户端。这样的话，我们只要配置上最够多的上游服务器，那么有几台挂掉，有几台性能不好，这都不是问题，只要有一个足够快返回正确的结果就行了。</p>
+<p>当然，前提是服务器的 resolver 得指向 dnsmasq。</p>
+<h2 id="服务器配置"><a href="#服务器配置" class="headerlink" title="服务器配置"></a>服务器配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">yum --y install dnsmasq;</span><br><span class="line">chkconfig dnsmasq on;</span><br><span class="line">cp /etc/resolv.conf&#123;,.`date <span class="string">'+%F'</span>`&#125;;</span><br><span class="line">cat &gt;/etc/resolv.conf&lt;&lt;_EOF_</span><br><span class="line">search phnamedns.com</span><br><span class="line">options timeout:1 attempts:1</span><br><span class="line">nameserver 127.0.0.1</span><br><span class="line"><span class="comment">#nameserver x.x.x.x</span></span><br><span class="line">_EOF_</span><br></pre></td></tr></table></figure>
+<p>上面的”x.x.x.x”是 Linux 服务器所在机房的二层 DNS<br>内网服务器的内网地址之一，注意：这个内网地址最好在所在机房的二层 DNS<br>服务器的内网地址之间尽量平均分配。</p>
+<p>这里为什么要加这么一个 nameserver 纪录呢，这是用来破除 Linux 服务器本地<br>dnsmasq 服务单点的问题的。万一万一本地的 dnsmasq<br>挂掉了，那么在运维人员接到报警上来处理之前，可以通过第二个内网 dns<br>服务器来解析域名。</p>
+<p>话又说回来，这个冗余相关的配置可能还是会有些问题，因为我们已将 timeout<br>的时间设成了最小值： 1s，而很有可能 resolver 在尝试从第一个 nameserver<br>解析域名超时之前，客户端程序早就已经超时了。这个时候，设置的第二条<br>nameserver 纪录显然就没用。</p>
+<h2 id="Dnsmasq-具体配置"><a href="#Dnsmasq-具体配置" class="headerlink" title="Dnsmasq 具体配置"></a>Dnsmasq 具体配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/dhcsmaws.conf</span><br><span class="line"><span class="comment">### /etc/dnsmasq.conf</span></span><br><span class="line">cp /etc/dnsmasq.conf&#123;,.`date <span class="string">'+%F'</span>`&#125;;</span><br><span class="line">cat &gt;/etc/dnsmasq.conf&lt;&lt;_EOF_</span><br><span class="line">port=53</span><br><span class="line">domain-needed</span><br><span class="line">interface=lo</span><br><span class="line">listen-address=127.0.0.1</span><br><span class="line">no-dhcp-interface=lo</span><br><span class="line">all-servers</span><br><span class="line"><span class="built_in">bind</span>-interfaces</span><br><span class="line">no-resolv</span><br><span class="line">server=10.0.0.1</span><br><span class="line">server=10.0.0.2</span><br><span class="line">server=10.0.1.1</span><br><span class="line">server=10.0.1.2</span><br><span class="line">server=10.0.2.1</span><br><span class="line">server=10.0.2.2</span><br><span class="line">server=10.0.3.1</span><br><span class="line">server=10.0.3.2</span><br><span class="line">_EOF_</span><br><span class="line"></span><br><span class="line">/etc/init.d/dnsmasq start;</span><br></pre></td></tr></table></figure>
+<h2 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h2><ol>
+<li>dnsmasq 小巧、灵活、配置简单</li>
+<li>不用再担心上游某台 DNS 服务器故障</li>
+<li>不用关心上游服务器性能差、网络延时大、反应迟钝</li>
+</ol>
+<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2><ul>
+<li>本机的 dnsmasq 服务成为了新的故障点，虽然在 /etc/resolv.conf 中启用第二个 nameserver 来破除了单点，但是由于前面提到的超时原因，dnsmasq 挂还是会导致本机的好多 DNS 解析失败。</li>
+</ul>
+<h1 id="前置-LB-设备方案"><a href="#前置-LB-设备方案" class="headerlink" title="前置 LB 设备方案"></a>前置 LB 设备方案</h1><h2 id="已有-LB-设备"><a href="#已有-LB-设备" class="headerlink" title="已有 LB 设备"></a>已有 LB 设备</h2><p>如果某个机房里已有现成的 LB 设备，如：F5、NetScaler 等等，或者是已有成熟商业 LB 产品出售的公有云，直接用现成的就好。</p>
+<h2 id="没有-LB-设备"><a href="#没有-LB-设备" class="headerlink" title="没有 LB 设备"></a>没有 LB 设备</h2><p>如果在某个没有负载均衡设备的机房，可以考虑在前端部署一套 LVS；再或者直接用 keepalived 来跑 vrrp 协议，跑两个 VIP，让两台二层 DNS 服务器互为主备，需要解析服务的机房内部服务器，可以直接用着两个 VIP 作为 nameserver。</p>
+<h2 id="优点-1"><a href="#优点-1" class="headerlink" title="优点"></a>优点</h2><ol>
+<li>本方案从基础设施本身入手，不用在客户端（服务器）上改太多东西</li>
+<li>实施后本方案也能基本解决目前所碰到的那几个问题</li>
+</ol>
+<h2 id="缺点-1"><a href="#缺点-1" class="headerlink" title="缺点"></a>缺点</h2><ol>
+<li>缺点也很明显，尤其是当需要再重新搭建 LVS 的时候，步骤相对复杂</li>
+</ol>
+<h1 id="远期优化方案—解耦"><a href="#远期优化方案—解耦" class="headerlink" title="远期优化方案—解耦"></a>远期优化方案—解耦</h1><p>从目前来看，无论是 dnsmasq 还是 LB<br>前置方案，都只是目前能做、可以做的，做了就能立马看到效果的优化方案。但我们还得要抬起头来走路，要看到远期，半年后、一年后、几年后……所以我这里连远期的优化改造方案思路也一并提出来，抛砖引玉。</p>
+<p>目前，内网解析 DNS 服务器和外网解析 DNS<br>服务器是在一起的，或者说，数据是在一起的，这样很不对，互联网服务讲究独立、不互相依赖，这样的服务才好维护。于是，本着解耦内外网<br>DNS 服务的目的，我觉得远期这两个服务一定要分开！</p>
+<p>怎么做？每个机房部署两台或多台 dnsmasq<br>服务（不需要单独服务器）替代现有的二层 DNS 服务器在内网解析中的角色。</p>
+<p>现在谈谈可行性、工作量。我发现其实这个工作量其实并不大！很简单，内网 DNS<br>解析服务器其实是并不需要外网权威 DNS<br>服务器那么多的数据的。对于我司完全拥有的域名的解析工作，可以直接走公网；对于由于我司劫持的域名或其他特殊需求，直接在<br>dnsmasq 里转发特定域名解析请求到特定服务器就好了。</p>
+<h1 id="备注"><a href="#备注" class="headerlink" title="备注"></a>备注</h1><ol>
+<li>本文档所有命令、软件均仅适用于 RHEL 6.<em> 或 CentOS<br>6.</em>，其他平台未经测试。</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li>Dnsmasq 官方文档：<a href="http://www.thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html" target="_blank" rel="noopener">http://www.thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html</a></li>
+<li>/etc/resolv.conf 的官方手册：<a href="http://man7.org/linux/man-pages/man5/resolv.conf.5.html" target="_blank" rel="noopener">http://man7.org/linux/man-pages/man5/resolv.conf.5.html</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/CentOS/" rel="tag"># CentOS</a>
+              <a href="/tags/Dnsmasq/" rel="tag"># Dnsmasq</a>
+              <a href="/tags/resolv-conf/" rel="tag"># resolv.conf</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/10/%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91%E4%B9%8B-SSR-%E6%96%B9%E6%A1%88/index.html" rel="prev" title="科学上网之 SSR 方案">
+                  <i class="fa fa-angle-left"></i> 科学上网之 SSR 方案
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/12/CentOS%207%20%E4%B8%8B%E9%87%8D%E7%BD%AE%20root%20%E5%AF%86%E7%A0%81%E7%9A%84%E6%AD%A5%E9%AA%A4/index.html" rel="next" title="CentOS 7 下重置 root 密码的步骤">
+                  CentOS 7 下重置 root 密码的步骤 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

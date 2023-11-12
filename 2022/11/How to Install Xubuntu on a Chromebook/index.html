@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="缘起鱼总毕业了，带回来一台 Chromebook(HP Chromebook 11A G6 EE)，说是毕业了，学校就把学生用的电脑送给学生了。 鱼总说这电脑配置挺渣的，但续航还行，ebay 上还能卖个二三十刀，让我看着办。 我还能怎么办？！凉拌呗。当下失业在家，没有收入，当然有垃圾必捡，且用且珍惜啦。 于是，折腾走起。鉴于国内使用 ChromeOS 的种种不便，决定还是装一套 Linux 跑着吧">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How to Install Xubuntu on a Chromebook">
+<meta property="og:url" content="https://ming.theyan.gs/2022/11/How%20to%20Install%20Xubuntu%20on%20a%20Chromebook/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="缘起鱼总毕业了，带回来一台 Chromebook(HP Chromebook 11A G6 EE)，说是毕业了，学校就把学生用的电脑送给学生了。 鱼总说这电脑配置挺渣的，但续航还行，ebay 上还能卖个二三十刀，让我看着办。 我还能怎么办？！凉拌呗。当下失业在家，没有收入，当然有垃圾必捡，且用且珍惜啦。 于是，折腾走起。鉴于国内使用 ChromeOS 的种种不便，决定还是装一套 Linux 跑着吧">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-11-02T11:18:29.000Z">
+<meta property="article:modified_time" content="2022-11-23T12:31:53.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="Ubuntu">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Xubuntu">
+<meta property="article:tag" content="Chromebook">
+<meta property="article:tag" content="coreboot">
+<meta property="article:tag" content="HP">
+<meta property="article:tag" content="HP Chromebook 11A G6 EE">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2022/11/How%20to%20Install%20Xubuntu%20on%20a%20Chromebook/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2022/11/How%20to%20Install%20Xubuntu%20on%20a%20Chromebook/index.html","path":"2022/11/How to Install Xubuntu on a Chromebook/index.html","title":"How to Install Xubuntu on a Chromebook"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>How to Install Xubuntu on a Chromebook | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%98%E8%B5%B7"><span class="nav-number">1.</span> <span class="nav-text">缘起</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.</span> <span class="nav-text">具体步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#turn-on-Developer-Mode"><span class="nav-number">2.1.</span> <span class="nav-text">turn on Developer Mode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Create-a-Bootable-USB-Drive"><span class="nav-number">2.2.</span> <span class="nav-text">Create a Bootable USB Drive</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#disable-firmware-write-protect"><span class="nav-number">2.3.</span> <span class="nav-text">disable firmware write-protect</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Install-a-UEFI-BIOS"><span class="nav-number">2.4.</span> <span class="nav-text">Install a UEFI BIOS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Install-Linux-to-Chromebook-by-USB-stick"><span class="nav-number">2.5.</span> <span class="nav-text">Install Linux to Chromebook by USB stick</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2022/11/How%20to%20Install%20Xubuntu%20on%20a%20Chromebook/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="How to Install Xubuntu on a Chromebook | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          How to Install Xubuntu on a Chromebook
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-11-02 19:18:29" itemprop="dateCreated datePublished" datetime="2022-11-02T19:18:29+08:00">2022-11-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-11-23 20:31:53" itemprop="dateModified" datetime="2022-11-23T20:31:53+08:00">2022-11-23</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>鱼总毕业了，带回来一台 <a target="_blank" rel="noopener" href="https://support.hp.com/gb-en/document/c06220011">Chromebook(HP Chromebook 11A G6 EE)</a>，说是毕业了，学校就把学生用的电脑送给学生了。</p>
+<p>鱼总说这电脑配置挺渣的，但续航还行，ebay 上还能卖个二三十刀，让我看着办。</p>
+<p>我还能怎么办？！凉拌呗。当下失业在家，没有收入，当然有垃圾必捡，且用且珍惜啦。</p>
+<p>于是，折腾走起。鉴于国内使用 ChromeOS 的种种不便，决定还是装一套 Linux 跑着吧。本来，ChromeOS 就直接支持 Linux(打开开发者模式就会有个简单的 Linux 可用)，而且还能通过几种工具（如 <a target="_blank" rel="noopener" href="https://github.com/dnschneid/crouton">Crouton</a> 和 <a target="_blank" rel="noopener" href="https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md">Crostini</a> 或 <a target="_blank" rel="noopener" href="https://chrx.org/">chrx</a> ）安装 Linux，但我觉得还是要装一个“干净”的 Linux 更好一些。</p>
+<span id="more"></span>
+
+<h2 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h2><h3 id="turn-on-Developer-Mode"><a href="#turn-on-Developer-Mode" class="headerlink" title="turn on Developer Mode"></a>turn on Developer Mode</h3><p>在 Chromebook 上打开开发者模式（Developer Mode），方法很简单。</p>
+<ul>
+<li>关机</li>
+<li>开机。同时按住 Esc key, refresh key（键盘最上一排，带箭头的大半个圆圈的那个键）和电源键</li>
+<li>当显示 Chrome OS is missing or damaged 的图片时，同时按住 Ctrl+D</li>
+<li>如果需要输入的话，直接回车</li>
+<li>机器会重启进入 Chromebook 的初始化安装设置，完成设置后</li>
+<li>当显示 OS verification is off 提示时按 Ctrl+D，系统会重启。搞定。</li>
+</ul>
+<h3 id="Create-a-Bootable-USB-Drive"><a href="#Create-a-Bootable-USB-Drive" class="headerlink" title="Create a Bootable USB Drive"></a>Create a Bootable USB Drive</h3><p>创建一个 Linux distribution 的安装 U 盘。</p>
+<ul>
+<li>下载一个 Linux 的 iso 文件（image）</li>
+<li>用 dd 命令或其他烧 iso 文件到 U 盘的工具（如 <a target="_blank" rel="noopener" href="https://etcher.balena.io/">Balena Etcher</a> ）将 ISO 文件写到 U 盘里。</li>
+</ul>
+<h3 id="disable-firmware-write-protect"><a href="#disable-firmware-write-protect" class="headerlink" title="disable firmware write-protect"></a>disable firmware write-protect</h3><p>因为下一步刷写新的 firmware 需要关闭 write protection。所以这一步我们需要提前做。根据 Chromebook 的型号不一样，关闭 WP 的方法各异，具体请查阅：<a target="_blank" rel="noopener" href="https://mrchromebox.tech/#devices%EF%BC%8C%E6%89%BE%E5%88%B0%E4%BD%A0%E7%9A%84">https://mrchromebox.tech/#devices，找到你的</a> Chromebook 的型号，看看其的 <em><strong>WP Method</strong></em> 是哪种情况，我的 HP Chromebook 11A G6 EE 是“battery”，意思是可以通过摘掉电池（battery）的方法来临时禁掉 firmware write-protect。</p>
+<p>这里禁掉 WP 的方法很多，有的是拧下一颗螺钉……</p>
+<p>于是我们先拆机，具体可以参考油管上的一个视频：<a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=SnTBAYd_am4">HP Chromebook 11 G6 EE Battery Replacement@youtube</a>，或者是拆机图：<a target="_blank" rel="noopener" href="https://www.ifixit.com/Guide/HP+Chromebook+11+G6+EE+Battery+Replacement/154057">HP Chromebook 11 G6 EE Battery Replacement@ifixit</a>，先把盖子拆了。</p>
+<p>看到电池以后，把电池和主板连接的那个接头小心的拔出即可。</p>
+<h3 id="Install-a-UEFI-BIOS"><a href="#Install-a-UEFI-BIOS" class="headerlink" title="Install a UEFI BIOS"></a>Install a UEFI BIOS</h3><p>刷一个 UEFI 的 BIOS 的 firmware，这里用的是 <a target="_blank" rel="noopener" href="https://mrchromebox.tech/">mrchromebox 改过的 coreboot</a></p>
+<ul>
+<li>开机（因为电池被断开，所以要接着电源）</li>
+<li>按 Ctrl+Alt+t，输入 <code>shell</code>，回车</li>
+<li>接着输入命令：<code>cd; curl -LO mrchromebox.tech/firmware-util.sh &amp;&amp; sudo bash firmware-util.sh</code></li>
+<li>输入 2（也就是选“Install&#x2F;Update UEFI (Full ROM) Firmware”）</li>
+<li>按提示输入（有机会插入 U 盘备份原来机器上的 ChromeOS 系统）直到刷写结束</li>
+</ul>
+<p>上面的过程有几个需要注意的地方：</p>
+<ol>
+<li>curl 命令的参数 “-LO” 是大写的英文字母”L”和“O”（不是数字 0 哟）</li>
+<li>curl 命令出 ssl 握手错误的时候，多加一个参数“k”（也就是用参数“-LOk”而不是”-LO”）</li>
+</ol>
+<h3 id="Install-Linux-to-Chromebook-by-USB-stick"><a href="#Install-Linux-to-Chromebook-by-USB-stick" class="headerlink" title="Install Linux to Chromebook by USB stick"></a>Install Linux to Chromebook by USB stick</h3><p>这里终于要用到前面做的 USB 启动盘了。</p>
+<ul>
+<li>插入前面做好的 Linux USB 启动盘</li>
+<li>开机（保持电源接入）</li>
+<li>敲击 esc 键进入 BIOS</li>
+<li>选择 U 盘启动</li>
+<li>然后就正常安装即可</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Ubuntu/" rel="tag"># Ubuntu</a>
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/Xubuntu/" rel="tag"># Xubuntu</a>
+              <a href="/tags/Chromebook/" rel="tag"># Chromebook</a>
+              <a href="/tags/coreboot/" rel="tag"># coreboot</a>
+              <a href="/tags/HP/" rel="tag"># HP</a>
+              <a href="/tags/HP-Chromebook-11A-G6-EE/" rel="tag"># HP Chromebook 11A G6 EE</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/10/%E5%88%A9%E7%94%A8%20termux%20%E5%92%8C%20termux-api%20%E5%9C%A8%20android%20%E6%89%8B%E6%9C%BA%E4%B8%8A%E5%AE%9A%E6%97%B6%E6%9B%B4%E6%96%B0%E5%A3%81%E7%BA%B8/index.html" rel="prev" title="利用 Termux 和 Termux-API 在 Android 手机上定时自动更新壁纸">
+                  <i class="fa fa-angle-left"></i> 利用 Termux 和 Termux-API 在 Android 手机上定时自动更新壁纸
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/12/How%20to%20deal%20with%20a%20faked%20tf%20card/index.html" rel="next" title="How to deal with a faked tf card">
+                  How to deal with a faked tf card <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

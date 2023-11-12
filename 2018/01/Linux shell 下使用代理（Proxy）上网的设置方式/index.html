@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="缘起我厂办公室测试小机房有一些运算资源，但是其网络是不能直接上公网的，而是通过一个内部代理（内部域名是：proxy.xxxdev.com，端口 3128）来上公网的。 但是现在部署环境，多半需要在命令行下折腾，而且还多半需要不停的从公网下东西（安装），所以，怎样在命令行下（shell 里）使用代理来上公网就成了一个绕不开的话题……">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux shell 下使用代理（Proxy）上网的设置方式">
+<meta property="og:url" content="https://ming.theyan.gs/2018/01/Linux%20shell%20%E4%B8%8B%E4%BD%BF%E7%94%A8%E4%BB%A3%E7%90%86%EF%BC%88Proxy%EF%BC%89%E4%B8%8A%E7%BD%91%E7%9A%84%E8%AE%BE%E7%BD%AE%E6%96%B9%E5%BC%8F/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="缘起我厂办公室测试小机房有一些运算资源，但是其网络是不能直接上公网的，而是通过一个内部代理（内部域名是：proxy.xxxdev.com，端口 3128）来上公网的。 但是现在部署环境，多半需要在命令行下折腾，而且还多半需要不停的从公网下东西（安装），所以，怎样在命令行下（shell 里）使用代理来上公网就成了一个绕不开的话题……">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-01-15T07:51:20.000Z">
+<meta property="article:modified_time" content="2019-04-04T23:47:07.003Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="Shell">
+<meta property="article:tag" content="Bash">
+<meta property="article:tag" content="Proxy">
+<meta property="article:tag" content="http_proxy">
+<meta property="article:tag" content="https_proxy">
+<meta property="article:tag" content="env">
+<meta property="article:tag" content="export">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2018/01/Linux%20shell%20%E4%B8%8B%E4%BD%BF%E7%94%A8%E4%BB%A3%E7%90%86%EF%BC%88Proxy%EF%BC%89%E4%B8%8A%E7%BD%91%E7%9A%84%E8%AE%BE%E7%BD%AE%E6%96%B9%E5%BC%8F/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2018/01/Linux%20shell%20%E4%B8%8B%E4%BD%BF%E7%94%A8%E4%BB%A3%E7%90%86%EF%BC%88Proxy%EF%BC%89%E4%B8%8A%E7%BD%91%E7%9A%84%E8%AE%BE%E7%BD%AE%E6%96%B9%E5%BC%8F/index.html","path":"2018/01/Linux shell 下使用代理（Proxy）上网的设置方式/index.html","title":"Linux shell 下使用代理（Proxy）上网的设置方式"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Linux shell 下使用代理（Proxy）上网的设置方式 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%98%E8%B5%B7"><span class="nav-number">1.</span> <span class="nav-text">缘起</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E6%96%B9%E6%A1%88"><span class="nav-number">2.</span> <span class="nav-text">具体方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%80%9C%E9%80%9A%E7%94%A8%E2%80%9D%E6%96%B9%E6%A1%88"><span class="nav-number">2.1.</span> <span class="nav-text">“通用”方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pear-amp-pecl"><span class="nav-number">2.2.</span> <span class="nav-text">pear &amp; pecl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-pull"><span class="nav-number">2.3.</span> <span class="nav-text">docker pull</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-build"><span class="nav-number">2.4.</span> <span class="nav-text">docker build</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E5%B0%BE"><span class="nav-number">3.</span> <span class="nav-text">结尾</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2018/01/Linux%20shell%20%E4%B8%8B%E4%BD%BF%E7%94%A8%E4%BB%A3%E7%90%86%EF%BC%88Proxy%EF%BC%89%E4%B8%8A%E7%BD%91%E7%9A%84%E8%AE%BE%E7%BD%AE%E6%96%B9%E5%BC%8F/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Linux shell 下使用代理（Proxy）上网的设置方式 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux shell 下使用代理（Proxy）上网的设置方式
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-01-15 15:51:20" itemprop="dateCreated datePublished" datetime="2018-01-15T15:51:20+08:00">2018-01-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2019-04-05 07:47:07" itemprop="dateModified" datetime="2019-04-05T07:47:07+08:00">2019-04-05</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h1><p>我厂办公室测试小机房有一些运算资源，但是其网络是不能直接上公网的，而是通过一个内部代理（内部域名是：proxy.xxxdev.com，端口 3128）来上公网的。</p>
+<p>但是现在部署环境，多半需要在命令行下折腾，而且还多半需要不停的从公网下东西（安装），所以，怎样在命令行下（shell 里）使用代理来上公网就成了一个绕不开的话题……</p>
+<a id="more"></a>
+<h1 id="具体方案"><a href="#具体方案" class="headerlink" title="具体方案"></a>具体方案</h1><h2 id="“通用”方案"><a href="#“通用”方案" class="headerlink" title="“通用”方案"></a>“通用”方案</h2><p>这里的通用之所以打上引号是因为其实这个方案并不通用，因为还是有很多软件不支持，只不过其相对其他来讲还算是相对通用。</p>
+<p>Linux Bash 中有环境变量：http_proxy、https_proxy 和 ftp_proxy 等相关变量，都是做 proxy 设置的。</p>
+<p>具体用法是：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> http_proxy=http://proxy.xxxdev.com:3218/</span><br><span class="line"><span class="built_in">export</span> https_proxy=http://proxy.xxxdev.com:3218/</span><br></pre></td></tr></table></figure>
+<p>这种做法 curl、wget 等命令都是支持的</p>
+<h2 id="pear-amp-pecl"><a href="#pear-amp-pecl" class="headerlink" title="pear &amp; pecl"></a>pear &amp; pecl</h2><p>用 php 的，有时候会用到 pear 和 pecl。<br>虽然这两者查看代理设置的命令是：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pear config-get http_proxy;</span><br><span class="line">pcel config-get http_proxy;</span><br></pre></td></tr></table></figure>
+<p>但是设置 http_proxy 的命令却都是这一句：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pear config-set http_proxy proxy.xxxdev.com:3128</span><br></pre></td></tr></table></figure>
+<h2 id="docker-pull"><a href="#docker-pull" class="headerlink" title="docker pull"></a>docker pull</h2><p>docker 拉取 image 的时候，如果需要代理怎么办呢？<br>如果是 CentOS 7.x 的环境下的话，可以：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/systemd/system/docker.service.d/;</span><br><span class="line">vim /etc/systemd/system/docker.service.d/https-proxy.conf;</span><br></pre></td></tr></table></figure>
+<p>写下如下内容：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Service]</span><br><span class="line"><span class="attribute">Environment</span>=<span class="string">"HTTP_PROXY=http://proxy.xxxdev.com:3128/"</span> HTTPS_PROXY=http://proxy.xxxdev.com:3128/<span class="string">"</span></span><br></pre></td></tr></table></figure>
+<p>然后</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker</span><br></pre></td></tr></table></figure>
+<h2 id="docker-build"><a href="#docker-build" class="headerlink" title="docker build"></a>docker build</h2><p>docker build image 的时候，也是需要拉东西的，这时也要单独设置 proxy，具体方法在命令行中加入参数 “ –build-arg HTTP_PROXY=<a href="http://proxy.xxxdev.com:3128/" target="_blank" rel="noopener">http://proxy.xxxdev.com:3128/</a> ”，于是整个命令就像是这样：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build --build-arg HTTP_PROXY=http://proxy.xxxdev.com:3128/ . -t xxx:yyy</span><br></pre></td></tr></table></figure>
+<h1 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h1><p>暂时就只整理到这么多，以后有新情况再继续更新。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Shell/" rel="tag"># Shell</a>
+              <a href="/tags/Bash/" rel="tag"># Bash</a>
+              <a href="/tags/Proxy/" rel="tag"># Proxy</a>
+              <a href="/tags/http-proxy/" rel="tag"># http_proxy</a>
+              <a href="/tags/https-proxy/" rel="tag"># https_proxy</a>
+              <a href="/tags/env/" rel="tag"># env</a>
+              <a href="/tags/export/" rel="tag"># export</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/12/CentOS%207%20%E4%B8%8B%E9%87%8D%E7%BD%AE%20root%20%E5%AF%86%E7%A0%81%E7%9A%84%E6%AD%A5%E9%AA%A4/index.html" rel="prev" title="CentOS 7 下重置 root 密码的步骤">
+                  <i class="fa fa-angle-left"></i> CentOS 7 下重置 root 密码的步骤
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/01/Nginx%20%E4%B8%8B%E5%90%AF%E7%94%A8%20HSTS/index.html" rel="next" title="Nginx 下启用 HSTS">
+                  Nginx 下启用 HSTS <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="背景之前学 python 做爬虫爬书时水过两篇文章（加上本篇，一共三篇）：  用 kindle 追网文  用 Kindle 追网文之二 用 Kindle 来追网文之三  当下，由于种种原因要切源到：m.uuks.org，所以有了第三篇水文：）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用 Kindle 来追网文之三">
+<meta property="og:url" content="https://ming.theyan.gs/2021/11/%E7%94%A8%20Kindle%20%E6%9D%A5%E8%BF%BD%E7%BD%91%E6%96%87%E4%B9%8B%E4%B8%89/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="背景之前学 python 做爬虫爬书时水过两篇文章（加上本篇，一共三篇）：  用 kindle 追网文  用 Kindle 追网文之二 用 Kindle 来追网文之三  当下，由于种种原因要切源到：m.uuks.org，所以有了第三篇水文：）">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-11-02T11:11:32.000Z">
+<meta property="article:modified_time" content="2022-05-23T14:18:23.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="Kindle">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Python3">
+<meta property="article:tag" content="Instapaper">
+<meta property="article:tag" content="爬虫">
+<meta property="article:tag" content="网络小说">
+<meta property="article:tag" content="UU看书">
+<meta property="article:tag" content="uuks.org">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2021/11/%E7%94%A8%20Kindle%20%E6%9D%A5%E8%BF%BD%E7%BD%91%E6%96%87%E4%B9%8B%E4%B8%89/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2021/11/%E7%94%A8%20Kindle%20%E6%9D%A5%E8%BF%BD%E7%BD%91%E6%96%87%E4%B9%8B%E4%B8%89/index.html","path":"2021/11/用 Kindle 来追网文之三/index.html","title":"用 Kindle 来追网文之三"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>用 Kindle 来追网文之三 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#show-me-the-code"><span class="nav-number">2.</span> <span class="nav-text">show me the code</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2021/11/%E7%94%A8%20Kindle%20%E6%9D%A5%E8%BF%BD%E7%BD%91%E6%96%87%E4%B9%8B%E4%B8%89/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="用 Kindle 来追网文之三 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用 Kindle 来追网文之三
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-11-02 19:11:32" itemprop="dateCreated datePublished" datetime="2021-11-02T19:11:32+08:00">2021-11-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-05-23 22:18:23" itemprop="dateModified" datetime="2022-05-23T22:18:23+08:00">2022-05-23</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>之前学 python 做爬虫爬书时水过两篇文章（加上本篇，一共三篇）：</p>
+<ul>
+<li><a href="/2020/05/%E7%94%A8kindle%E8%BF%BD%E7%BD%91%E6%96%87/index.html" title="用 Kindle 来追网文">用 kindle 追网文</a> </li>
+<li><a href="/2020/07/%E7%94%A8%20Kindle%20%E8%BF%BD%E7%BD%91%E6%96%87_2/index.html" title="用 Kindle 来追网文之二">用 Kindle 追网文之二</a></li>
+<li><a href="/2021/11/%E7%94%A8%20Kindle%20%E6%9D%A5%E8%BF%BD%E7%BD%91%E6%96%87%E4%B9%8B%E4%B8%89/index.html" title="用 Kindle 来追网文之三">用 Kindle 来追网文之三</a></li>
+</ul>
+<p>当下，由于种种原因要切源到：m.uuks.org，所以有了第三篇水文：）</p>
+<span id="more"></span>
+
+<h2 id="show-me-the-code"><a href="#show-me-the-code" class="headerlink" title="show me the code"></a>show me the code</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> os.path</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> importlib <span class="keyword">import</span> reload</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime</span><br><span class="line"><span class="keyword">from</span> bs4 <span class="keyword">import</span> BeautifulSoup</span><br><span class="line"><span class="keyword">from</span> pyinstapaper.instapaper <span class="keyword">import</span> Instapaper, Folder, Bookmark</span><br><span class="line"></span><br><span class="line">INSTAPAPER_KEY = <span class="string">&#x27;*****************&#x27;</span></span><br><span class="line">INSTAPAPER_SECRET = <span class="string">&#x27;**************&#x27;</span></span><br><span class="line">INSTAPAPER_LOGIN = <span class="string">&#x27;u@x.com&#x27;</span></span><br><span class="line">INSTAPAPER_PASSWORD = <span class="string">&#x27;password&#x27;</span></span><br><span class="line"></span><br><span class="line">base_url = <span class="string">&#x27;http://m.uuks.org&#x27;</span></span><br><span class="line">novel_list = [</span><br><span class="line">    <span class="string">&quot;苏厨&quot;</span>, <span class="string">&quot;绍宋&quot;</span>, <span class="string">&quot;从 1983 开始&quot;</span>, <span class="string">&quot;全职艺术家&quot;</span>, <span class="string">&quot;大明镇海王&quot;</span>, <span class="string">&quot;奶爸学园&quot;</span></span><br><span class="line">]</span><br><span class="line">novel_url = [</span><br><span class="line">    <span class="string">&#x27;392_392855&#x27;</span>, <span class="string">&#x27;511_511286&#x27;</span>, <span class="string">&#x27;441_441819&#x27;</span>, <span class="string">&#x27;32802&#x27;</span>, <span class="string">&#x27;519_519302&#x27;</span>, <span class="string">&quot;33250&quot;</span></span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">instapaper = Instapaper(INSTAPAPER_KEY, INSTAPAPER_SECRET)</span><br><span class="line">instapaper.login(INSTAPAPER_LOGIN, INSTAPAPER_PASSWORD)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">add_bookmark_instapaper</span>(<span class="params">title, url</span>):</span><br><span class="line">    data = &#123;</span><br><span class="line">        <span class="string">&#x27;time&#x27;</span>: time.time(),</span><br><span class="line">        <span class="string">&#x27;progress_timestamp&#x27;</span>: <span class="number">0</span>,</span><br><span class="line">        <span class="string">&#x27;title&#x27;</span>: title,</span><br><span class="line">        <span class="string">&#x27;url&#x27;</span>: url</span><br><span class="line">    &#125;</span><br><span class="line">    bookmark = Bookmark(instapaper, **data)</span><br><span class="line">    bookmark.add()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">fetch_novel</span>(<span class="params">novel_list, novel_url</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;job running&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> os.path.isfile(<span class="string">&#x27;url.pkl&#x27;</span>):</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;url.pkl&#x27;</span>, <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            last_url = pickle.load(f)</span><br><span class="line">        f.close()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment">#last_url=[[],[],[],[]]</span></span><br><span class="line">        last_url = [[]] * <span class="built_in">len</span>(novel_list)</span><br><span class="line"></span><br><span class="line">    url_archive = []</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(novel_list)):</span><br><span class="line">        <span class="built_in">print</span>(novel_list[j])</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            old_url = last_url[j]</span><br><span class="line">        <span class="keyword">except</span> IndexError:</span><br><span class="line">            old_url = []</span><br><span class="line">        url = base_url + <span class="string">&#x27;/b/&#x27;</span> + novel_url[j] + <span class="string">&#x27;/&#x27;</span></span><br><span class="line">        head = &#123;&#125;</span><br><span class="line">        head[</span><br><span class="line">            <span class="string">&#x27;User-Agent&#x27;</span>] = <span class="string">&#x27;Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166  Safari/535.19&#x27;</span></span><br><span class="line">        page = requests.get(url)</span><br><span class="line">        soup = BeautifulSoup(page.content, <span class="string">&#x27;lxml&#x27;</span>)</span><br><span class="line">        soup_text = soup.select(</span><br><span class="line">            <span class="string">&#x27;#book-sp &gt; div.listbox &gt; div.list_cont &gt; div.book-detial &gt; div.ml-list &gt; ul a&#x27;</span></span><br><span class="line">        )</span><br><span class="line">        latest_url = []</span><br><span class="line">        latest_title = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(soup_text)):</span><br><span class="line"></span><br><span class="line">            latest_url.append(base_url + soup_text[i][<span class="string">&#x27;href&#x27;</span>])</span><br><span class="line">            latest_title.append(novel_list[j] + <span class="string">&#x27;---&#x27;</span> +</span><br><span class="line">                                 soup_text[i].string)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(latest_url)-<span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>):</span><br><span class="line">            <span class="keyword">if</span> latest_url[k] <span class="keyword">in</span> old_url:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="built_in">print</span>(latest_title[k], latest_url[k])</span><br><span class="line">            add_bookmark_instapaper(latest_title[k], latest_url[k])</span><br><span class="line"></span><br><span class="line">        old_url = latest_url</span><br><span class="line">        url_archive.append(old_url)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;url.pkl&#x27;</span>, <span class="string">&#x27;wb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        pickle.dump(url_archive, f)</span><br><span class="line">    f.close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">bookmarks = instapaper.get_bookmarks(<span class="string">&#x27;unread&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> ct, bookmark <span class="keyword">in</span> <span class="built_in">enumerate</span>(bookmarks):</span><br><span class="line">    <span class="built_in">print</span>(bookmark.title)</span><br><span class="line">    bookmark.archive()</span><br><span class="line">    bookmark.delete()</span><br><span class="line"></span><br><span class="line">fetch_novel(novel_list, novel_url)</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Kindle/" rel="tag"># Kindle</a>
+              <a href="/tags/Python/" rel="tag"># Python</a>
+              <a href="/tags/Python3/" rel="tag"># Python3</a>
+              <a href="/tags/Instapaper/" rel="tag"># Instapaper</a>
+              <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"># 爬虫</a>
+              <a href="/tags/%E7%BD%91%E7%BB%9C%E5%B0%8F%E8%AF%B4/" rel="tag"># 网络小说</a>
+              <a href="/tags/UU%E7%9C%8B%E4%B9%A6/" rel="tag"># UU看书</a>
+              <a href="/tags/uuks-org/" rel="tag"># uuks.org</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/06/%E9%97%AE%E8%BF%90%E7%BB%B4%E5%9B%A2%E9%98%9F%20leader%20%E7%9A%84%E4%B8%80%E4%BA%9B%EF%BC%88%E6%8A%80%E6%9C%AF%EF%BC%89%E9%97%AE%E9%A2%98/index.html" rel="prev" title="问运维团队 leader 的一些（技术）问题">
+                  <i class="fa fa-angle-left"></i> 问运维团队 leader 的一些（技术）问题
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/12/sync_repo_from_github_to_gitee_using_github_action/index.html" rel="next" title="sync repo from Github to Gitee using github action">
+                  sync repo from Github to Gitee using github action <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="缘起无非就是“又”失业了，重新开始找工作，原本还不想招惹外包公司，无奈行情不好，外包工作也是工作呀，于是乎，就定了某个外包公司的面试，第一面：外包公司的技术面。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="某个外包公司的面试总结">
+<meta property="og:url" content="https://ming.theyan.gs/2022/04/%E6%9F%90%E4%B8%AA%E5%A4%96%E5%8C%85%E5%85%AC%E5%8F%B8%E7%9A%84%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="缘起无非就是“又”失业了，重新开始找工作，原本还不想招惹外包公司，无奈行情不好，外包工作也是工作呀，于是乎，就定了某个外包公司的面试，第一面：外包公司的技术面。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-04-12T14:23:35.000Z">
+<meta property="article:modified_time" content="2022-04-17T12:32:31.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="面试总结">
+<meta property="article:tag" content="外包公司">
+<meta property="article:tag" content="aws">
+<meta property="article:tag" content="eks">
+<meta property="article:tag" content="Jenkins">
+<meta property="article:tag" content="ingress">
+<meta property="article:tag" content="X-Forwarded-For">
+<meta property="article:tag" content="CI&#x2F;CD">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2022/04/%E6%9F%90%E4%B8%AA%E5%A4%96%E5%8C%85%E5%85%AC%E5%8F%B8%E7%9A%84%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2022/04/%E6%9F%90%E4%B8%AA%E5%A4%96%E5%8C%85%E5%85%AC%E5%8F%B8%E7%9A%84%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/index.html","path":"2022/04/某个外包公司的面试总结/index.html","title":"某个外包公司的面试总结"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>某个外包公司的面试总结 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%98%E8%B5%B7"><span class="nav-number">1.</span> <span class="nav-text">缘起</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">心得体会</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%A0%E4%B8%AA%E5%85%B7%E4%BD%93%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">几个具体问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E-eks-%E7%9A%84-ingress"><span class="nav-number">3.1.</span> <span class="nav-text">关于 eks 的 ingress</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E8%A2%AB-nginx-%E5%8F%8D%E4%BB%A3%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%A6%82%E4%BD%95%E8%8E%B7%E5%BE%97%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9A%84%E7%9C%9F%E5%AE%9E-IP-%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.2.</span> <span class="nav-text">关于被 nginx 反代的服务如何获得客户端的真实 IP 的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Jenkins-%E6%80%8E%E4%B9%88%E5%81%9A%E4%BB%A3%E7%A0%81%E8%A7%A6%E5%8F%91%E8%87%AA%E5%8A%A8%E6%9E%84%E5%BB%BA%EF%BC%88CI%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">Jenkins 怎么做代码触发自动构建（CI）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E-serverless"><span class="nav-number">3.4.</span> <span class="nav-text">关于 serverless</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E8%BF%87%E5%A4%9A%E5%B0%91-aws-%E7%9A%84%E6%9C%8D%E5%8A%A1"><span class="nav-number">3.5.</span> <span class="nav-text">用过多少 aws 的服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#eks-%E4%B8%AD%E7%9A%84%E6%9C%8D%E5%8A%A1%E6%9A%B4%E9%9C%B2%E5%87%BA%E6%9D%A5%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%B3%95"><span class="nav-number">3.6.</span> <span class="nav-text">eks 中的服务暴露出来的几种方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C"><span class="nav-number">4.</span> <span class="nav-text">结果</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2022/04/%E6%9F%90%E4%B8%AA%E5%A4%96%E5%8C%85%E5%85%AC%E5%8F%B8%E7%9A%84%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="某个外包公司的面试总结 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          某个外包公司的面试总结
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-12 22:23:35" itemprop="dateCreated datePublished" datetime="2022-04-12T22:23:35+08:00">2022-04-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-04-17 20:32:31" itemprop="dateModified" datetime="2022-04-17T20:32:31+08:00">2022-04-17</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>无非就是“又”失业了，重新开始找工作，原本还不想招惹外包公司，无奈行情不好，外包工作也是工作呀，于是乎，就定了某个外包公司的面试，第一面：外包公司的技术面。</p>
+<span id="more"></span>
+
+<h2 id="心得体会"><a href="#心得体会" class="headerlink" title="心得体会"></a>心得体会</h2><p>主要问题都是跟 aws 有关系，这个岗位的甲方是个外企，肯定重度使用 aws。而且还在用 aws 的 eks 服务。</p>
+<p>感觉面试官的视野还是很重要的。</p>
+<h2 id="几个具体问题"><a href="#几个具体问题" class="headerlink" title="几个具体问题"></a>几个具体问题</h2><p>有个细节：腾讯会议面试，面试官几个人，可能是三个，首先特意让我把视频打开，于是我打开了，但是对方并没有打开。好吧，我是求职者，不对等也正常。</p>
+<p>但为什么面试需要让面试者打开视频呢？这个不太明白，也许相关 HR 会比较清楚这一点。</p>
+<h3 id="关于-eks-的-ingress"><a href="#关于-eks-的-ingress" class="headerlink" title="关于 eks 的 ingress"></a>关于 eks 的 ingress</h3><p>问我 eks 里的服务通过 ingress 暴露出去，然后数据包是怎么从外网到 pod 的。</p>
+<p>这个题我答的不好，前东家其实差不多就是这个架构：nginx-ingress，然后外面是 aws 的 LB，我一直在解释外网流量到 aws 的 LB 设备之后然后是转到 eks 集群的 node 节点的某个 tcp 端口，我的意思是，其实服务最终是通过 nodeport 透出去的。</p>
+<p>上面我说的这个大概是基本上没太大问题的，但是人家问的应该不是这个。:(</p>
+<p>其实上面我提到的 nodeport 透出去的服务正是 nginx-ingress（或者是 nginx-ingress-controller，具体忘了，我得再看看 nginx-ingress）</p>
+<h3 id="关于被-nginx-反代的服务如何获得客户端的真实-IP-的问题"><a href="#关于被-nginx-反代的服务如何获得客户端的真实-IP-的问题" class="headerlink" title="关于被 nginx 反代的服务如何获得客户端的真实 IP 的问题"></a>关于被 nginx 反代的服务如何获得客户端的真实 IP 的问题</h3><p>这个其实我比较熟悉，http 基本协议嘛。</p>
+<p>我说这个简单，在反代的 nginx 配置里将 client ip 直接写入一个特定的 http 头，然后真实的服务里再把这个头取出来即可。</p>
+<p>其实这个回答完全没毛病，我之前有项目就是这么干的。但面试官却感觉好像抓住了什么一样拼命问我到底是哪个 http 头？搞得我都有点上头了，我于是说：“哪个头不一样吗，只要跟后端协商好了就行了”。还被追问，还问一般标准是哪个头，于是我只能说 X-Forwarded-For，于是面试官认可了。</p>
+<p>我其实没有细说为什么要另外弄一个头，这是因为客户端访问服务，中间可能会过 n 层代理，理论上每一层都会且必须要往 X-Forwarded-For 里写东西，但实际上，守规矩的人有，但绝对不是全部！于是我们的逻辑就是单独再搞一个 http 头，算是有点私有协议的意思，自己用，这样感觉比直接用 X-Forwarded-For 更靠谱一些。</p>
+<h3 id="Jenkins-怎么做代码触发自动构建（CI）"><a href="#Jenkins-怎么做代码触发自动构建（CI）" class="headerlink" title="Jenkins 怎么做代码触发自动构建（CI）"></a>Jenkins 怎么做代码触发自动构建（CI）</h3><p>某个面试官问的，我当时回答：我不知道。我真不知道，或者我们曾经也有用过这种功能，但因为具体不是我配的，我就没了解到。但我知道，这个是绝度可以实现的，大致猜想是通过 webhook 之类的东西来做就可以。</p>
+<p>我又说，我们有时并没有用 Jenkins，面试官就逼问：“没有 Jenkins 怎么做 CI&#x2F;CD 呢？”，我当时就笑了，说：“我的好几个前司，项目的 CI&#x2F;CD 是直接在 gitlab 里做的。”（他可能不太清楚 gitlab 本身就有 CI&#x2F;CD 的功能）。而我恰恰由于要维护这个，曾经大概看过相关配置。</p>
+<p>估计他也不知道 github-action 之类的东西吧。</p>
+<h3 id="关于-serverless"><a href="#关于-serverless" class="headerlink" title="关于 serverless"></a>关于 serverless</h3><p>我回答说之前的某司，我用过 aws 上的什么服务来着（我真是这么说的，我忘了那个叫 Lambda 了），用那个写了个 python 程序，定时执行一些操作。那个我理解就是 serverless</p>
+<h3 id="用过多少-aws-的服务"><a href="#用过多少-aws-的服务" class="headerlink" title="用过多少 aws 的服务"></a>用过多少 aws 的服务</h3><p>于是我就说了一堆，但的确好多服务我忘了名字了，我只能简单介绍下这个服务是干啥的。我估计我用的好多服务面试官们也没用过，：）。这个很正常，就像他们用过的服务有些我也没用过一样。</p>
+<h3 id="eks-中的服务暴露出来的几种方法"><a href="#eks-中的服务暴露出来的几种方法" class="headerlink" title="eks 中的服务暴露出来的几种方法"></a>eks 中的服务暴露出来的几种方法</h3><p>我居然只回答出 nodeport 和 ingress 两种，连 LB 设备这个都忘了。:(</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的结果，自然是挂了呀。:(</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" rel="tag"># 面试总结</a>
+              <a href="/tags/%E5%A4%96%E5%8C%85%E5%85%AC%E5%8F%B8/" rel="tag"># 外包公司</a>
+              <a href="/tags/aws/" rel="tag"># aws</a>
+              <a href="/tags/eks/" rel="tag"># eks</a>
+              <a href="/tags/Jenkins/" rel="tag"># Jenkins</a>
+              <a href="/tags/ingress/" rel="tag"># ingress</a>
+              <a href="/tags/X-Forwarded-For/" rel="tag"># X-Forwarded-For</a>
+              <a href="/tags/CI-CD/" rel="tag"># CI/CD</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/03/%E5%88%A9%E7%94%A8%20ttl%20%E8%BF%9E%E6%8E%A5%E8%8E%B7%E5%8F%96%E7%A5%9E%E9%A9%AC%E7%9F%BF%E6%9C%BA%E7%9A%84%20root%20%E6%9D%83%E9%99%90/index.html" rel="prev" title="利用 ttl 连接获取神马（Whatsminer）矿机的 root 权限">
+                  <i class="fa fa-angle-left"></i> 利用 ttl 连接获取神马（Whatsminer）矿机的 root 权限
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/05/%E4%BB%8E%E5%AE%98%E7%BD%91%E6%89%92%E6%9F%90%E5%84%BF%E7%AB%A5%E9%A2%91%E9%81%93%E7%9A%84%E4%B8%80%E4%BA%9B%E9%9F%B3%E9%A2%91%E8%B5%84%E6%BA%90/index.html" rel="next" title="从官网扒某儿童频道的一些音频资源">
+                  从官网扒某儿童频道的一些音频资源 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

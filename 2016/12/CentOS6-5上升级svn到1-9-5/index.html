@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Intro环境是一台开发用（pc）服务器，具体情况如下：  CentOS 6.5 Subversion（svn） 1.6.11 Kernel 2.6.32-431.17.1.el6.x86_64  Why为什么要升级 svn？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS6.5上升级svn到1.9.5">
+<meta property="og:url" content="https://ming.theyan.gs/2016/12/CentOS6-5%E4%B8%8A%E5%8D%87%E7%BA%A7svn%E5%88%B01-9-5/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="Intro环境是一台开发用（pc）服务器，具体情况如下：  CentOS 6.5 Subversion（svn） 1.6.11 Kernel 2.6.32-431.17.1.el6.x86_64  Why为什么要升级 svn？">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-12-11T07:51:20.000Z">
+<meta property="article:modified_time" content="2019-04-04T23:47:06.997Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="CentOS">
+<meta property="article:tag" content="Subversion">
+<meta property="article:tag" content="svn">
+<meta property="article:tag" content="update">
+<meta property="article:tag" content="strace">
+<meta property="article:tag" content="open">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2016/12/CentOS6-5%E4%B8%8A%E5%8D%87%E7%BA%A7svn%E5%88%B01-9-5/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2016/12/CentOS6-5%E4%B8%8A%E5%8D%87%E7%BA%A7svn%E5%88%B01-9-5/index.html","path":"2016/12/CentOS6-5上升级svn到1-9-5/index.html","title":"CentOS6.5上升级svn到1.9.5"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>CentOS6.5上升级svn到1.9.5 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Intro"><span class="nav-number">1.</span> <span class="nav-text">Intro</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Why"><span class="nav-number">2.</span> <span class="nav-text">Why</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#How-to"><span class="nav-number">3.</span> <span class="nav-text">How to</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RPM-%E6%96%B9%E5%BC%8F"><span class="nav-number">3.1.</span> <span class="nav-text">RPM 方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BA%90%E4%BB%A3%E7%A0%81%E7%BC%96%E8%AF%91"><span class="nav-number">3.2.</span> <span class="nav-text">源代码编译</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Appendix"><span class="nav-number">4.</span> <span class="nav-text">Appendix</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2016/12/CentOS6-5%E4%B8%8A%E5%8D%87%E7%BA%A7svn%E5%88%B01-9-5/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="CentOS6.5上升级svn到1.9.5 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CentOS6.5上升级svn到1.9.5
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-12-11 15:51:20" itemprop="dateCreated datePublished" datetime="2016-12-11T15:51:20+08:00">2016-12-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2019-04-05 07:47:06" itemprop="dateModified" datetime="2019-04-05T07:47:06+08:00">2019-04-05</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="Intro"><a href="#Intro" class="headerlink" title="Intro"></a>Intro</h1><p>环境是一台开发用（pc）服务器，具体情况如下：</p>
+<ul>
+<li>CentOS 6.5</li>
+<li>Subversion（svn） 1.6.11</li>
+<li>Kernel 2.6.32-431.17.1.el6.x86_64</li>
+</ul>
+<h1 id="Why"><a href="#Why" class="headerlink" title="Why"></a>Why</h1><p>为什么要升级 svn？</p>
+<a id="more"></a>
+<p>因为开发同学有报 <code>svn up</code> 时巨慢。通过 strace 简单跟了一下，发现是系统调用 open 被调用了大几万次，耗费了 99% 的时间。google 了一下，有说是：</p>
+<blockquote>
+<p>The Subversion working copy performs quite badly when there’s a huge number of directories, like in your case. For write operations (even only locally) to the working copy, the working copy has to be locked, which means that a lock file is created in every directory (that’s 11k file creates), then the action executes, and the those 11k files are deleted again.</p>
+<p>Subversion 1.7 is moving to a different working copy format, that should resolve these problems. Until then there’s a few tricks you might try to speed things up, like excluding the working copy from your virus scanner, disabling file monitors on the directory (like TortoiseSvnCache), and trying to reduce the total number of directories. (Perhaps by checking out a few separate working copies)</p>
+</blockquote>
+<p>这段话描述的情况跟我面对的情况何其相似！报慢的开发同学那个 <code>svn up</code> 的目录也巨大无比、目录文件众多。</p>
+<p>然后在我的建议下，开发同学用他本地的 Subversion(1.8.8) 做了下对比测试，同样用 strace 跟，发现系统调用 open 减至一千多次，所占时间可忽略不计。</p>
+<p>结论：升级 subversion 版本的办法看来是靠谱的。</p>
+<h1 id="How-to"><a href="#How-to" class="headerlink" title="How to"></a>How to</h1><h2 id="RPM-方式"><a href="#RPM-方式" class="headerlink" title="RPM 方式"></a>RPM 方式</h2><p>这是我最初比较倾向于的方案，这种方式的复杂度在于：</p>
+<ol>
+<li>CentOS 6.x 的官方 yum 源和 epel 里的 subversion 的最高版本只到 1.6.x</li>
+<li>Subversion 的源代码里并没有提供可用的 .spec 文件</li>
+<li>Subversion 官网上列出的 CentOS 的 RPM 包维护的几家里两家需要注册帐号，剩下那家已经挂掉很久了。 </li>
+</ol>
+<p>这一切的一切看起来都表明着我只能自己手写 .spec 文件来自己 build Subversion 的 RPM 包了。</p>
+<p>但是机智如我，又怎么能就此屈服而去做这种及其繁琐复杂且效果未知的事情呢？果然，很轻松在 google 里找到了上面需要注册帐号的两家中的一家的 yum 源的路径（<a href="http://opensource.wandisco.com/centos/6/svn-1.9/RPMS/x86_64/）。有了这个，升级就不要太简单哟" target="_blank" rel="noopener">http://opensource.wandisco.com/centos/6/svn-1.9/RPMS/x86_64/）。有了这个，升级就不要太简单哟</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">BASE_URL=<span class="string">"http://opensource.wandisco.com/centos/6/svn-1.9/RPMS/x86_64"</span>;</span><br><span class="line">rpm -Uvh \</span><br><span class="line">	<span class="variable">$&#123;BASE_URL&#125;</span>/subversion-1.9.5-1.x86_64.rpm \</span><br><span class="line">	<span class="variable">$&#123;BASE_URL&#125;</span>/subversion-perl-1.9.5-1.x86_64.rpm \</span><br><span class="line">	<span class="variable">$&#123;BASE_URL&#125;</span>/serf-1.3.7-1.x86_64.rpm;</span><br></pre></td></tr></table></figure>
+<h2 id="源代码编译"><a href="#源代码编译" class="headerlink" title="源代码编译"></a>源代码编译</h2><p>这种方式是必须要做的，因为需要先“装”一个高版本的 Subversion 先试一下。具体步骤如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">yum -y install unzip wget make gcc;</span><br><span class="line">BASE_URL=<span class="string">"http://opensource.wandisco.com/centos/6/svn-1.9/RPMS/x86_64"</span>;</span><br><span class="line">rpm -ivh \</span><br><span class="line">	<span class="variable">$&#123;BASE_URL&#125;</span>/serf-devel-1.3.7-1.x86_64.rpm;</span><br><span class="line"><span class="comment"># serf-devel 是源代码编译 Subversion&gt;1.7 以上版本时必需</span></span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src;</span><br><span class="line">wget \</span><br><span class="line">	http://www-eu.apache.org/dist/subversion/subversion-1.9.5.tar.gz;</span><br><span class="line">wget \</span><br><span class="line">	http://www.sqlite.org/sqlite-amalgamation-3071501.zip;</span><br><span class="line">tar xzvf subversion-1.9.5.tar.gz;</span><br><span class="line">unzip sqlite-amalgamation-3071501.zip -d .</span><br><span class="line"><span class="built_in">cd</span> subversion-1.9.5;</span><br><span class="line">ln -s \</span><br><span class="line">	../sqlite-amalgamation-3071501 \</span><br><span class="line">	sqlite-amalgamation;</span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/subversion;</span><br><span class="line">make;</span><br><span class="line">make install;</span><br></pre></td></tr></table></figure>
+<h1 id="Appendix"><a href="#Appendix" class="headerlink" title="Appendix"></a>Appendix</h1><ul>
+<li><a href="http://subversion.apache.org/" target="_blank" rel="noopener">Subversion 官网</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/CentOS/" rel="tag"># CentOS</a>
+              <a href="/tags/Subversion/" rel="tag"># Subversion</a>
+              <a href="/tags/svn/" rel="tag"># svn</a>
+              <a href="/tags/update/" rel="tag"># update</a>
+              <a href="/tags/strace/" rel="tag"># strace</a>
+              <a href="/tags/open/" rel="tag"># open</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/12/%E5%9C%A8Ubuntu14-04%E4%B8%8A%E8%87%AA%E5%BB%BALeanote%E6%9C%8D%E5%8A%A1%E5%99%A8/index.html" rel="prev" title="在Ubuntu14.04上自建Leanote服务器">
+                  <i class="fa fa-angle-left"></i> 在Ubuntu14.04上自建Leanote服务器
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/12/CentOS6-x%E4%B8%8Blimits-conf%E8%A2%AB%E6%94%B9%E9%94%99%E7%9A%84%E6%95%85%E9%9A%9C%E7%BB%8F%E5%8E%86/index.html" rel="next" title="CentOS6.x 下 /etc/security/limits.conf 被改错的故障经历">
+                  CentOS6.x 下 /etc/security/limits.conf 被改错的故障经历 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="缘起最近在美丽国矿场帮忙，顺便修下矿机。 本来心里有些想法，需要有设备（计算设备、网络设备）来实现，无奈手头没有资源。后来修神马矿机的时候发现其系统是基于 OpenWRT 的！于是就想如果能拿到 root 权限的话，是不是就能利用现有系统来做很多事情了？于是就开始研究怎么 root 其控制板（其实还有其他难点，比如控制板怎么取电？还要给控制板找一个盒子）。 连接方法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用 ttl 连接获取神马（Whatsminer）矿机的 root 权限">
+<meta property="og:url" content="https://ming.theyan.gs/2022/03/%E5%88%A9%E7%94%A8%20ttl%20%E8%BF%9E%E6%8E%A5%E8%8E%B7%E5%8F%96%E7%A5%9E%E9%A9%AC%E7%9F%BF%E6%9C%BA%E7%9A%84%20root%20%E6%9D%83%E9%99%90/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="缘起最近在美丽国矿场帮忙，顺便修下矿机。 本来心里有些想法，需要有设备（计算设备、网络设备）来实现，无奈手头没有资源。后来修神马矿机的时候发现其系统是基于 OpenWRT 的！于是就想如果能拿到 root 权限的话，是不是就能利用现有系统来做很多事情了？于是就开始研究怎么 root 其控制板（其实还有其他难点，比如控制板怎么取电？还要给控制板找一个盒子）。 连接方法">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/WechatIMG91.jpeg">
+<meta property="og:image" content="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/WechatIMG92.jpeg">
+<meta property="og:image" content="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/IMG_20220629_103740.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/IMG_20220629_103716.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/IMG_20220629_103733.jpg">
+<meta property="article:published_time" content="2022-03-14T11:24:18.000Z">
+<meta property="article:modified_time" content="2022-03-15T12:24:44.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="root">
+<meta property="article:tag" content="whatsminer">
+<meta property="article:tag" content="神马矿机">
+<meta property="article:tag" content="M21">
+<meta property="article:tag" content="M20">
+<meta property="article:tag" content="M30">
+<meta property="article:tag" content="OpenWRT">
+<meta property="article:tag" content="hack">
+<meta property="article:tag" content="ttl">
+<meta property="article:tag" content="ch341a">
+<meta property="article:tag" content="编程器">
+<meta property="article:tag" content="杜邦线">
+<meta property="article:tag" content="putty">
+<meta property="article:tag" content="cp2102">
+<meta property="article:tag" content="pl2303">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/WechatIMG91.jpeg">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2022/03/%E5%88%A9%E7%94%A8%20ttl%20%E8%BF%9E%E6%8E%A5%E8%8E%B7%E5%8F%96%E7%A5%9E%E9%A9%AC%E7%9F%BF%E6%9C%BA%E7%9A%84%20root%20%E6%9D%83%E9%99%90/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2022/03/%E5%88%A9%E7%94%A8%20ttl%20%E8%BF%9E%E6%8E%A5%E8%8E%B7%E5%8F%96%E7%A5%9E%E9%A9%AC%E7%9F%BF%E6%9C%BA%E7%9A%84%20root%20%E6%9D%83%E9%99%90/index.html","path":"2022/03/利用 ttl 连接获取神马矿机的 root 权限/index.html","title":"利用 ttl 连接获取神马（Whatsminer）矿机的 root 权限"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>利用 ttl 连接获取神马（Whatsminer）矿机的 root 权限 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%98%E8%B5%B7"><span class="nav-number">1.</span> <span class="nav-text">缘起</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">连接方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%B7%E7%9C%8B%E6%88%AA%E5%9B%BE"><span class="nav-number">2.1.</span> <span class="nav-text">请看截图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%B5%E8%84%91%E7%AB%AF%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">电脑端配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E8%BF%87%E7%9A%84%E7%B3%BB%E7%BB%9F%E8%BD%AF%E4%BB%B6%E7%89%88%E6%9C%AC"><span class="nav-number">4.</span> <span class="nav-text">测试过的系统软件版本</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2022/03/%E5%88%A9%E7%94%A8%20ttl%20%E8%BF%9E%E6%8E%A5%E8%8E%B7%E5%8F%96%E7%A5%9E%E9%A9%AC%E7%9F%BF%E6%9C%BA%E7%9A%84%20root%20%E6%9D%83%E9%99%90/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="利用 ttl 连接获取神马（Whatsminer）矿机的 root 权限 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          利用 ttl 连接获取神马（Whatsminer）矿机的 root 权限
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-14 19:24:18" itemprop="dateCreated datePublished" datetime="2022-03-14T19:24:18+08:00">2022-03-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-03-15 20:24:44" itemprop="dateModified" datetime="2022-03-15T20:24:44+08:00">2022-03-15</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>最近在美丽国矿场帮忙，顺便修下矿机。</p>
+<p>本来心里有些想法，需要有设备（计算设备、网络设备）来实现，无奈手头没有资源。后来修神马矿机的时候发现其系统是基于 OpenWRT 的！于是就想如果能拿到 root 权限的话，是不是就能利用现有系统来做很多事情了？于是就开始研究怎么 root 其控制板（其实还有其他难点，比如控制板怎么取电？还要给控制板找一个盒子）。</p>
+<h2 id="连接方法"><a href="#连接方法" class="headerlink" title="连接方法"></a>连接方法</h2><span id="more"></span>
+
+<p>前同事、硬件玩儿家、大佬陈总给了我一个关键性信息：用 ttl 连接控制板可以直接获得 root 权限！</p>
+<p>然后我就开始找设备，正好同事为了维修，早就采购的有 ch341a 编程器，于是我又让其帮忙采购了一包杜邦线就 OK 了。</p>
+<p>这里其实没有什么太多的技巧，就是用杜邦线把 ch341a 的几个 pin 脚接到神马矿机控制板的几个 pin 脚上，再把 ch341a 的 usb 头插进电脑，最后再用模拟终端软件打开，如果没有问题，则会直接进 root 环境。</p>
+<h3 id="请看截图"><a href="#请看截图" class="headerlink" title="请看截图"></a>请看截图</h3><p>连接方法也简单：</p>
+<ul>
+<li>就是 RX 和 TX 互相接；</li>
+<li>gnd 接 gnd；</li>
+</ul>
+<ol>
+<li>控制板</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/WechatIMG91.jpeg" alt="控制板上的连接方法"></p>
+<p>注意：这里没有用杜邦线（因为当时杜邦线还没采购回来，所以用的是风扇的电源线），但这个图能清楚显示出接的是控制板上的哪几个 pin 脚</p>
+<ol>
+<li>ch341a 编程器(非杜邦线)</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/WechatIMG92.jpeg" alt="ch341a 编程器上的连接方法"></p>
+<p>注意：这图里也没有用杜邦线</p>
+<ol>
+<li>ch341a 编程器插到电脑上</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/IMG_20220629_103740.jpg" alt="ch341a 编程器插到电脑上"></p>
+<ol>
+<li>矿机、ch341a 编程器和电脑</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/IMG_20220629_103716.jpg" alt="矿机、ch341a 编程器和电脑"></p>
+<ol>
+<li>获得 root 权限后的界面</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/IMG_20220629_103733.jpg" alt="获得 root 权限后的界面"></p>
+<h2 id="电脑端配置"><a href="#电脑端配置" class="headerlink" title="电脑端配置"></a>电脑端配置</h2><p>我在 MacOS 未成功，最后用的是 Windows + Putty 配置成功了，连接的端口看下“设备管理器”，连接的其他配置参数为：115200,8,无,1,无</p>
+<h2 id="测试过的系统软件版本"><a href="#测试过的系统软件版本" class="headerlink" title="测试过的系统软件版本"></a>测试过的系统软件版本</h2><p>这个不是所有版本的控制板都可行的。猜想应该是早期工程师用来调试用的，后来把这个关掉了。据我测试的版本来说：</p>
+<ul>
+<li>20200409.20.REL 可以</li>
+<li>H6OS-V10-20210520.22.REL 不行</li>
+<li>H6OS-V10-20210325.22.REL 不行</li>
+<li>H3-V10-20200609.22.REL 可以！</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/root/" rel="tag"># root</a>
+              <a href="/tags/whatsminer/" rel="tag"># whatsminer</a>
+              <a href="/tags/%E7%A5%9E%E9%A9%AC%E7%9F%BF%E6%9C%BA/" rel="tag"># 神马矿机</a>
+              <a href="/tags/M21/" rel="tag"># M21</a>
+              <a href="/tags/M20/" rel="tag"># M20</a>
+              <a href="/tags/M30/" rel="tag"># M30</a>
+              <a href="/tags/OpenWRT/" rel="tag"># OpenWRT</a>
+              <a href="/tags/hack/" rel="tag"># hack</a>
+              <a href="/tags/ttl/" rel="tag"># ttl</a>
+              <a href="/tags/ch341a/" rel="tag"># ch341a</a>
+              <a href="/tags/%E7%BC%96%E7%A8%8B%E5%99%A8/" rel="tag"># 编程器</a>
+              <a href="/tags/%E6%9D%9C%E9%82%A6%E7%BA%BF/" rel="tag"># 杜邦线</a>
+              <a href="/tags/putty/" rel="tag"># putty</a>
+              <a href="/tags/cp2102/" rel="tag"># cp2102</a>
+              <a href="/tags/pl2303/" rel="tag"># pl2303</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/02/flash%20xiaomi.eu%20for%20redmi%20k40/index.html" rel="prev" title="Flash xiaomi.eu for Redmi K40">
+                  <i class="fa fa-angle-left"></i> Flash xiaomi.eu for Redmi K40
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/04/%E6%9F%90%E4%B8%AA%E5%A4%96%E5%8C%85%E5%85%AC%E5%8F%B8%E7%9A%84%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/index.html" rel="next" title="某个外包公司的面试总结">
+                  某个外包公司的面试总结 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

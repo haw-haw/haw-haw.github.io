@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="缘起今天下午面了一家特别想去的公司，结果聊很多，但是……折了，不要问我为什么知道的，面试完本来说别的同事（一般会是 HR）再聊一下但结果是前台来直接送走这不是凉了是什么？ 主要原因我想是：  人家本来要求就高 我有几个技术点答的不好  我想，折了就折了吧，我只能看能不能变废为宝，从中学到点什么，吸取什么教训什么的，于是就有了本篇面试总结。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="xx公司面试总结（查漏补缺）">
+<meta property="og:url" content="https://ming.theyan.gs/2019/02/xx%E5%85%AC%E5%8F%B8%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93%EF%BC%88%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%89/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="缘起今天下午面了一家特别想去的公司，结果聊很多，但是……折了，不要问我为什么知道的，面试完本来说别的同事（一般会是 HR）再聊一下但结果是前台来直接送走这不是凉了是什么？ 主要原因我想是：  人家本来要求就高 我有几个技术点答的不好  我想，折了就折了吧，我只能看能不能变废为宝，从中学到点什么，吸取什么教训什么的，于是就有了本篇面试总结。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-02-21T07:12:23.000Z">
+<meta property="article:modified_time" content="2019-02-21T07:13:23.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="面试总结">
+<meta property="article:tag" content="TFO">
+<meta property="article:tag" content="Page fault">
+<meta property="article:tag" content="TCP Fast Open">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2019/02/xx%E5%85%AC%E5%8F%B8%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93%EF%BC%88%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%89/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2019/02/xx%E5%85%AC%E5%8F%B8%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93%EF%BC%88%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%89/index.html","path":"2019/02/xx公司面试总结（查漏补缺）/index.html","title":"xx公司面试总结（查漏补缺）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>xx公司面试总结（查漏补缺） | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%98%E8%B5%B7"><span class="nav-number">1.</span> <span class="nav-text">缘起</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BF%83%E5%BE%97"><span class="nav-number">2.</span> <span class="nav-text">心得</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E5%BD%A2%E8%80%8C%E4%B8%8A"><span class="nav-number">2.1.</span> <span class="nav-text">关于形而上</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">知识点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Page-fault"><span class="nav-number">2.2.1.</span> <span class="nav-text">Page fault</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Page-fault-%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">Page fault 的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BD%AF%E6%80%A7"><span class="nav-number">2.2.1.1.1.</span> <span class="nav-text">软性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%A1%AC%E6%80%A7"><span class="nav-number">2.2.1.1.2.</span> <span class="nav-text">硬性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%97%A0%E6%95%88"><span class="nav-number">2.2.1.1.3.</span> <span class="nav-text">无效</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-Fast-Open"><span class="nav-number">2.2.2.</span> <span class="nav-text">TCP Fast Open</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TFO-%E7%9A%84%E5%85%B7%E4%BD%93%E8%BF%87%E7%A8%8B"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">TFO 的具体过程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82Fast-Open-Cookie"><span class="nav-number">2.2.2.1.1.</span> <span class="nav-text">请求Fast Open Cookie</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%9E%E6%96%BDTCP-Fast-Open"><span class="nav-number">2.2.2.1.2.</span> <span class="nav-text">实施TCP Fast Open</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Docker-%E7%9A%84%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.2.3.</span> <span class="nav-text">Docker 的网络模型</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2019/02/xx%E5%85%AC%E5%8F%B8%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93%EF%BC%88%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%89/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="xx公司面试总结（查漏补缺） | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          xx公司面试总结（查漏补缺）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2019-02-21 15:12:23 / 修改时间：15:13:23" itemprop="dateCreated datePublished" datetime="2019-02-21T15:12:23+08:00">2019-02-21</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h1><p>今天下午面了一家特别想去的公司，结果聊很多，但是……折了，不要问我为什么知道的，面试完本来说别的同事（一般会是 HR）再聊一下但结果是前台来直接送走这不是凉了是什么？</p>
+<p>主要原因我想是：</p>
+<ul>
+<li>人家本来要求就高</li>
+<li>我有几个技术点答的不好</li>
+</ul>
+<p>我想，折了就折了吧，我只能看能不能变废为宝，从中学到点什么，吸取什么教训什么的，于是就有了本篇面试总结。</p>
+<span id="more"></span>
+
+<h1 id="心得"><a href="#心得" class="headerlink" title="心得"></a>心得</h1><h2 id="关于形而上"><a href="#关于形而上" class="headerlink" title="关于形而上"></a>关于形而上</h2><p>形而上，或者是高大上、高逼格的东西，面试中如果能适当的、不生硬的引出来，肯定是有加分的，尤其是对那些高大上的岗位（管理岗、架构师啥的），所以，这个要靠平时自己多准备。貌似我对这个没有天赋</p>
+<h2 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h2><p>面试期间，大概有三个技术点我是没答对或者没描述明白的。具体情况如下：</p>
+<h3 id="Page-fault"><a href="#Page-fault" class="headerlink" title="Page fault"></a>Page fault</h3><p>以下来自<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E9%A1%B5%E7%BC%BA%E5%A4%B1">维基百科</a></p>
+<blockquote>
+<p>页缺失（英语：Page fault，又名硬错误、硬中断、分页错误、寻页缺失、缺页中断、页故障等）指的是当软件试图访问已映射在虚拟地址空间中，但是当前并未被加载在物理内存中的一个分页时，由中央处理器的内存管理单元所发出的中断。</p>
+</blockquote>
+<blockquote>
+<p>通常情况下，用于处理此中断的程序是操作系统的一部分。如果操作系统判断此次访问是有效的，那么操作系统会尝试将相关的分页从硬盘上的虚拟内存文件中调入内存。而如果访问是不被允许的，那么操作系统通常会结束相关的进程。</p>
+</blockquote>
+<blockquote>
+<p>虽然其名为“页缺失”错误，但实际上这并不一定是一种错误。而且这一机制对于利用虚拟内存来增加程序可用内存空间的操作系统（比如Microsoft Windows和各种类Unix系统）中都是常见且有必要的。</p>
+</blockquote>
+<p>我理解其实 Page fault 就是当进程访问虚拟内存中的某个不在物理内存里的内存页的时候，CPU 的 MMU 发出的一个中断。</p>
+<p>如果访问时合法的，所需的内存页会被交换进物理内存。</p>
+<h4 id="Page-fault-的分类"><a href="#Page-fault-的分类" class="headerlink" title="Page fault 的分类"></a>Page fault 的分类</h4><h5 id="软性"><a href="#软性" class="headerlink" title="软性"></a>软性</h5><p>以下内容来自于维基百科</p>
+<blockquote>
+<p>软性页缺失指页缺失发生时，相关的页已经被加载进内存，但是没有向MMU注册的情况。操作系统只需要在MMU中注册相关页对应的物理地址即可。</p>
+</blockquote>
+<blockquote>
+<p>发生这种情况的可能性之一，是一块物理内存被两个或多个程序共享，操作系统已经为其中的一个装载并注册了相应的页，但是没有为另一个程序注册。</p>
+</blockquote>
+<blockquote>
+<p>可能性之二，是该页已被从CPU的工作集中移除，但是尚未被交换到磁盘上。比如OpenVMS这样的使用次级页缓存的系统，就有可能会在工作集过大的情况下，将某页从工作集中去除，但是不写入硬盘也不擦除（比如说这一页被读出硬盘后没被修改过），只是放入空闲页表。除非有其他程序需要，导致这一页被分配出去了，不然这一页的内容不会被修改。当原程序再次需要该页内的数据时，如果这一页确实没有被分配出去，那么系统只需要重新为该页在MMU内注册映射即可。</p>
+</blockquote>
+<h5 id="硬性"><a href="#硬性" class="headerlink" title="硬性"></a>硬性</h5><p>以下内容来自于维基百科</p>
+<blockquote>
+<p>与软性页缺失相反，硬性页缺失是指相关的页在页缺失发生时未被加载进内存的情况。这时操作系统需要：</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>寻找到一个空闲的页。或者把另外一个使用中的页写到磁盘上（如果其在最后一次写入后发生了变化的话），并注销在 MMU 内的记录</li>
+<li>将数据读入被选定的页</li>
+<li>向 MMU 注册该页</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>硬性页缺失导致的性能损失是很大的。以一块 7200rpm 的主流机械硬盘为例，其平均寻道时间为 8.5 毫秒，读入内存需要 0.05 毫秒。相对的，DDR3 内存的访问延迟通常在数十到 100 纳秒之间，性能差距可能会达到 8 万到 22 万倍。</p>
+</blockquote>
+<blockquote>
+<p>另外，有些操作系统会将程序的一部分延迟到需要使用的时候再加载入内存执行，以此来提升性能。这一特性也是通过捕获硬性页缺失达到的。</p>
+</blockquote>
+<blockquote>
+<p>当硬性页缺失过于频繁的发生时，称发生系统颠簸（Thrashing）。</p>
+</blockquote>
+<h5 id="无效"><a href="#无效" class="headerlink" title="无效"></a>无效</h5><p>以下内容来自于维基百科</p>
+<blockquote>
+<p>当程序访问的虚拟地址是不存在于虚拟地址空间内的时候，则发生无效页缺失。一般来说这是个软件问题，但是也不排除硬件可能，比如因为内存故障而损坏了一个正确的指针。</p>
+</blockquote>
+<blockquote>
+<p>具体动作与所使用的操作系统有关，比如 Windows 会使用异常机制向程序报告，而类 Unix 系统则会使用信号机制。如果程序未处理相关问题，那么操作系统会执行默认处理方式，通常是转储内存、终止相关的程序，然后向用户报告。</p>
+</blockquote>
+<p>貌似这才是真正的“错误”。</p>
+<h3 id="TCP-Fast-Open"><a href="#TCP-Fast-Open" class="headerlink" title="TCP Fast Open"></a>TCP Fast Open</h3><p>以下内容来自于<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/TCP%E5%BF%AB%E9%80%9F%E6%89%93%E5%BC%80">维基百科</a></p>
+<blockquote>
+<p>TCP 快速打开（英语：TCP Fast Open，简称 TFO ）是对计算机网络中传输控制协议（TCP）连接的一种简化握手手续的拓展，用于提高两端点间连接的打开速度。</p>
+</blockquote>
+<blockquote>
+<p>它通过握手开始时的 SYN 包中的 TFO cookie（一个 TCP 选项）来验证一个之前连接过的客户端。如果验证成功，它可以在三次握手最终的 ACK 包收到之前就开始发送数据，这样便跳过了一个绕路的行为，更在传输开始时就降低了延迟。这个加密的 Cookie 被存储在客户端，在一开始的连接时被设定好。然后每当客户端连接时，这个 Cookie 被重复返回。</p>
+</blockquote>
+<blockquote>
+<p>此 Cookie 通常采用一种分组密码，私钥由服务器根据客户端的IP地址保存，生成一个第三方难以仿冒的消息认证码标签，即便第三方可以伪造源IP地址或从其他IP地址制造到同一个服务器的连接。尽管使用了加密技术来生成cookie，但 TFO 并不着眼于提供比它所替换的三次握手有更多的安全性，并且不对所产生的 TCP 连接提供任何形式的加密保护或端点身份认证。它的目的不是为了抵挡中间人攻击。</p>
+</blockquote>
+<blockquote>
+<p>这个协议最早提出于 2011 年并在 2012 年 2 月时已为一个 IETF 互联网草案，这项规范最终在 2014 年 12 月作为RFC 7413 发布。</p>
+</blockquote>
+<h4 id="TFO-的具体过程"><a href="#TFO-的具体过程" class="headerlink" title="TFO 的具体过程"></a>TFO 的具体过程</h4><p>以下内容来自于维基百科</p>
+<h5 id="请求Fast-Open-Cookie"><a href="#请求Fast-Open-Cookie" class="headerlink" title="请求Fast Open Cookie"></a>请求Fast Open Cookie</h5><blockquote>
+<ol>
+<li>客户端发送 SYN 数据包，该数据包包含 Fast Open 选项，且该选项的 Cookie 为空，这表明客户端请求 Fast Open Cookie；</li>
+<li>支持 TCP Fast Open 的服务器生成 Cookie，并将其置于 SYN-ACK 数据包中的 Fast Open 选项以发回客户端；</li>
+<li>客户端收到 SYN-ACK 后，缓存 Fast Open 选项中的 Cookie。</li>
+</ol>
+</blockquote>
+<h5 id="实施TCP-Fast-Open"><a href="#实施TCP-Fast-Open" class="headerlink" title="实施TCP Fast Open"></a>实施TCP Fast Open</h5><blockquote>
+<p>以下描述假定客户端在此前的 TCP 连接中已完成请求 Fast Open Cookie 的过程并存有有效的 Fast Open Cookie。</p>
+</blockquote>
+<blockquote>
+<p>客户端发送 SYN 数据包，该数据包包含数据（对于非 TFO 的普通 TCP 握手过程，SYN 数据包中不包含数据）以及此前记录的 Cookie；<br>支持 TCP Fast Open 的服务器会对收到 Cookie 进行校验：如果 Cookie 有效，服务器将在 SYN-ACK 数据包中对 SYN和数据进行确认（Acknowledgement），服务器随后将数据递送至相应的应用程序；否则，服务器将丢弃 SYN 数据包中包含的数据，且其随后发出的 SYN-ACK 数据包将仅确认（Acknowledgement）SYN 的对应序列号；<br>如果服务器接受了 SYN 数据包中的数据，服务器可在握手完成之前发送数据；<br>客户端将发送 ACK 确认服务器发回的 SYN 以及数据，但如果客户端在初始的 SYN 数据包中发送的数据未被确认，则客户端将重新发送数据；<br>此后的 TCP 连接和非 TFO 的正常情况一致。<br>注：客户端在请求并存储了 Fast Open Cookie 之后，可以不断重复 TCP Fast Open 直至服务器认为 Cookie 无效（通常为过期）。</p>
+</blockquote>
+<h3 id="Docker-的网络模型"><a href="#Docker-的网络模型" class="headerlink" title="Docker 的网络模型"></a>Docker 的网络模型</h3><p>这里聊到的其实是指我在前公司用过的一个简单的 Docker 应用的网络模型，非常简单，就是桥接。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Docker/" rel="tag"># Docker</a>
+              <a href="/tags/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" rel="tag"># 面试总结</a>
+              <a href="/tags/TFO/" rel="tag"># TFO</a>
+              <a href="/tags/Page-fault/" rel="tag"># Page fault</a>
+              <a href="/tags/TCP-Fast-Open/" rel="tag"># TCP Fast Open</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/01/ec2-mount-root-duplicate-uuid-error/index.html" rel="prev" title="EC2 上挂载别的机器的根分区时"duplicate uuid" 问题">
+                  <i class="fa fa-angle-left"></i> EC2 上挂载别的机器的根分区时"duplicate uuid" 问题
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/03/Linux%20%E4%B8%8B%20wireguard%20%E9%97%AE%E9%A2%98%E7%9A%84%E8%A7%A3%E5%86%B3/index.html" rel="next" title="Linux 下 wireguard 出问题的解决">
+                  Linux 下 wireguard 出问题的解决 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

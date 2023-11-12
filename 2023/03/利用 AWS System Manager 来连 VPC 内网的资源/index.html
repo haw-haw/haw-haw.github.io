@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="环境配置好的 EC2VPC 内需要有一台 EC2（有无公网 IP 好像没关系），并做好相关配置 安装 SSM AgentAmazon Linux（无论是 1，还是 2，或者是 2023） 一般是预装好的，只需要确认是否正常启动： 1234sudo systemctl status amazon-ssm-agent# 如果没有启动的话，设置为自启动，并启动sudo systemctl enable">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用 AWS System Manager 来连 VPC 内网的资源">
+<meta property="og:url" content="https://ming.theyan.gs/2023/03/%E5%88%A9%E7%94%A8%20AWS%20System%20Manager%20%E6%9D%A5%E8%BF%9E%20VPC%20%E5%86%85%E7%BD%91%E7%9A%84%E8%B5%84%E6%BA%90/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="环境配置好的 EC2VPC 内需要有一台 EC2（有无公网 IP 好像没关系），并做好相关配置 安装 SSM AgentAmazon Linux（无论是 1，还是 2，或者是 2023） 一般是预装好的，只需要确认是否正常启动： 1234sudo systemctl status amazon-ssm-agent# 如果没有启动的话，设置为自启动，并启动sudo systemctl enable">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://docs.aws.amazon.com/zh_cn/systems-manager/latest/userguide/images/menu-icon-small.png">
+<meta property="article:published_time" content="2023-03-09T13:23:34.000Z">
+<meta property="article:modified_time" content="2023-03-14T15:34:27.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="AWS System Manager">
+<meta property="article:tag" content="Session Manager">
+<meta property="article:tag" content="SSM">
+<meta property="article:tag" content="amazon-ssm-agent">
+<meta property="article:tag" content="Fleet Manager">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://docs.aws.amazon.com/zh_cn/systems-manager/latest/userguide/images/menu-icon-small.png">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2023/03/%E5%88%A9%E7%94%A8%20AWS%20System%20Manager%20%E6%9D%A5%E8%BF%9E%20VPC%20%E5%86%85%E7%BD%91%E7%9A%84%E8%B5%84%E6%BA%90/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2023/03/%E5%88%A9%E7%94%A8%20AWS%20System%20Manager%20%E6%9D%A5%E8%BF%9E%20VPC%20%E5%86%85%E7%BD%91%E7%9A%84%E8%B5%84%E6%BA%90/index.html","path":"2023/03/利用 AWS System Manager 来连 VPC 内网的资源/index.html","title":"利用 AWS System Manager 来连 VPC 内网的资源"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>利用 AWS System Manager 来连 VPC 内网的资源 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">1.</span> <span class="nav-text">环境</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E5%A5%BD%E7%9A%84-EC2"><span class="nav-number">1.1.</span> <span class="nav-text">配置好的 EC2</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-SSM-Agent"><span class="nav-number">1.1.1.</span> <span class="nav-text">安装 SSM Agent</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%BF%80%E6%B4%BB%E2%80%9C%E9%BB%98%E8%AE%A4%E4%B8%BB%E6%9C%BA%E7%AE%A1%E7%90%86%E9%85%8D%E7%BD%AE%E2%80%9D"><span class="nav-number">1.1.2.</span> <span class="nav-text">激活“默认主机管理配置”</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0-aws-cli-%E5%92%8C-Session-Manager-plugin"><span class="nav-number">1.2.</span> <span class="nav-text">本地 aws-cli 和 Session Manager plugin</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E4%BD%BF%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">具体使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E4%B8%80%EF%BC%9A%E7%99%BB%E5%BD%95%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">2.1.</span> <span class="nav-text">场景一：登录服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E4%BA%8C%EF%BC%9A%E6%89%93%E6%B4%9E%E5%88%B0-RDS"><span class="nav-number">2.2.</span> <span class="nav-text">场景二：打洞到 RDS</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2023/03/%E5%88%A9%E7%94%A8%20AWS%20System%20Manager%20%E6%9D%A5%E8%BF%9E%20VPC%20%E5%86%85%E7%BD%91%E7%9A%84%E8%B5%84%E6%BA%90/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="利用 AWS System Manager 来连 VPC 内网的资源 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          利用 AWS System Manager 来连 VPC 内网的资源
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-09 21:23:34" itemprop="dateCreated datePublished" datetime="2023-03-09T21:23:34+08:00">2023-03-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-14 23:34:27" itemprop="dateModified" datetime="2023-03-14T23:34:27+08:00">2023-03-14</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><h3 id="配置好的-EC2"><a href="#配置好的-EC2" class="headerlink" title="配置好的 EC2"></a>配置好的 EC2</h3><p>VPC 内需要有一台 EC2（有无公网 IP 好像没关系），并做好相关配置</p>
+<h4 id="安装-SSM-Agent"><a href="#安装-SSM-Agent" class="headerlink" title="安装 SSM Agent"></a>安装 SSM Agent</h4><p>Amazon Linux（无论是 1，还是 2，或者是 2023） 一般是预装好的，只需要确认是否正常启动：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl status amazon-ssm-agent</span><br><span class="line"><span class="comment"># 如果没有启动的话，设置为自启动，并启动</span></span><br><span class="line">sudo systemctl <span class="built_in">enable</span> amazon-ssm-agent</span><br><span class="line">sudo systemctl start amazon-ssm-agent</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>如果系统没有安装过 SSM Agent，那么安装（以 CentOS 8 为例）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo dnf install -y \</span><br><span class="line">    https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm</span><br></pre></td></tr></table></figure>
+
+<h4 id="激活“默认主机管理配置”"><a href="#激活“默认主机管理配置”" class="headerlink" title="激活“默认主机管理配置”"></a>激活“默认主机管理配置”</h4><ol>
+<li>访问 <a target="_blank" rel="noopener" href="https://console.aws.amazon.com/systems-manager/">https://console.aws.amazon.com/systems-manager/</a>，打开 AWS Systems Manager 控制台。</li>
+<li>在导航窗格中，选择 <strong>Fleet Manager</strong>。或者如果首先打开 AWS Systems Manager 主页，选择菜单图标 (  <img src="https://docs.aws.amazon.com/zh_cn/systems-manager/latest/userguide/images/menu-icon-small.png" alt="The menu icon">) 以打开导航窗格，然后在导航窗格中选择 <strong>Fleet Manager</strong>。</li>
+<li>在<strong>账户管理</strong>下拉列表中选择<strong>默认主机管理配置</strong>。</li>
+<li>打开<strong>启用默认主机管理配置</strong>。</li>
+<li>选择用于为您的实例启用 Systems Manager 功能的 AWS Identity and Access Management（IAM）角色。我们建议使用“默认主机管理配置”提供的默认角色。它包含使用 Systems Manager 管理您的 Amazon EC2 实例所需的最低权限集合。如果您更喜欢使用自定义角色，则该角色的信任策略必须允许 Systems Manager 作为可信实体。</li>
+<li>选择<strong>配置</strong>以完成设置。</li>
+</ol>
+<p>注意：</p>
+<p>在打开“默认主机管理配置”后，您的实例可能需要最长 30 分钟才能使用所选角色的凭证。您必须在要自动管理 Amazon EC2 实例的每个区域中打开“默认主机管理配置”。</p>
+<p>如不做其他调整，最多 30 分钟以后，你会在 System Manager -&gt; Fleet Manager -&gt; Managed nodes 下看到你的 EC2 了</p>
+<h3 id="本地-aws-cli-和-Session-Manager-plugin"><a href="#本地-aws-cli-和-Session-Manager-plugin" class="headerlink" title="本地 aws-cli 和 Session Manager plugin"></a>本地 aws-cli 和 Session Manager plugin</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 我的本地环境是 Macbook Air (m1)，</span></span><br><span class="line"><span class="comment"># 其他环境可能命令不一样</span></span><br><span class="line">curl \</span><br><span class="line">    <span class="string">&quot;https://awscli.amazonaws.com/AWSCLIV2.pkg&quot;</span> \</span><br><span class="line">    -o <span class="string">&quot;AWSCLIV2.pkg&quot;</span></span><br><span class="line">sudo installer \</span><br><span class="line">    -pkg AWSCLIV2.pkg \</span><br><span class="line">    -target /</span><br><span class="line"><span class="comment"># 以上命令是安装 aws-cli。</span></span><br><span class="line"><span class="comment"># 然后当然还需要配置 aws --configure</span></span><br><span class="line"><span class="comment"># 或 aws --profile xxx --configure</span></span><br><span class="line">curl \</span><br><span class="line">    <span class="string">&quot;https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac_arm64/session-manager-plugin.pkg&quot;</span> \</span><br><span class="line">    -o <span class="string">&quot;session-manager-plugin.pkg&quot;</span></span><br><span class="line">sudo installer \</span><br><span class="line">    -pkg session-manager-plugin.pkg \</span><br><span class="line">    -target /</span><br><span class="line">sudo <span class="built_in">ln</span> \</span><br><span class="line">    -s /usr/local/sessionmanagerplugin/bin/session-manager-plugin \</span><br><span class="line">    /usr/local/bin/session-manager-plugin</span><br></pre></td></tr></table></figure>
+
+<h2 id="具体使用"><a href="#具体使用" class="headerlink" title="具体使用"></a>具体使用</h2><h3 id="场景一：登录服务器"><a href="#场景一：登录服务器" class="headerlink" title="场景一：登录服务器"></a>场景一：登录服务器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">aws --profile <span class="built_in">test</span> \</span><br><span class="line">    ssm start-session \</span><br><span class="line">    --target i-xxxxxxxxxxxxxxxxxx</span><br><span class="line"><span class="comment"># &quot;i-xxxxxxxxxxxxxxxxxx&quot; 是这台 EC2 的 ID</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="场景二：打洞到-RDS"><a href="#场景二：打洞到-RDS" class="headerlink" title="场景二：打洞到 RDS"></a>场景二：打洞到 RDS</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">aws --profile <span class="built_in">test</span> \</span><br><span class="line">    ssm start-session \</span><br><span class="line">    --target i-xxxxxxxxxxxxxxxxxx \</span><br><span class="line">    --document-name AWS-StartPortForwardingSessionToRemoteHost \</span><br><span class="line">    --parameters 、</span><br><span class="line">    host=<span class="string">&quot;10.0.0.1&quot;</span>,portNumber=<span class="string">&quot;3306&quot;</span>,localPortNumber=<span class="string">&quot;5555&quot;</span></span><br><span class="line"><span class="comment"># 这里的 “10.0.0.1” 是你要连的 MySQL 的 IP 地址，是假设的，得根据实际情况修改</span></span><br></pre></td></tr></table></figure>
+
+<p>然后就可以愉快的在本地连数据库了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -h 127.0.0.1 -P 5555 -U admin -p</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/tags/AWS-System-Manager/" rel="tag"># AWS System Manager</a>
+              <a href="/tags/Session-Manager/" rel="tag"># Session Manager</a>
+              <a href="/tags/SSM/" rel="tag"># SSM</a>
+              <a href="/tags/amazon-ssm-agent/" rel="tag"># amazon-ssm-agent</a>
+              <a href="/tags/Fleet-Manager/" rel="tag"># Fleet Manager</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/02/%E4%BB%8E%20Client%20VPN%20endpoint%20%E8%BF%81%E7%A7%BB%E5%88%B0%20EC2%20%E4%B8%8A%E7%9A%84%20OpenVPN/index.html" rel="prev" title="从 Client VPN endpoint 迁移到 EC2 上的 OpenVPN">
+                  <i class="fa fa-angle-left"></i> 从 Client VPN endpoint 迁移到 EC2 上的 OpenVPN
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/04/%E9%80%9A%E8%BF%87%20API%20%E6%8A%93%E5%8F%96%20linear.app%20%E7%9A%84%E4%BB%BB%E5%8A%A1%E7%94%9F%E6%88%90%E5%91%A8%E6%8A%A5/index.html" rel="next" title="通过 API 抓取 linear.app 的任务生成周报">
+                  通过 API 抓取 linear.app 的任务生成周报 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

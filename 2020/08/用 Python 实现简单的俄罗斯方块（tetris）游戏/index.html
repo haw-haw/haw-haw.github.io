@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="缘起最近又（为什么要说“又”呢？）在学着用 Python 来解决一些实际问题，希望能从真实应用场景中提升编码的能力。前面的 用 Kindle 追网文之二 是，现在的俄罗斯方块也是。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用 Python 实现简单的俄罗斯方块（tetris）游戏">
+<meta property="og:url" content="https://ming.theyan.gs/2020/08/%E7%94%A8%20Python%20%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E7%9A%84%E4%BF%84%E7%BD%97%E6%96%AF%E6%96%B9%E5%9D%97%EF%BC%88tetris%EF%BC%89%E6%B8%B8%E6%88%8F/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="缘起最近又（为什么要说“又”呢？）在学着用 Python 来解决一些实际问题，希望能从真实应用场景中提升编码的能力。前面的 用 Kindle 追网文之二 是，现在的俄罗斯方块也是。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-08-09T07:51:20.000Z">
+<meta property="article:modified_time" content="2020-08-10T09:11:32.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Python3">
+<meta property="article:tag" content="tetris">
+<meta property="article:tag" content="pygame">
+<meta property="article:tag" content="game">
+<meta property="article:tag" content="游戏">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2020/08/%E7%94%A8%20Python%20%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E7%9A%84%E4%BF%84%E7%BD%97%E6%96%AF%E6%96%B9%E5%9D%97%EF%BC%88tetris%EF%BC%89%E6%B8%B8%E6%88%8F/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2020/08/%E7%94%A8%20Python%20%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E7%9A%84%E4%BF%84%E7%BD%97%E6%96%AF%E6%96%B9%E5%9D%97%EF%BC%88tetris%EF%BC%89%E6%B8%B8%E6%88%8F/index.html","path":"2020/08/用 Python 实现简单的俄罗斯方块（tetris）游戏/index.html","title":"用 Python 实现简单的俄罗斯方块（tetris）游戏"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>用 Python 实现简单的俄罗斯方块（tetris）游戏 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%98%E8%B5%B7"><span class="nav-number">1.</span> <span class="nav-text">缘起</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E4%BB%A3%E7%A0%81"><span class="nav-number">2.</span> <span class="nav-text">详细代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">使用方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E8%AF%B4%E6%98%8E"><span class="nav-number">4.</span> <span class="nav-text">一些说明</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2020/08/%E7%94%A8%20Python%20%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E7%9A%84%E4%BF%84%E7%BD%97%E6%96%AF%E6%96%B9%E5%9D%97%EF%BC%88tetris%EF%BC%89%E6%B8%B8%E6%88%8F/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="用 Python 实现简单的俄罗斯方块（tetris）游戏 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用 Python 实现简单的俄罗斯方块（tetris）游戏
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-09 15:51:20" itemprop="dateCreated datePublished" datetime="2020-08-09T15:51:20+08:00">2020-08-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2020-08-10 17:11:32" itemprop="dateModified" datetime="2020-08-10T17:11:32+08:00">2020-08-10</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>最近又（为什么要说“又”呢？）在学着用 Python 来解决一些实际问题，希望能从真实应用场景中提升编码的能力。前面的 <a href="/2020/07/%E7%94%A8%20Kindle%20%E8%BF%BD%E7%BD%91%E6%96%87_2/index.html" title="用 Kindle 来追网文之二">用 Kindle 追网文之二</a> 是，现在的俄罗斯方块也是。</p>
+<span id="more"></span>
+
+<h2 id="详细代码"><a href="#详细代码" class="headerlink" title="详细代码"></a>详细代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pygame</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line">colors = [</span><br><span class="line">    (<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>),</span><br><span class="line">    (<span class="number">120</span>, <span class="number">37</span>, <span class="number">179</span>),</span><br><span class="line">    (<span class="number">100</span>, <span class="number">179</span>, <span class="number">179</span>),</span><br><span class="line">    (<span class="number">80</span>, <span class="number">34</span>, <span class="number">22</span>),</span><br><span class="line">    (<span class="number">80</span>, <span class="number">134</span>, <span class="number">22</span>),</span><br><span class="line">    (<span class="number">180</span>, <span class="number">34</span>, <span class="number">22</span>),</span><br><span class="line">    (<span class="number">180</span>, <span class="number">34</span>, <span class="number">122</span>),</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Figure</span>:</span><br><span class="line">    x = <span class="number">0</span></span><br><span class="line">    y = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    figures = [</span><br><span class="line">        [[<span class="number">1</span>, <span class="number">5</span>, <span class="number">9</span>, <span class="number">13</span>], [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>]],</span><br><span class="line">        [[<span class="number">4</span>, <span class="number">5</span>, <span class="number">9</span>, <span class="number">10</span>], [<span class="number">2</span>, <span class="number">6</span>, <span class="number">5</span>, <span class="number">9</span>]],</span><br><span class="line">        [[<span class="number">6</span>, <span class="number">7</span>, <span class="number">9</span>, <span class="number">10</span>], [<span class="number">1</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">10</span>]],</span><br><span class="line">        [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">5</span>, <span class="number">9</span>], [<span class="number">0</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>], [<span class="number">1</span>, <span class="number">5</span>, <span class="number">9</span>, <span class="number">8</span>], [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">10</span>]],</span><br><span class="line">        [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">6</span>, <span class="number">10</span>], [<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">9</span>], [<span class="number">2</span>, <span class="number">6</span>, <span class="number">10</span>, <span class="number">11</span>], [<span class="number">3</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>]],</span><br><span class="line">        [[<span class="number">1</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>], [<span class="number">1</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">9</span>], [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">9</span>], [<span class="number">1</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">9</span>]],</span><br><span class="line">        [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">5</span>, <span class="number">6</span>]],</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, x, y</span>):</span><br><span class="line">        self.x = x</span><br><span class="line">        self.y = y</span><br><span class="line">        self.<span class="built_in">type</span> = random.randint(<span class="number">0</span>, <span class="built_in">len</span>(self.figures) - <span class="number">1</span>)</span><br><span class="line">        self.color = random.randint(<span class="number">1</span>, <span class="built_in">len</span>(colors) - <span class="number">1</span>)</span><br><span class="line">        self.rotation = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">image</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self.figures[self.<span class="built_in">type</span>][self.rotation]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">rotate</span>(<span class="params">self</span>):</span><br><span class="line">        self.rotation = (self.rotation + <span class="number">1</span>) % <span class="built_in">len</span>(self.figures[self.<span class="built_in">type</span>])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Tetris</span>:</span><br><span class="line">    level = <span class="number">1</span></span><br><span class="line">    score = <span class="number">0</span></span><br><span class="line">    state = <span class="string">&quot;start&quot;</span></span><br><span class="line">    field = []</span><br><span class="line">    height = <span class="number">0</span></span><br><span class="line">    width = <span class="number">0</span></span><br><span class="line">    x = <span class="number">100</span></span><br><span class="line">    y = <span class="number">60</span></span><br><span class="line">    zoom = <span class="number">20</span></span><br><span class="line">    figure = <span class="literal">None</span></span><br><span class="line">    figure_next = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, height, width</span>):</span><br><span class="line">        self.height = height</span><br><span class="line">        self.width = width</span><br><span class="line">        self.field = []</span><br><span class="line">        self.score = <span class="number">0</span></span><br><span class="line">        self.state = <span class="string">&quot;start&quot;</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(height):</span><br><span class="line">            new_line = []</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(width):</span><br><span class="line">                new_line.append(<span class="number">0</span>)</span><br><span class="line">            self.field.append(new_line)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">new_figure</span>(<span class="params">self</span>):</span><br><span class="line">        self.figure = Figure(<span class="number">3</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">new_next_figure</span>(<span class="params">self</span>):</span><br><span class="line">        self.figure_next = Figure(<span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">intersects</span>(<span class="params">self</span>):</span><br><span class="line">        intersection = <span class="literal">False</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">                <span class="keyword">if</span> i * <span class="number">4</span> + j <span class="keyword">in</span> self.figure.image():</span><br><span class="line">                    <span class="keyword">if</span> i + self.figure.y &gt; self.height - <span class="number">1</span> <span class="keyword">or</span> \</span><br><span class="line">                            j + self.figure.x &gt; self.width - <span class="number">1</span> <span class="keyword">or</span> \</span><br><span class="line">                            j + self.figure.x &lt; <span class="number">0</span> <span class="keyword">or</span> \</span><br><span class="line">                            self.field[i +</span><br><span class="line">                                       self.figure.y][j +</span><br><span class="line">                                                      self.figure.x] &gt; <span class="number">0</span>:</span><br><span class="line">                        intersection = <span class="literal">True</span></span><br><span class="line">        <span class="keyword">return</span> intersection</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">break_lines</span>(<span class="params">self</span>):</span><br><span class="line">        lines = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, self.height):</span><br><span class="line">            zeros = <span class="number">0</span></span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(self.width):</span><br><span class="line">                <span class="keyword">if</span> self.field[i][j] == <span class="number">0</span>:</span><br><span class="line">                    zeros += <span class="number">1</span></span><br><span class="line">            <span class="keyword">if</span> zeros == <span class="number">0</span>:</span><br><span class="line">                lines += <span class="number">1</span></span><br><span class="line">                <span class="keyword">for</span> i1 <span class="keyword">in</span> <span class="built_in">range</span>(i, <span class="number">1</span>, -<span class="number">1</span>):</span><br><span class="line">                    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(self.width):</span><br><span class="line">                        self.field[i1][j] = self.field[i1 - <span class="number">1</span>][j]</span><br><span class="line">        self.score += lines ** <span class="number">2</span></span><br><span class="line">        self.level = self.score // <span class="number">100</span> + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">go_space</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">not</span> self.intersects():</span><br><span class="line">            self.figure.y += <span class="number">1</span></span><br><span class="line">        self.figure.y -= <span class="number">1</span></span><br><span class="line">        self.freeze()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">go_down</span>(<span class="params">self</span>):</span><br><span class="line">        self.figure.y += <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> self.intersects():</span><br><span class="line">            self.figure.y -= <span class="number">1</span></span><br><span class="line">            self.freeze()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">freeze</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">                <span class="keyword">if</span> i * <span class="number">4</span> + j <span class="keyword">in</span> self.figure.image():</span><br><span class="line">                    self.field[</span><br><span class="line">                        i + self.figure.y][</span><br><span class="line">                            j + self.figure.x] = self.figure.color</span><br><span class="line">        self.break_lines()</span><br><span class="line">        self.new_figure()</span><br><span class="line">        tmp_x = self.figure.x</span><br><span class="line">        tmp_y = self.figure.y</span><br><span class="line">        self.figure = self.figure_next</span><br><span class="line">        self.figure.x = tmp_x</span><br><span class="line">        self.figure.y = tmp_y</span><br><span class="line">        self.new_next_figure()</span><br><span class="line">        <span class="keyword">if</span> self.intersects():</span><br><span class="line">            self.state = <span class="string">&quot;gameover&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">go_side</span>(<span class="params">self, dx</span>):</span><br><span class="line">        old_x = self.figure.x</span><br><span class="line">        self.figure.x += dx</span><br><span class="line">        <span class="keyword">if</span> self.intersects():</span><br><span class="line">            self.figure.x = old_x</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">rotate</span>(<span class="params">self</span>):</span><br><span class="line">        old_rotation = self.figure.rotation</span><br><span class="line">        self.figure.rotate()</span><br><span class="line">        <span class="keyword">if</span> self.intersects():</span><br><span class="line">            self.figure.rotation = old_rotation</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Initialize the game engine</span></span><br><span class="line">pygame.init()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Define some colors</span></span><br><span class="line">BLACK = (<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line">WHITE = (<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>)</span><br><span class="line">GRAY = (<span class="number">128</span>, <span class="number">128</span>, <span class="number">128</span>)</span><br><span class="line"></span><br><span class="line">size = (<span class="number">400</span>, <span class="number">500</span>)</span><br><span class="line">screen = pygame.display.set_mode(size)</span><br><span class="line"></span><br><span class="line">pygame.display.set_caption(<span class="string">&quot;Tetris&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Loop until the user clicks the close button.</span></span><br><span class="line">done = <span class="literal">False</span></span><br><span class="line">clock = pygame.time.Clock()</span><br><span class="line">fps = <span class="number">25</span></span><br><span class="line">game = Tetris(<span class="number">20</span>, <span class="number">10</span>)</span><br><span class="line">counter = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">pressing_down = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="keyword">not</span> done:</span><br><span class="line">    <span class="keyword">if</span> game.figure <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        game.new_figure()</span><br><span class="line">        game.new_next_figure()</span><br><span class="line">    counter += <span class="number">1</span></span><br><span class="line">    <span class="keyword">if</span> counter &gt; <span class="number">100000</span>:</span><br><span class="line">        counter = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> counter % (fps // game.level // <span class="number">2</span>) == <span class="number">0</span> <span class="keyword">or</span> pressing_down:</span><br><span class="line">        <span class="keyword">if</span> game.state == <span class="string">&quot;start&quot;</span>:</span><br><span class="line">            game.go_down()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> event <span class="keyword">in</span> pygame.event.get():</span><br><span class="line">        <span class="keyword">if</span> event.<span class="built_in">type</span> == pygame.QUIT:</span><br><span class="line">            done = <span class="literal">True</span></span><br><span class="line">        <span class="keyword">if</span> event.<span class="built_in">type</span> == pygame.KEYDOWN:</span><br><span class="line">            <span class="keyword">if</span> game.state == <span class="string">&quot;paused&quot;</span>:</span><br><span class="line">                <span class="keyword">if</span> event.key == pygame.K_p:</span><br><span class="line">                    game.state = <span class="string">&quot;start&quot;</span></span><br><span class="line">            <span class="keyword">elif</span> game.state == <span class="string">&quot;start&quot;</span>:</span><br><span class="line">                <span class="keyword">if</span> event.key == pygame.K_UP:</span><br><span class="line">                    game.rotate()</span><br><span class="line">                <span class="keyword">if</span> event.key == pygame.K_DOWN:</span><br><span class="line">                    pressing_down = <span class="literal">True</span></span><br><span class="line">                <span class="keyword">if</span> event.key == pygame.K_LEFT:</span><br><span class="line">                    game.go_side(-<span class="number">1</span>)</span><br><span class="line">                <span class="keyword">if</span> event.key == pygame.K_RIGHT:</span><br><span class="line">                    game.go_side(<span class="number">1</span>)</span><br><span class="line">                <span class="keyword">if</span> event.key == pygame.K_SPACE:</span><br><span class="line">                    game.go_space()</span><br><span class="line">                <span class="keyword">if</span> event.key == pygame.K_p:</span><br><span class="line">                    game.state = <span class="string">&quot;paused&quot;</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">pass</span></span><br><span class="line">            <span class="keyword">if</span> event.key == pygame.K_ESCAPE:</span><br><span class="line">                game.__init__(<span class="number">20</span>, <span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> event.<span class="built_in">type</span> == pygame.KEYUP:</span><br><span class="line">            <span class="keyword">if</span> event.key == pygame.K_DOWN:</span><br><span class="line">                pressing_down = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    screen.fill(WHITE)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> game.figure_next <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">                p = i * <span class="number">4</span> + j</span><br><span class="line">                <span class="keyword">if</span> p <span class="keyword">in</span> game.figure_next.image():</span><br><span class="line">                    pygame.draw.rect(</span><br><span class="line">                        screen,</span><br><span class="line">                        colors[game.figure_next.color],</span><br><span class="line">                        [<span class="number">0</span> + game.zoom * (j + game.figure_next.x) + <span class="number">1</span>,</span><br><span class="line">                         <span class="number">60</span> + game.zoom * (i + game.figure_next.y) + <span class="number">1</span>,</span><br><span class="line">                         game.zoom - <span class="number">2</span>,</span><br><span class="line">                         game.zoom - <span class="number">2</span>])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(game.height):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(game.width):</span><br><span class="line">            pygame.draw.rect(</span><br><span class="line">                screen,</span><br><span class="line">                GRAY,</span><br><span class="line">                [game.x + game.zoom * j,</span><br><span class="line">                 game.y + game.zoom * i,</span><br><span class="line">                 game.zoom,</span><br><span class="line">                 game.zoom],</span><br><span class="line">                <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">if</span> game.field[i][j] &gt; <span class="number">0</span>:</span><br><span class="line">                pygame.draw.rect(</span><br><span class="line">                    screen,</span><br><span class="line">                    colors[game.field[i][j]],</span><br><span class="line">                    [game.x + game.zoom * j + <span class="number">1</span>,</span><br><span class="line">                     game.y + game.zoom * i + <span class="number">1</span>,</span><br><span class="line">                     game.zoom - <span class="number">2</span>,</span><br><span class="line">                     game.zoom - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> game.figure <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">                p = i * <span class="number">4</span> + j</span><br><span class="line">                <span class="keyword">if</span> p <span class="keyword">in</span> game.figure.image():</span><br><span class="line">                    pygame.draw.rect(</span><br><span class="line">                        screen,</span><br><span class="line">                        colors[game.figure.color],</span><br><span class="line">                        [game.x + game.zoom * (j + game.figure.x) + <span class="number">1</span>,</span><br><span class="line">                         game.y + game.zoom * (i + game.figure.y) + <span class="number">1</span>,</span><br><span class="line">                         game.zoom - <span class="number">2</span>,</span><br><span class="line">                         game.zoom - <span class="number">2</span>])</span><br><span class="line"></span><br><span class="line">    font = pygame.font.SysFont(<span class="string">&#x27;Calibri&#x27;</span>, <span class="number">25</span>, <span class="literal">True</span>, <span class="literal">False</span>)</span><br><span class="line">    font1 = pygame.font.SysFont(<span class="string">&#x27;Calibri&#x27;</span>, <span class="number">65</span>, <span class="literal">True</span>, <span class="literal">False</span>)</span><br><span class="line">    text = font.render(<span class="string">&quot;Score: &quot;</span> + <span class="built_in">str</span>(game.score) + <span class="string">&quot; Speed: &quot;</span> + <span class="built_in">str</span>(game.level), <span class="literal">True</span>, BLACK)</span><br><span class="line">    text1 = font.render(<span class="string">&quot;Next :&quot;</span>, <span class="literal">True</span>, BLACK)</span><br><span class="line">    text_game_over = font1.render(<span class="string">&quot;Game Over&quot;</span>, <span class="literal">True</span>, (<span class="number">255</span>, <span class="number">125</span>, <span class="number">0</span>))</span><br><span class="line">    text_game_over1 = font1.render(<span class="string">&quot;Press ESC&quot;</span>, <span class="literal">True</span>, (<span class="number">255</span>, <span class="number">215</span>, <span class="number">0</span>))</span><br><span class="line">    text_paused = font1.render(<span class="string">&quot;PAUSED&quot;</span>, <span class="literal">True</span>, (<span class="number">255</span>, <span class="number">125</span>, <span class="number">0</span>))</span><br><span class="line">    text_paused1 = font1.render(<span class="string">&quot;p-&gt;continue&quot;</span>, <span class="literal">True</span>, (<span class="number">255</span>, <span class="number">215</span>, <span class="number">0</span>))</span><br><span class="line"></span><br><span class="line">    screen.blit(text, [<span class="number">0</span>, <span class="number">0</span>])</span><br><span class="line">    screen.blit(text1, [<span class="number">0</span>, <span class="number">26</span>])</span><br><span class="line">    <span class="keyword">if</span> game.state == <span class="string">&quot;gameover&quot;</span>:</span><br><span class="line">        screen.blit(text_game_over, [<span class="number">5</span>, <span class="number">200</span>])</span><br><span class="line">        screen.blit(text_game_over1, [<span class="number">20</span>, <span class="number">265</span>])</span><br><span class="line">    <span class="keyword">if</span> game.state == <span class="string">&quot;paused&quot;</span>:</span><br><span class="line">        screen.blit(text_paused, [<span class="number">20</span>, <span class="number">200</span>])</span><br><span class="line">        screen.blit(text_paused1, [<span class="number">1</span>, <span class="number">265</span>])</span><br><span class="line"></span><br><span class="line">    pygame.display.flip()</span><br><span class="line">    clock.tick(fps)</span><br><span class="line"></span><br><span class="line">pygame.quit()</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><p>要首先安装软件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip3 install pygame</span><br></pre></td></tr></table></figure>
+
+<h2 id="一些说明"><a href="#一些说明" class="headerlink" title="一些说明"></a>一些说明</h2><ol>
+<li>原始代码来自于<a target="_blank" rel="noopener" href="https://gist.github.com/timurbakibayev/1f683d34487362b0f36280989c80960c/raw/bf7bbed19315e4124ee04826be192ecc5bf2d8a1/tetris.py">这里</a></li>
+<li>参考了 <a target="_blank" rel="noopener" href="https://levelup.gitconnected.com/writing-tetris-in-python-2a16bddb5318">How to write Tetris in Python</a></li>
+<li>我给新增了几项功能<ol>
+<li>增加了预览下一个块式样的功能</li>
+<li>增加游戏暂停功能</li>
+<li>增加了随着分数增加块下落的速度也跟着加快的功能</li>
+</ol>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Python/" rel="tag"># Python</a>
+              <a href="/tags/Python3/" rel="tag"># Python3</a>
+              <a href="/tags/tetris/" rel="tag"># tetris</a>
+              <a href="/tags/pygame/" rel="tag"># pygame</a>
+              <a href="/tags/game/" rel="tag"># game</a>
+              <a href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag"># 游戏</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/07/%E7%94%A8%20Kindle%20%E8%BF%BD%E7%BD%91%E6%96%87_2/index.html" rel="prev" title="用 Kindle 来追网文之二">
+                  <i class="fa fa-angle-left"></i> 用 Kindle 来追网文之二
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/09/%E9%9D%A2%E8%AF%95%E7%9F%A5%E8%AF%86%E7%82%B9%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA/index.html" rel="next" title="面试之查漏补缺">
+                  面试之查漏补缺 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

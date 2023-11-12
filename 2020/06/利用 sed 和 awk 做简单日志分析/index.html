@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="环境本实验是在 macOS 下做的，Linux 下可能会稍有不同（比如 gzcat）。 日志文件1gzcat data.gz | head -n 40 # data.gz 是日志文件  系统输出：  May 13 00:01:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12513]): Could">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用 sed 和 awk 做简单日志分析">
+<meta property="og:url" content="https://ming.theyan.gs/2020/06/%E5%88%A9%E7%94%A8%20sed%20%E5%92%8C%20awk%20%E5%81%9A%E7%AE%80%E5%8D%95%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="环境本实验是在 macOS 下做的，Linux 下可能会稍有不同（比如 gzcat）。 日志文件1gzcat data.gz | head -n 40 # data.gz 是日志文件  系统输出：  May 13 00:01:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12513]): Could">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-14T13:43:27.000Z">
+<meta property="article:modified_time" content="2020-06-15T14:32:34.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="sed">
+<meta property="article:tag" content="awk">
+<meta property="article:tag" content="gzcat">
+<meta property="article:tag" content="head">
+<meta property="article:tag" content="curl">
+<meta property="article:tag" content="POST">
+<meta property="article:tag" content="json">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2020/06/%E5%88%A9%E7%94%A8%20sed%20%E5%92%8C%20awk%20%E5%81%9A%E7%AE%80%E5%8D%95%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2020/06/%E5%88%A9%E7%94%A8%20sed%20%E5%92%8C%20awk%20%E5%81%9A%E7%AE%80%E5%8D%95%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90/index.html","path":"2020/06/利用 sed 和 awk 做简单日志分析/index.html","title":"利用 sed 和 awk 做简单日志分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>利用 sed 和 awk 做简单日志分析 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">1.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">日志文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A6%81%E6%B1%82"><span class="nav-number">3.</span> <span class="nav-text">要求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E7%BB%88%E6%96%B9%E6%A1%88%E4%BB%A3%E7%A0%81"><span class="nav-number">5.</span> <span class="nav-text">最终方案代码</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2020/06/%E5%88%A9%E7%94%A8%20sed%20%E5%92%8C%20awk%20%E5%81%9A%E7%AE%80%E5%8D%95%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="利用 sed 和 awk 做简单日志分析 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          利用 sed 和 awk 做简单日志分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-06-14 21:43:27" itemprop="dateCreated datePublished" datetime="2020-06-14T21:43:27+08:00">2020-06-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2020-06-15 22:32:34" itemprop="dateModified" datetime="2020-06-15T22:32:34+08:00">2020-06-15</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><p>本实验是在 macOS 下做的，Linux 下可能会稍有不同（比如 gzcat）。</p>
+<h2 id="日志文件"><a href="#日志文件" class="headerlink" title="日志文件"></a>日志文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gzcat data.gz | <span class="built_in">head</span> -n 40 <span class="comment"># data.gz 是日志文件</span></span><br></pre></td></tr></table></figure>
+
+<p>系统输出：</p>
+<blockquote>
+<p>May 13 00:01:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12513]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:01:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12513]): Service exited with abnormal code: 78<br>May 13 00:02:12 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.xpc.launchd.domain.pid.mdmclient.12523): Failed to bootstrap path: path &#x3D; &#x2F;usr&#x2F;libexec&#x2F;mdmclient, error &#x3D; 108: Invalid path<br>May 13 00:04:20 BBAOMACBOOKAIR2 syslogd[113]: ASL Sender Statistics<br>May 13 00:05:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12535]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:05:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12535]): Service exited with abnormal code: 78<br>May 13 00:09:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12536]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:09:58 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12536]): Service exited with abnormal code: 78<br>May 13 00:17:59 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12555]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:17:59 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12555]): Service exited with abnormal code: 78<br>May 13 00:17:59 BBAOMACBOOKAIR2 syslogd[113]: ASL Sender Statistics<br>May 13 00:19:59 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12556]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:19:59 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12556]): Service exited with abnormal code: 78<br>May 13 00:21:59 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12560]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:21:59 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12560]): Service exited with abnormal code: 78<br>May 13 00:22:18 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.xpc.launchd.domain.user.914945058): Service “com.apple.xpc.launchd.unmanaged.loginwindow.594” tried to register for endpoint “com.apple.tsm.uiserver” already registered by owner: com.apple.TextInputMenuAgent<br>May 13 00:22:49 — last message repeated 1 time —<br>May 13 00:23:50 BBAOMACBOOKAIR2 timed[158]: settimeofday({0x5ebacd96,0x52ddf}) &#x3D;&#x3D; 0<br>May 13 00:28:05 BBAOMACBOOKAIR2 syslogd[113]: ASL Sender Statistics<br>May 13 00:28:07 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.ScreenSaver.Computer-Name[12564]): Service exited due to SIGKILL | sent by Computer Name[12564]<br>May 13 00:28:17 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing the target of a source after it has been activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:17 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing target queue hierarchy after xpc connection was activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:18 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing the target of a source after it has been activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:18 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing target queue hierarchy after xpc connection was activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:19 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing the target of a source after it has been activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:19 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing target queue hierarchy after xpc connection was activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:20 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing the target of a source after it has been activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:20 BBAOMACBOOKAIR2 VTDecoderXPCService[960]: DEPRECATED USE in libdispatch client: Changing target queue hierarchy after xpc connection was activated; set a breakpoint on _dispatch_bug_deprecated to debug<br>May 13 00:28:26 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.preference.displays.MirrorDisplays): Service only ran for 9 seconds. Pushing respawn out by 1 seconds.<br>May 13 00:28:31 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.preference.displays.MirrorDisplays): Service only ran for 4 seconds. Pushing respawn out by 6 seconds.<br>May 13 00:29:49 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12610]): Could not find uid associated with service: 0: Undefined error: 0 501<br>May 13 00:29:49 BBAOMACBOOKAIR2 com.apple.xpc.launchd[1] (com.apple.mdworker.bundles[12610]): Service exited with abnormal code: 78<br>May 13 00:30:00 BBAOMACBOOKAIR2 syslogd[113]: Configuration Notice:<br>    ASL Module “com.apple.cdscheduler” claims selected messages.<br>    Those messages may not appear in standard system log files or in the ASL database.<br>May 13 00:30:00 BBAOMACBOOKAIR2 syslogd[113]: Configuration Notice:<br>    ASL Module “com.apple.install” claims selected messages.<br>    Those messages may not appear in standard system log files or in the ASL database.<br>May 13 00:30:00 BBAOMACBOOKAIR2 syslogd[113]: Configuration Notice:<br>    ASL Module “com.apple.callhistory.asl.conf” claims selected messages.</p>
+</blockquote>
+<span id="more"></span>
+
+<p>以上日志贴出来可能看的不够清晰，其实就几点：</p>
+<ol>
+<li>正常的日志都是日期时间开头，像“May 13 00:30:00”这样</li>
+<li>不是这个开头的日志行（基本都是 \t 跳格开头），其实是上一行的继续（日志分析时要将其和上一行合并）</li>
+<li>有“— last message repeated 1 time —”的日志其实内容跟上一行是完全一样的（开头的日期时间除外）</li>
+</ol>
+<h2 id="要求"><a href="#要求" class="headerlink" title="要求"></a>要求</h2><p>分析系统日志文件（data.gz）从中得到关键信息，用 Json 的格式 POST 上传至服务器 <a target="_blank" rel="noopener" href="https://foo.com/bar">https://foo.com/bar</a> )，key的名称如下（在括号里）：</p>
+<ol>
+<li>设备名称: (deviceName)</li>
+<li>错误的进程号码: (processId)</li>
+<li>进程&#x2F;服务名称: (processName)</li>
+<li>错误的原因（描述）(description)</li>
+<li>发生的时间（小时级），例如0100-0200，0300-0400, (timeWindow)</li>
+<li>在小时级别内发生的次数 (numberOfOccurrence)</li>
+</ol>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>这里考察的点应该就是多行日志的处理（主要是合并）问题，这个可以借助 sed 可以搞定，但还有一个重复日志的问题，也就是当日志行里有“— last message repeated 1 time —”时的处理问题，没想好怎样完美的解决。</p>
+<h2 id="最终方案代码"><a href="#最终方案代码" class="headerlink" title="最终方案代码"></a>最终方案代码</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gzcat data.gz | <span class="built_in">head</span> -n 40 | sed -e <span class="string">&#x27;1h;2,$H;$!d;g;s/\n\t/ /g&#x27;</span> | awk -f log_ana.awk&gt; data.json</span><br><span class="line"><span class="comment"># 上面的 head -n 40 主要是为了演示，只取头 40 行数据，真正的环境是取的整个数据文件的所有数据</span></span><br><span class="line">curl -X POST -H <span class="string">&quot;Content-Type: application/json&quot;</span> -d @data.json https://foo.com/bar</span><br></pre></td></tr></table></figure>
+
+<p>其中 log_ana.awk 代码如下：</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#! /usr/bin/awk -f</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">BEGIN</span> &#123;</span><br><span class="line">    pre_logline = <span class="string">&quot;&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    processId = <span class="number">0</span></span><br><span class="line">    deviceName = <span class="string">&quot;&quot;</span></span><br><span class="line">    processName = <span class="string">&quot;&quot;</span></span><br><span class="line">    description = <span class="string">&quot;&quot;</span></span><br><span class="line">    timeWindow = <span class="string">&quot;&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="regexp">/--- last message peated 1 time ---/</span> &#123;</span><br><span class="line">    sub(<span class="regexp">/--- last message peated 1 time ---/</span>, pre_logline)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">delete</span> a</span><br><span class="line">    split(<span class="variable">$3</span>, a, <span class="string">&quot;:&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;00&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;0000-0100&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;01&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;0100-0200&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;02&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;0220-0300&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;03&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;0300-0400&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;04&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;0400-0500&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;05&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;0500-0600&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;06&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;0600-0700&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;07&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;0700-0800&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;08&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;0800-0900&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;09&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;0900-1000&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;10&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;1000-1100&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;11&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;1100-1200&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;12&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;1200-1300&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;13&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;1300-1400&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;14&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;1400-1500&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;15&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;1500-1600&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;16&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;1600-1700&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;17&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;1700-1800&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;18&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;1800-1900&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;19&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;1900-2000&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;20&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;2000-2100&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;21&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;2100-2200&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;22&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;2200-2300&quot;</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (a[<span class="number">1</span>] == <span class="string">&quot;23&quot;</span>)</span><br><span class="line">        timeWindow = <span class="string">&quot;2300-2400&quot;</span></span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">4</span>; i&lt;=NF; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (i == <span class="number">4</span>) &#123;</span><br><span class="line">            pre_logline = <span class="variable">$i</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            pre_logline = pre_logline<span class="string">&quot; &quot;</span><span class="variable">$i</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> ((pre_logline, timeWindow) <span class="keyword">in</span> countA) &#123;</span><br><span class="line">        countA[pre_logline, timeWindow] = countA[pre_logline, timeWindow] + <span class="number">1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        countA[pre_logline, timeWindow] = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">END</span> &#123;</span><br><span class="line">    print <span class="string">&quot;[&quot;</span></span><br><span class="line">    n = <span class="number">1</span></span><br><span class="line">    sum = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> (k <span class="keyword">in</span> countA) &#123;</span><br><span class="line">        processId = <span class="number">0</span></span><br><span class="line">        deviceName = <span class="string">&quot;&quot;</span></span><br><span class="line">        processName = <span class="string">&quot;&quot;</span></span><br><span class="line">        description = <span class="string">&quot;&quot;</span></span><br><span class="line">        timeWindow = <span class="string">&quot;&quot;</span></span><br><span class="line">        c = length(countA)</span><br><span class="line">        <span class="keyword">delete</span> a</span><br><span class="line">        split(k, a, SUBSEP)</span><br><span class="line">	numberOfOccurrence = countA[a[<span class="number">1</span>], a[<span class="number">2</span>]]</span><br><span class="line">        timeWindow = a[<span class="number">2</span>]</span><br><span class="line">        <span class="keyword">delete</span> aa</span><br><span class="line">        split(a[<span class="number">1</span>], aa, <span class="string">&quot; &quot;</span>)</span><br><span class="line">        deviceName = aa[<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">delete</span> aaa</span><br><span class="line">        split(aa[<span class="number">2</span>], aaa, <span class="string">&quot;]&quot;</span>)</span><br><span class="line">        <span class="keyword">delete</span> aaaa</span><br><span class="line">        split(aaa[<span class="number">1</span>], aaaa, <span class="string">&quot;[&quot;</span>)</span><br><span class="line">        processName = aaaa[<span class="number">1</span>]</span><br><span class="line">        processId = aaaa[<span class="number">2</span>]</span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">3</span>; i&lt;=length(aa); i++) &#123;</span><br><span class="line">            gsub(<span class="regexp">/&quot;/</span>, <span class="string">&quot;\\\&quot;&quot;</span>, aa[i])</span><br><span class="line">            <span class="keyword">if</span> (i == <span class="number">3</span>) &#123;</span><br><span class="line">                description = aa[i]</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                description = description<span class="string">&quot; &quot;</span>aa[i]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    	printf <span class="string">&quot;  &#123;\n    \&quot;deviceName\&quot;:\&quot;%s\&quot;, \n    \&quot;processId\&quot;:%d, \n    \&quot;processName\&quot;:\&quot;%s\&quot;, \n    \&quot;description\&quot;:\&quot;%s\&quot;, \n    \&quot;timeWindow\&quot;:\&quot;%s\&quot;, \n    \&quot;numberOfOccurrence\&quot;:%d \n  &#125;&quot;</span>, deviceName, processId, processName, description, timeWindow, numberOfOccurrence</span><br><span class="line">        sum = sum + numberOfOccurrence</span><br><span class="line">        <span class="keyword">if</span> (n &lt; c)</span><br><span class="line">            print <span class="string">&quot;, &quot;</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            print <span class="string">&quot;&quot;</span></span><br><span class="line">        n++</span><br><span class="line">    &#125;</span><br><span class="line">    print <span class="string">&quot;]&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>data.json 文件的内容可以这样看：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> data.json</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12560]): Could not find uid associated with service: 0: Undefined error: 0 501&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12535]): Could not find uid associated with service: 0: Undefined error: 0 501&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;---&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;last&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;message repeated 1 time ---&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12513]): Service exited with abnormal code: 78&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.preference.displays.MirrorDisplays): Service only ran for 9 seconds. Pushing respawn out by 1 seconds.&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">158</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;timed&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;settimeofday(&#123;0x5ebacd96,0x52ddf&#125;) == 0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.xpc.launchd.domain.user.914945058): Service \&quot;com.apple.xpc.launchd.unmanaged.loginwindow.594\&quot; tried to register for endpoint \&quot;com.apple.tsm.uiserver\&quot; already registered by owner: com.apple.TextInputMenuAgent&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">113</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;syslogd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;Configuration Notice: ASL Module \&quot;com.apple.install\&quot; claims selected messages. Those messages may not appear in standard system log files or in the ASL database.&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12610]): Could not find uid associated with service: 0: Undefined error: 0 501&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12610]): Service exited with abnormal code: 78&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.preference.displays.MirrorDisplays): Service only ran for 4 seconds. Pushing respawn out by 6 seconds.&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12535]): Service exited with abnormal code: 78&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.xpc.launchd.domain.pid.mdmclient.12523): Failed to bootstrap path: path = /usr/libexec/mdmclient, error = 108: Invalid path&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">960</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;VTDecoderXPCService&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;DEPRECATED USE in libdispatch client: Changing target queue hierarchy after xpc connection was activated; set a breakpoint on _dispatch_bug_deprecated to debug&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">4</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12555]): Could not find uid associated with service: 0: Undefined error: 0 501&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">960</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;VTDecoderXPCService&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;DEPRECATED USE in libdispatch client: Changing the target of a source after it has been activated; set a breakpoint on _dispatch_bug_deprecated to debug&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">4</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12536]): Service exited with abnormal code: 78&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12513]): Could not find uid associated with service: 0: Undefined error: 0 501&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12536]): Could not find uid associated with service: 0: Undefined error: 0 501&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.ScreenSaver.Computer-Name[12564]): Service exited due to SIGKILL | sent by Computer Name[12564]&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12555]): Service exited with abnormal code: 78&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">113</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;syslogd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;Configuration Notice: ASL Module \&quot;com.apple.callhistory.asl.conf\&quot; claims selected messages.&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12560]): Service exited with abnormal code: 78&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">113</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;syslogd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;ASL Sender Statistics&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">3</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">113</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;syslogd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;Configuration Notice: ASL Module \&quot;com.apple.cdscheduler\&quot; claims selected messages. Those messages may not appear in standard system log files or in the ASL database.&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12556]): Could not find uid associated with service: 0: Undefined error: 0 501&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;deviceName&quot;</span><span class="punctuation">:</span><span class="string">&quot;BBAOMACBOOKAIR2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processId&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;processName&quot;</span><span class="punctuation">:</span><span class="string">&quot;com.apple.xpc.launchd&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span><span class="string">&quot;(com.apple.mdworker.bundles[12556]): Service exited with abnormal code: 78&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;timeWindow&quot;</span><span class="punctuation">:</span><span class="string">&quot;0000-0100&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;numberOfOccurrence&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<p>这里的大概解释下：</p>
+<p>多行日志的合并问题，这里是用 sed 命令解决的，awk 程序主要是处理了“— last message peated 1 time —”的问题以及做日志分析（从日志里抓取关键信息并做统计且生成上报数据文件）。其实这样不是特完美，毕竟日志文件循环了两遍，理论上来讲最好过一遍就处理完毕的，但是我在 awk 里实在是没想好怎样同时处理多行日志合并以及“— last message peated 1 time —”的问题。这里请各位大佬教我。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/sed/" rel="tag"># sed</a>
+              <a href="/tags/awk/" rel="tag"># awk</a>
+              <a href="/tags/gzcat/" rel="tag"># gzcat</a>
+              <a href="/tags/head/" rel="tag"># head</a>
+              <a href="/tags/curl/" rel="tag"># curl</a>
+              <a href="/tags/POST/" rel="tag"># POST</a>
+              <a href="/tags/json/" rel="tag"># json</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/05/%E7%94%A8kindle%E8%BF%BD%E7%BD%91%E6%96%87/index.html" rel="prev" title="用 Kindle 来追网文">
+                  <i class="fa fa-angle-left"></i> 用 Kindle 来追网文
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/07/%E7%94%A8%20Kindle%20%E8%BF%BD%E7%BD%91%E6%96%87_2/index.html" rel="next" title="用 Kindle 来追网文之二">
+                  用 Kindle 来追网文之二 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="用 Kindle 来追网文为嘛要干这个呢？这个说来话长，可能还是跟本人的实际情况有关系，别人可能还真没有这需求，毕竟，各种设备基本上都有 Kindle 和 Instapaper 的应用吧，直接看不香吗？所以，这里不解释，有需求的自然懂。 代码及主要思路来自于：这里">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用 Kindle 来追网文">
+<meta property="og:url" content="https://ming.theyan.gs/2020/05/%E7%94%A8kindle%E8%BF%BD%E7%BD%91%E6%96%87/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="用 Kindle 来追网文为嘛要干这个呢？这个说来话长，可能还是跟本人的实际情况有关系，别人可能还真没有这需求，毕竟，各种设备基本上都有 Kindle 和 Instapaper 的应用吧，直接看不香吗？所以，这里不解释，有需求的自然懂。 代码及主要思路来自于：这里">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-01T07:51:20.000Z">
+<meta property="article:modified_time" content="2020-07-12T09:11:32.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="Kindle">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Instapaper">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2020/05/%E7%94%A8kindle%E8%BF%BD%E7%BD%91%E6%96%87/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2020/05/%E7%94%A8kindle%E8%BF%BD%E7%BD%91%E6%96%87/index.html","path":"2020/05/用kindle追网文/index.html","title":"用 Kindle 来追网文"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>用 Kindle 来追网文 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%A8-Kindle-%E6%9D%A5%E8%BF%BD%E7%BD%91%E6%96%87"><span class="nav-number">1.</span> <span class="nav-text">用 Kindle 来追网文</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.1.</span> <span class="nav-text">准备工作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Instapaper"><span class="nav-number">1.1.1.</span> <span class="nav-text">Instapaper</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#API"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">API</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#send-to-Kindle-%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">send to Kindle 设置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="nav-number">1.1.2.</span> <span class="nav-text">运行环境</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">硬件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">软件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#code"><span class="nav-number">1.2.</span> <span class="nav-text">code</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BE%85%E6%94%B9%E8%BF%9B%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="nav-number">1.3.</span> <span class="nav-text">待改进的地方</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2020/05/%E7%94%A8kindle%E8%BF%BD%E7%BD%91%E6%96%87/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="用 Kindle 来追网文 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用 Kindle 来追网文
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-01 15:51:20" itemprop="dateCreated datePublished" datetime="2020-05-01T15:51:20+08:00">2020-05-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2020-07-12 17:11:32" itemprop="dateModified" datetime="2020-07-12T17:11:32+08:00">2020-07-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="用-Kindle-来追网文"><a href="#用-Kindle-来追网文" class="headerlink" title="用 Kindle 来追网文"></a>用 Kindle 来追网文</h1><p>为嘛要干这个呢？这个说来话长，可能还是跟本人的实际情况有关系，别人可能还真没有这需求，毕竟，各种设备基本上都有 Kindle 和 Instapaper 的应用吧，直接看不香吗？所以，这里不解释，有需求的自然懂。</p>
+<p>代码及主要思路来自于：<a target="_blank" rel="noopener" href="https://dlsong.com/tech/fetch_novel/">这里</a></p>
+<span id="more"></span>
+
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><h3 id="Instapaper"><a href="#Instapaper" class="headerlink" title="Instapaper"></a>Instapaper</h3><h4 id="API"><a href="#API" class="headerlink" title="API"></a>API</h4><p>原来的代码用的是 Instapaper simple API，而我改过的是用的 Instapaper full API，所以，使用之前需要在 <a target="_blank" rel="noopener" href="https://www.instapaper.com/main/request_oauth_consumer_token">Instapaper 官方</a> 先申请 token</p>
+<p>申请通过后，会收到两个东西：</p>
+<ul>
+<li>token</li>
+<li>secret</li>
+</ul>
+<p>这两样和账号密码后面程序里会用</p>
+<h4 id="send-to-Kindle-设置"><a href="#send-to-Kindle-设置" class="headerlink" title="send to Kindle 设置"></a>send to Kindle 设置</h4><p>注册一个 Instapaper 账号并登录，点击右上角你的用户名，再选 “Settings”（或者在地址栏里直接访问<a target="_blank" rel="noopener" href="https://www.instapaper.com/user">这里</a>），往下翻到 Kindle 的相关设置部分。</p>
+<p>这里需要注意的是有两点：</p>
+<ol>
+<li>需要在 <a target="_blank" rel="noopener" href="https://www.amazon.com/gp/digital/fiona/manage?&#pdocSettings">Kindle 个人文档设置</a> 里将 Instapaper 的发件地址（类似于 ‘kindle.?????@instapaper.com’ 这样，具体点击 “Your Kindle Email Address” 旁边链接：”what’s this?” 查看）加到白名单里去。</li>
+<li>“Your Kindle Email Address” 是填你 Kindle 设备收文档的地址，在 <a target="_blank" rel="noopener" href="https://www.amazon.com/gp/digital/fiona/manage?&#pdocSettings">Kindle 个人文档设置</a> 里可以找到。</li>
+</ol>
+<h3 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h3><h4 id="硬件"><a href="#硬件" class="headerlink" title="硬件"></a>硬件</h4><p>这个很正常，你在哪里准备 Python 环境？你的程序写好了在哪里跑？我是跑在一个 VPS 上的。</p>
+<h4 id="软件"><a href="#软件" class="headerlink" title="软件"></a>软件</h4><p>这里也没什么，也就是各种依赖的包的安装，Python 版本也没啥要求，2 或 3 都应该可以，我用的是 2.7</p>
+<h2 id="code"><a href="#code" class="headerlink" title="code"></a>code</h2><p>这部分已经更新，详见： <a href="/2020/07/%E7%94%A8%20Kindle%20%E8%BF%BD%E7%BD%91%E6%96%87_2/index.html" title="用 Kindle 来追网文之二">用 Kindle 追网文之二</a><br><del>下面才是真正的戏肉部分，废话不说，直接上代码：</del></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> os.path</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime</span><br><span class="line"><span class="keyword">from</span> bs4 <span class="keyword">import</span> BeautifulSoup</span><br><span class="line"><span class="keyword">from</span> pyinstapaper.instapaper <span class="keyword">import</span> Instapaper, Folder, Bookmark</span><br><span class="line"></span><br><span class="line">reload(sys)</span><br><span class="line">sys.setdefaultencoding(<span class="string">&#x27;utf8&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以下四个变量根据自己的情况填写</span></span><br><span class="line">INSTAPAPER_KEY = <span class="string">&#x27;************************&#x27;</span></span><br><span class="line">INSTAPAPER_SECRET = <span class="string">&#x27;*********************&#x27;</span></span><br><span class="line">INSTAPAPER_LOGIN = <span class="string">&#x27;u@x.com&#x27;</span></span><br><span class="line">INSTAPAPER_PASSWORD = <span class="string">&#x27;password&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 几本书，用来做例子</span></span><br><span class="line">novel_list = [<span class="string">&quot;苏厨&quot;</span>, <span class="string">&quot;王老实的幸福生活&quot;</span>, <span class="string">&quot;大魔王又出手了&quot;</span>]</span><br><span class="line">novel_url = [<span class="string">&#x27;392_392855&#x27;</span>, <span class="string">&#x27;7_7669&#x27;</span>, <span class="string">&#x27;431_431648&#x27;</span>]</span><br><span class="line"></span><br><span class="line">instapaper = Instapaper(INSTAPAPER_KEY, INSTAPAPER_SECRET)</span><br><span class="line">instapaper.login(INSTAPAPER_LOGIN, INSTAPAPER_PASSWORD)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">fetch_novel</span>(<span class="params">novel_list, novel_url</span>):</span><br><span class="line">    <span class="keyword">if</span> os.path.isfile(<span class="string">&#x27;url.pkl&#x27;</span>):</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;url.pkl&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            last_url = pickle.load(f)</span><br><span class="line">        f.close()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        last_url=[[],[],[],[]]</span><br><span class="line"></span><br><span class="line">    url_archve = []</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,<span class="built_in">len</span>(novel_list)):</span><br><span class="line">        old_url=last_url[j]</span><br><span class="line">        url = <span class="string">&#x27;https://www.xinxs.la/&#x27;</span>+novel_url[j]+<span class="string">&#x27;/&#x27;</span></span><br><span class="line">        urlm = <span class="string">&#x27;https://m.xinxs.la/&#x27;</span>+novel_url[j]+<span class="string">&#x27;/&#x27;</span></span><br><span class="line">        head = &#123;&#125;</span><br><span class="line">        head[<span class="string">&#x27;User-Agent&#x27;</span>] = <span class="string">&#x27;Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166  Safari/535.19&#x27;</span></span><br><span class="line">        page = requests.get(url)</span><br><span class="line">        soup = BeautifulSoup(page.content,<span class="string">&#x27;lxml&#x27;</span>)</span><br><span class="line">        soup_text = soup.find_all(<span class="string">&quot;a&quot;</span>, href=re.<span class="built_in">compile</span>(<span class="string">&quot;\d+\.html&quot;</span>), style=<span class="string">&quot;&quot;</span>)</span><br><span class="line">        latest_url=[]</span><br><span class="line">        latest_title=[]</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,<span class="built_in">len</span>(soup_text)):</span><br><span class="line">            <span class="keyword">if</span> <span class="string">&quot;/&quot;</span> <span class="keyword">in</span> soup_text[i][<span class="string">&#x27;href&#x27;</span>]:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">            latest_url.append(urlm + soup_text[i][<span class="string">&#x27;href&#x27;</span>])</span><br><span class="line">            latest_title.append(novel_list[j]+<span class="string">&#x27;---&#x27;</span>+soup_text[i].string.encode(<span class="string">&#x27;utf-8&#x27;</span>))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> k <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,<span class="built_in">len</span>(latest_url)):</span><br><span class="line">            <span class="keyword">if</span> latest_url[k] <span class="keyword">in</span> old_url:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            data = &#123; <span class="string">&#x27;time&#x27;</span>: time.time(), <span class="string">&#x27;progress_timestamp&#x27;</span>: <span class="number">0</span>, <span class="string">&#x27;title&#x27;</span>: latest_title[k], <span class="string">&#x27;url&#x27;</span>: latest_url[k] &#125;</span><br><span class="line">            bookmark = Bookmark(instapaper, **data)</span><br><span class="line">            bookmark.add()</span><br><span class="line"></span><br><span class="line">        old_url=latest_url</span><br><span class="line">        url_archive.append(old_url)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;url.pkl&#x27;</span>, <span class="string">&#x27;w&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        pickle.dump(url_archive,f)</span><br><span class="line">    f.close()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 每次抓取新的文章之前，先把以前的删掉</span></span><br><span class="line">bookmarks = instapaper.get_bookmarks(<span class="string">&#x27;unread&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> ct, bookmark <span class="keyword">in</span> <span class="built_in">enumerate</span>(bookmarks):</span><br><span class="line">    bookmark.archive()</span><br><span class="line">    bookmark.delete()</span><br><span class="line"></span><br><span class="line">fetch_novel(novel_list, novel_url)</span><br></pre></td></tr></table></figure>
+
+<h2 id="待改进的地方"><a href="#待改进的地方" class="headerlink" title="待改进的地方"></a>待改进的地方</h2><ol>
+<li>目前抓链接是通过 <a target="_blank" rel="noopener" href="http://www.xinxs.la/">www.xinxs.la</a> 来直接抓的，由于其 html 代码不够规范，只能用 lxml 模块丑陋的实现了查找更新链接的工作，后来才发现了原来还有移动端适配版本：m.xinxs.la，如果这个 html 代码规范的话，我想用更优雅的方式来实现查找链接的工作</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Kindle/" rel="tag"># Kindle</a>
+              <a href="/tags/Python/" rel="tag"># Python</a>
+              <a href="/tags/Instapaper/" rel="tag"># Instapaper</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/03/Build%20RAT%20fon%20Android/index.html" rel="prev" title="手撸一个 Android 的 RAT(reote administration tool)">
+                  <i class="fa fa-angle-left"></i> 手撸一个 Android 的 RAT(reote administration tool)
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/06/%E5%88%A9%E7%94%A8%20sed%20%E5%92%8C%20awk%20%E5%81%9A%E7%AE%80%E5%8D%95%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90/index.html" rel="next" title="利用 sed 和 awk 做简单日志分析">
+                  利用 sed 和 awk 做简单日志分析 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

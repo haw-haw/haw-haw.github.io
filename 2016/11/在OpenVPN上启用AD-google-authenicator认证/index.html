@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="缘起(Why)现有环境 KVM CentOS 6.x OpenVPN 2.3.2 Google Authenticator libPAM 1.0.1 pam_ldap 185 Windows AD(2008R2)  来自老板的需求 希望加强登录认证，仅仅靠原来的基于 AD 的认证还不够  老板认可的方案 用 Google Authenticator 来做动态的二次认证 结合原有的 ldap 集中认">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在OpenVPN上启用AD+Google Authenticator认证">
+<meta property="og:url" content="https://ming.theyan.gs/2016/11/%E5%9C%A8OpenVPN%E4%B8%8A%E5%90%AF%E7%94%A8AD-google-authenicator%E8%AE%A4%E8%AF%81/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="缘起(Why)现有环境 KVM CentOS 6.x OpenVPN 2.3.2 Google Authenticator libPAM 1.0.1 pam_ldap 185 Windows AD(2008R2)  来自老板的需求 希望加强登录认证，仅仅靠原来的基于 AD 的认证还不够  老板认可的方案 用 Google Authenticator 来做动态的二次认证 结合原有的 ldap 集中认">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-11-05T06:54:17.000Z">
+<meta property="article:modified_time" content="2017-03-17T02:47:22.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="CentOS">
+<meta property="article:tag" content="AD">
+<meta property="article:tag" content="OpenVPN">
+<meta property="article:tag" content="Google Authenticator">
+<meta property="article:tag" content="PAM">
+<meta property="article:tag" content="Windows">
+<meta property="article:tag" content="LDAP">
+<meta property="article:tag" content="KVM">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2016/11/%E5%9C%A8OpenVPN%E4%B8%8A%E5%90%AF%E7%94%A8AD-google-authenicator%E8%AE%A4%E8%AF%81/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2016/11/%E5%9C%A8OpenVPN%E4%B8%8A%E5%90%AF%E7%94%A8AD-google-authenicator%E8%AE%A4%E8%AF%81/index.html","path":"2016/11/在OpenVPN上启用AD-google-authenicator认证/index.html","title":"在OpenVPN上启用AD+Google Authenticator认证"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>在OpenVPN上启用AD+Google Authenticator认证 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%98%E8%B5%B7-Why"><span class="nav-number">1.</span> <span class="nav-text">缘起(Why)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%B0%E6%9C%89%E7%8E%AF%E5%A2%83"><span class="nav-number">1.1.</span> <span class="nav-text">现有环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%A5%E8%87%AA%E8%80%81%E6%9D%BF%E7%9A%84%E9%9C%80%E6%B1%82"><span class="nav-number">1.2.</span> <span class="nav-text">来自老板的需求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%81%E6%9D%BF%E8%AE%A4%E5%8F%AF%E7%9A%84%E6%96%B9%E6%A1%88"><span class="nav-number">1.3.</span> <span class="nav-text">老板认可的方案</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E6%AD%A5%E9%AA%A4-Howto"><span class="nav-number">2.</span> <span class="nav-text">具体步骤(Howto)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF"><span class="nav-number">2.1.</span> <span class="nav-text">服务器端</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%B6%E4%BD%9Cgoogle-authenticator%E7%9A%84rpm%E5%8C%85"><span class="nav-number">2.1.1.</span> <span class="nav-text">制作google-authenticator的rpm包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6"><span class="nav-number">2.1.2.</span> <span class="nav-text">安装软件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E8%BD%AF%E4%BB%B6"><span class="nav-number">2.1.3.</span> <span class="nav-text">配置软件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#etc-pam-ldap-conf"><span class="nav-number">2.1.3.1.</span> <span class="nav-text">&#x2F;etc&#x2F;pam_ldap.conf</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#etc-openvpn-xxx-conf"><span class="nav-number">2.1.3.2.</span> <span class="nav-text">&#x2F;etc&#x2F;openvpn&#x2F;xxx.conf</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#etc-pam-d-openvpn"><span class="nav-number">2.1.3.3.</span> <span class="nav-text">&#x2F;etc&#x2F;pam.d&#x2F;openvpn</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.1.4.</span> <span class="nav-text">启动服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">2.1.5.</span> <span class="nav-text">用户初始化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">2.2.</span> <span class="nav-text">客户端</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E4%BD%BF%E7%94%A8"><span class="nav-number">2.2.1.</span> <span class="nav-text">软件安装及配置使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Google-Authenticator"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">Google Authenticator</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#OpenVPN%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">OpenVPN客户端</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E6%B5%8B%E8%AF%95"><span class="nav-number">2.3.</span> <span class="nav-text">简单测试</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-number">3.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2016/11/%E5%9C%A8OpenVPN%E4%B8%8A%E5%90%AF%E7%94%A8AD-google-authenicator%E8%AE%A4%E8%AF%81/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="在OpenVPN上启用AD+Google Authenticator认证 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在OpenVPN上启用AD+Google Authenticator认证
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-11-05 14:54:17" itemprop="dateCreated datePublished" datetime="2016-11-05T14:54:17+08:00">2016-11-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2017-03-17 10:47:22" itemprop="dateModified" datetime="2017-03-17T10:47:22+08:00">2017-03-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/System/" itemprop="url" rel="index"><span itemprop="name">System</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="缘起-Why"><a href="#缘起-Why" class="headerlink" title="缘起(Why)"></a>缘起(Why)</h1><h2 id="现有环境"><a href="#现有环境" class="headerlink" title="现有环境"></a>现有环境</h2><ul>
+<li>KVM</li>
+<li>CentOS 6.x</li>
+<li>OpenVPN 2.3.2</li>
+<li>Google Authenticator libPAM 1.0.1</li>
+<li>pam_ldap 185</li>
+<li>Windows AD(2008R2)</li>
+</ul>
+<h2 id="来自老板的需求"><a href="#来自老板的需求" class="headerlink" title="来自老板的需求"></a>来自老板的需求</h2><ol>
+<li>希望加强登录认证，仅仅靠原来的基于 AD 的认证还不够</li>
+</ol>
+<h2 id="老板认可的方案"><a href="#老板认可的方案" class="headerlink" title="老板认可的方案"></a>老板认可的方案</h2><ol>
+<li>用 Google Authenticator 来做动态的二次认证</li>
+<li>结合原有的 ldap 集中认证</li>
+</ol>
+<a id="more"></a>
+<h1 id="具体步骤-Howto"><a href="#具体步骤-Howto" class="headerlink" title="具体步骤(Howto)"></a>具体步骤(Howto)</h1><h2 id="服务器端"><a href="#服务器端" class="headerlink" title="服务器端"></a>服务器端</h2><h3 id="制作google-authenticator的rpm包"><a href="#制作google-authenticator的rpm包" class="headerlink" title="制作google-authenticator的rpm包"></a>制作google-authenticator的rpm包</h3><ul>
+<li>其实 epel 源里有 google-authenticator 的 rpm 包，但是那个太老了( 0.3?)，很多参数不支持，没法用。</li>
+<li>随便一台 CentOS 6.x for x86_64 的机器上编都可以</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 准备打包的软件环境</span></span><br><span class="line">yum -y install git gcc \</span><br><span class="line">		libtool autoconf \</span><br><span class="line">		automake pam-devel \</span><br><span class="line">		rpm-build qrencode-libs;</span><br><span class="line"><span class="comment"># 抓取源代码，打包</span></span><br><span class="line">git <span class="built_in">clone</span> \</span><br><span class="line">	https://github.com/google/google-authenticator-libpam.git;</span><br><span class="line"><span class="built_in">cd</span> google-authenticator-libpam;</span><br><span class="line">./bootstrap.sh;</span><br><span class="line">./configure;</span><br><span class="line">make dist;</span><br><span class="line">cp google-authenticator-*.tar.gz ~/rpmbuild/SOURCES/;</span><br><span class="line"><span class="comment"># 上面这一步如果提示~/rpmbuild目录不存在</span></span><br><span class="line"><span class="comment"># 则先把下一步执行一次然后再试</span></span><br><span class="line"><span class="comment"># （下面这一步会确保有~/rpmbuild目录）</span></span><br><span class="line">rpmbuild -ba contrib/rpm.spec;</span><br><span class="line"><span class="comment"># 成功以后，编好的rpm包路径在：</span></span><br><span class="line"><span class="comment"># ~/rpmbuild/RPMS/x86_64/google-authenticator-1.*.el6.x86_64.rpm</span></span><br></pre></td></tr></table></figure>
+<h3 id="安装软件"><a href="#安装软件" class="headerlink" title="安装软件"></a>安装软件</h3><p>在要跑 OpenVPN 服务的目标服务器上，</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装前一步制作的google-authenticator的rpm包</span></span><br><span class="line">rpm -ivh google-authenticator-1.*.el6.x86_64.rpm;</span><br><span class="line">yum -y install openvpn \</span><br><span class="line">		pam_ldap \</span><br><span class="line">		openvpn-auth-ldap \</span><br><span class="line">		pamtester;</span><br><span class="line"><span class="comment"># 如果是新装的服务器（我这里自然不是），请别忘了装openvpn</span></span><br><span class="line"><span class="comment"># 上面的openvpn-auth-ldap和pamtester都不是必须要装的</span></span><br><span class="line"><span class="comment"># pamtester用来做一些pam认证的测试</span></span><br></pre></td></tr></table></figure>
+<h3 id="配置软件"><a href="#配置软件" class="headerlink" title="配置软件"></a>配置软件</h3><h4 id="etc-pam-ldap-conf"><a href="#etc-pam-ldap-conf" class="headerlink" title="/etc/pam_ldap.conf"></a>/etc/pam_ldap.conf</h4><p>这是 CentOS 6.x 下 pam_ldap.so 的配置文件，因为我们后面在 OpenVPN 的 pam 认证里会用 pam_ldap.so 来从 AD 认证，所以这里我们需要先把这个配置好。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># host 定义的是域控的 ip</span></span><br><span class="line"><span class="comment"># 可以多写几个</span></span><br><span class="line"><span class="comment"># 用空格分开即可</span></span><br><span class="line"><span class="comment"># 请根据实际情况填写</span></span><br><span class="line">host 10.0.0.1</span><br><span class="line"><span class="comment"># base 写的是用户的 basedn</span></span><br><span class="line"><span class="comment"># 这个需要根据具体情况修改</span></span><br><span class="line">base ou=staff,dc=xxx,dc=com</span><br><span class="line"><span class="comment"># binddn 是用来搜索 AD 域的帐号</span></span><br><span class="line">binddn CN=xxx_ldap,OU=access account,OU=staff,DC=xxx,DC=com</span><br><span class="line"><span class="comment"># bindpw 是搜索 AD 域的帐号的密码</span></span><br><span class="line">bindpw passwordxxx</span><br><span class="line"><span class="comment"># pam_filter 可以设一些允许连接 OpenVPN 服务的条件</span></span><br><span class="line"><span class="comment"># 我司这里用了一个允许拨入的条件</span></span><br><span class="line"><span class="comment"># 这个不是必须的</span></span><br><span class="line">pam_filter msNPAllowDialin=TRUE</span><br><span class="line"><span class="comment"># pam_login_attribute 是来设定 AD 域上</span></span><br><span class="line"><span class="comment"># 跟 OpenVPN 里登录的用户名匹配的属性</span></span><br><span class="line"><span class="comment"># AD 这里一般都是 sAMAccountName</span></span><br><span class="line">pam_login_attribute sAMAccountName</span><br><span class="line"><span class="comment"># ssl 设置是否使用加密，我司这里没有使用加密</span></span><br><span class="line">ssl off</span><br></pre></td></tr></table></figure>
+<h4 id="etc-openvpn-xxx-conf"><a href="#etc-openvpn-xxx-conf" class="headerlink" title="/etc/openvpn/xxx.conf"></a>/etc/openvpn/xxx.conf</h4><p>这是 openvpn 服务器的主配置文件，”xxx” 用自己喜欢的字串替换，这个配置最重要的是以下两句：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plugin /usr/lib64/openvpn/plugins/openvpn-plugin-auth-pam.so openvpn</span><br><span class="line">reneg-sec 36000</span><br></pre></td></tr></table></figure>
+<p>这里配置的基本思想就是：</p>
+<ul>
+<li>把认证丢给系统的 pam 插件来做</li>
+<li>这里的 openvpn 参数指的是 pam 的配置文件（路径在 /etc/pam.d/）</li>
+<li>reneg-sec 是用来设置重新认证的时间间隔，这里是 10 小时。这个参数跟客户端的同样的参数取小者有效</li>
+</ul>
+<h4 id="etc-pam-d-openvpn"><a href="#etc-pam-d-openvpn" class="headerlink" title="/etc/pam.d/openvpn"></a>/etc/pam.d/openvpn</h4><p>这个配置文件是真正认证 openvpn 登录的配置文件，里面内容主要是以下几句：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">auth	required	pam_google_authenticator.so nullok forward_pass debug</span><br><span class="line">auth	required	pam_ldap.so use_first_pass debug</span><br><span class="line">account	required	pam_unix.so</span><br></pre></td></tr></table></figure>
+<ul>
+<li>第一行的 forward_pass 参数使得一次读入系统密码(ldap，也就是 AD 密码)和 google authenticator 的密码，然后把系统密码扔给后续的pam（也就是带有 use_first_pass 参数的pam模块）处理</li>
+<li>第二行的 use_first_pass 上面已有讲到</li>
+<li>前两行都带 debug 参数完全是调试的需要，生产环境可以不用</li>
+<li>第三行是必须的，否则 openvpn 登录不上</li>
+</ul>
+<h3 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chkconfig openvpn on;</span><br><span class="line">service openvpn start;</span><br></pre></td></tr></table></figure>
+<h3 id="用户初始化"><a href="#用户初始化" class="headerlink" title="用户初始化"></a>用户初始化</h3><p>因为 google authenticator 需要在每个用户的家目录里生成一个叫 .google_authenticator 的文件，里面存有密钥和几个一次性的超级认证码及其他一些配置，所以，我们需要在 openvpn 服务器上做一次初始化数据的工作。假设有 100 个用户要用这个系统登录 openvpn，用户名从 user1 到 user100，那么初始化脚本就是：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> &#123;1..100&#125;</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">	useradd user<span class="variable">$&#123;i&#125;</span></span><br><span class="line">	su -c \</span><br><span class="line">		<span class="string">"google-authenticator -t -f -d -w 17 -r 3 -R 30 -q"</span> \</span><br><span class="line">		user<span class="variable">$&#123;i&#125;</span></span><br><span class="line">	cat /home/user<span class="variable">$&#123;i&#125;</span>/.google_authenticator | \</span><br><span class="line">		mail -s <span class="string">"your .google_authenticator is:"</span> \</span><br><span class="line">		user<span class="variable">$&#123;i&#125;</span>@xxx.com</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+<p>这里注意，在用户数据初始化的最后部分，将生成的 .google_authenticator 发给了每个用户自己。</p>
+<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><h3 id="软件安装及配置使用"><a href="#软件安装及配置使用" class="headerlink" title="软件安装及配置使用"></a>软件安装及配置使用</h3><h4 id="Google-Authenticator"><a href="#Google-Authenticator" class="headerlink" title="Google Authenticator"></a>Google Authenticator</h4><p>这个软件准确来讲不是必须在 openvpn 客户端上安装的软件，只不过这个软件是用来生成登录所需的 6 位动态数字密码的，一般安装在手机上。ios 系统和 android 系统分别在 app store 和 google play 里搜索 “google authenticator” 然后安装即可。</p>
+<p>这个软件的使用也很简单，本地运行，根本不需要“科学上网”。具体以 iphone 版本为例：打开软件，第一次点击右上角“+”（加号）–&gt;手动输入验证码，然后：</p>
+<ul>
+<li>账号：随便填</li>
+<li>密钥：.google_authenticator 文件（内容已经邮件发给个人）的第一行</li>
+<li>基于时间：划到打开状态</li>
+</ul>
+<p>这样以后每次打开软件，都会看到每30秒生成一个新的6位数字，这就是二次认证的验证码</p>
+<h4 id="OpenVPN客户端"><a href="#OpenVPN客户端" class="headerlink" title="OpenVPN客户端"></a>OpenVPN客户端</h4><p>OpenVPN 客户端软件各个平台都有很多，我们在 mac 下常用 tunnelblick，用啥不重要，重要的是要在配置文件里加一句话：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reneg-sec 36000</span><br></pre></td></tr></table></figure>
+<p>这个参数具体配多少随意，真正生效的是和服务器端同样的参数相比的小者，而本例中服务器端配的是 36000。</p>
+<p>客户端软件使用时需要把手机放手边打开 Google Authenticator 应用，输入密码时输入系统密码+6位验证码这样的组合，比如，用户密码是 “woshimima”(不带引号)，手机上显示的6位验证码是 “123456”（不带引号），那么输入密码时我就要输入 “woshimima123456”（不带引号）</p>
+<h2 id="简单测试"><a href="#简单测试" class="headerlink" title="简单测试"></a>简单测试</h2><p>在 OpenVPN 服务器上，使用前面安装的 pamtester 来测试 OpenVPN 认证，方法很简单，登录 OpenVPN 服务器，执行命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pamtester openvpn san.zhang authenticate;</span><br><span class="line"><span class="comment"># 系统会提示输入密码和 Google Authenticator 的 6 位动态密码</span></span><br><span class="line"><span class="comment"># 一起输入，先输入域帐号 san.zhang 的密码</span></span><br><span class="line"><span class="comment"># 这个测试必须要通过，否则整个配置肯定是失败的</span></span><br></pre></td></tr></table></figure>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><ul>
+<li><a href="https://github.com/google/google-authenticator-libpam" target="_blank" rel="noopener">google-authenticator@github</a></li>
+<li><a href="https://github.com/google/google-authenticator-libpam/blob/master/contrib/README.rpm.md" target="_blank" rel="noopener">google-authenticator的rpm包制作官方文档</a>（注意：这个文档有问题，起码在 CentOS 6.x 下是有问题的）</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/CentOS/" rel="tag"># CentOS</a>
+              <a href="/tags/AD/" rel="tag"># AD</a>
+              <a href="/tags/OpenVPN/" rel="tag"># OpenVPN</a>
+              <a href="/tags/Google-Authenticator/" rel="tag"># Google Authenticator</a>
+              <a href="/tags/PAM/" rel="tag"># PAM</a>
+              <a href="/tags/Windows/" rel="tag"># Windows</a>
+              <a href="/tags/LDAP/" rel="tag"># LDAP</a>
+              <a href="/tags/KVM/" rel="tag"># KVM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/10/%E7%BB%99ios10%E5%9C%A8ubuntu-14-04%E4%B8%8A%E9%85%8D%E7%BD%AEipsec%E6%9C%8D%E5%8A%A1%E5%99%A8/index.html" rel="prev" title="给ios10在ubuntu 14.04上配置IPSec服务器">
+                  <i class="fa fa-angle-left"></i> 给ios10在ubuntu 14.04上配置IPSec服务器
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/11/%E4%BB%8E%E4%B8%80%E6%AC%A1%E7%94%A8cat%E7%A9%BA%E6%96%87%E4%BB%B6%E5%88%B0log%E6%96%87%E4%BB%B6%E6%9D%A5%E6%B8%85log%E6%96%B9%E6%B3%95%E7%9A%84%E5%A4%B1%E8%B4%A5%E8%AF%B4%E5%BC%80%E5%8E%BB/index.html" rel="next" title="从一次用cat空文件到log文件来清log方法的失败说开去">
+                  从一次用cat空文件到log文件来清log方法的失败说开去 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

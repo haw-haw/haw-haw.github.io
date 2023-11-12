@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="缘起这个问题我觉得中小公司有需求，但是大公司应该没这个需求，大公司肯定都找第三方直接 MPLS 之类的商业全套解决方案了。但是对于缺钱的中小企业，我觉得还是有借鉴意义的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="中小企业多 IDC 之间的内网打通方案">
+<meta property="og:url" content="https://ming.theyan.gs/2022/08/%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A%E5%A4%9A%20IDC%20%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%85%E7%BD%91%E6%89%93%E9%80%9A%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="缘起这个问题我觉得中小公司有需求，但是大公司应该没这个需求，大公司肯定都找第三方直接 MPLS 之类的商业全套解决方案了。但是对于缺钱的中小企业，我觉得还是有借鉴意义的。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/Backbone_network.jpg">
+<meta property="article:published_time" content="2022-08-03T13:33:42.000Z">
+<meta property="article:modified_time" content="2022-08-12T15:11:23.000Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="IPSec">
+<meta property="article:tag" content="aws">
+<meta property="article:tag" content="VPC">
+<meta property="article:tag" content="公有云">
+<meta property="article:tag" content="checkpoint">
+<meta property="article:tag" content="VPN">
+<meta property="article:tag" content="中小企业">
+<meta property="article:tag" content="方案">
+<meta property="article:tag" content="transit gateway">
+<meta property="article:tag" content="WireGuard">
+<meta property="article:tag" content="OSPF">
+<meta property="article:tag" content="Zerotier">
+<meta property="article:tag" content="PLANT">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/Backbone_network.jpg">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2022/08/%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A%E5%A4%9A%20IDC%20%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%85%E7%BD%91%E6%89%93%E9%80%9A%E6%96%B9%E6%A1%88/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2022/08/%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A%E5%A4%9A%20IDC%20%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%85%E7%BD%91%E6%89%93%E9%80%9A%E6%96%B9%E6%A1%88/index.html","path":"2022/08/中小企业多 IDC 之间的内网打通方案/index.html","title":"中小企业多 IDC 之间的内网打通方案"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>中小企业多 IDC 之间的内网打通方案 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%98%E8%B5%B7"><span class="nav-number">1.</span> <span class="nav-text">缘起</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E7%BB%86%E8%8A%82"><span class="nav-number">2.</span> <span class="nav-text">方案细节</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E6%A6%82%E5%86%B5"><span class="nav-number">2.1.</span> <span class="nav-text">方案概况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">关键点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%B7%E5%A4%96%E8%8A%82%E7%82%B9%E4%B9%8B%E9%97%B4%E7%9A%84%EF%BC%88%E5%86%85%E7%BD%91%EF%BC%89%E4%BA%92%E8%81%94"><span class="nav-number">2.2.1.</span> <span class="nav-text">海外节点之间的（内网）互联</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%BD%E5%86%85%E8%8A%82%E7%82%B9%E4%B9%8B%E9%97%B4%E7%9A%84%EF%BC%88%E5%86%85%E7%BD%91%EF%BC%89%E4%BA%92%E8%81%94"><span class="nav-number">2.2.2.</span> <span class="nav-text">国内节点之间的（内网）互联</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E7%9A%84%E2%80%9C%E7%BC%BA%E7%82%B9%E2%80%9D"><span class="nav-number">2.3.</span> <span class="nav-text">方案的“缺点”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A5%E5%85%85%E4%B8%80%E4%B8%8B-VPN-%E6%8E%A5%E5%85%A5%E6%96%B9%E6%A1%88"><span class="nav-number">2.4.</span> <span class="nav-text">补充一下 VPN 接入方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E7%9A%84%E5%B1%80%E9%99%90%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">方案的局限性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8A%82%E7%82%B9%E7%BB%B4%E6%8A%A4%E7%9A%84%E5%A4%8D%E6%9D%82%E6%80%A7"><span class="nav-number">3.1.</span> <span class="nav-text">节点维护的复杂性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E9%80%89%E6%8B%A9%E7%9A%84%E5%A4%8D%E6%9D%82%E6%80%A7"><span class="nav-number">3.2.</span> <span class="nav-text">路由选择的复杂性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E4%BC%98%E9%9B%85%E7%9A%84%E5%86%85%E7%BD%91%E4%BA%92%E9%80%9A%E6%96%B9%E6%A1%88"><span class="nav-number">4.</span> <span class="nav-text">最优雅的内网互通方案</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2022/08/%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A%E5%A4%9A%20IDC%20%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%85%E7%BD%91%E6%89%93%E9%80%9A%E6%96%B9%E6%A1%88/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="中小企业多 IDC 之间的内网打通方案 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          中小企业多 IDC 之间的内网打通方案
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-08-03 21:33:42" itemprop="dateCreated datePublished" datetime="2022-08-03T21:33:42+08:00">2022-08-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-08-12 23:11:23" itemprop="dateModified" datetime="2022-08-12T23:11:23+08:00">2022-08-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>这个问题我觉得中小公司有需求，但是大公司应该没这个需求，大公司肯定都找第三方直接 MPLS 之类的商业全套解决方案了。但是对于缺钱的中小企业，我觉得还是有借鉴意义的。</p>
+<span id="more"></span>
+
+<p>这篇文章本来是要讲“中小企业维护海外服务器的 VPN 方案”的，但讲着讲着，发现大部分内容，都是讲的“内网打通”。:(</p>
+<p>这个方案准确讲是来自我在某个前司（前司比较多：）的一段工作经历，他们业务跑在海外公有云（AWS）上，技术团队在国内，连服务器需要先拨 VPN，直接拨经常断，所以我就折腾了这么一个方案出来，我在那里的一年多时间，完全没有出过问题。</p>
+<h2 id="方案细节"><a href="#方案细节" class="headerlink" title="方案细节"></a>方案细节</h2><h3 id="方案概况"><a href="#方案概况" class="headerlink" title="方案概况"></a>方案概况</h3><p>正所谓：一图胜千文。所以，请看图：</p>
+<p><img src="https://raw.githubusercontent.com/haw-haw/image-hosting/master/img/Backbone_network.jpg" alt="内网拓扑图"></p>
+<p>注意：这里为了脱敏，我把一些真正的公网 IP 地址和公司产品的名字以及一些我认为是隐私的信息隐去了。</p>
+<p>另外，上图其实可以和我的另外一篇文章：<a href="/2021/03/How%20to%20build%20IPsec%20tunnel%20between%20checkpoint%20and%20AWS%20ec2%20at%20cn-north-1/index.html">怎样在 checkpoint 设备和 AWS 北京的 EC2 之间搭建 IPsec 隧道</a> 结合起来看。</p>
+<p>所以，这个图其实是个“内网打通”的示意图。</p>
+<h3 id="关键点"><a href="#关键点" class="headerlink" title="关键点"></a>关键点</h3><h4 id="海外节点之间的（内网）互联"><a href="#海外节点之间的（内网）互联" class="headerlink" title="海外节点之间的（内网）互联"></a>海外节点之间的（内网）互联</h4><p>各大公有云厂商，都有成熟的产品来处理内部的各个 VPC 之间的内网互通，比如如上图所示，aws 的相关产品，就叫 “transit gateway”，阿里云也有类似的产品，好像叫“云企业网”还是什么别的。Azure 和 GCP 就不太了解，但肯定有类似产品。</p>
+<p>所以，这个问题的答案就是：</p>
+<ul>
+<li>如果是厂商内部，直接使用厂商的产品即可。跨账号的 VPC 之间也支持（内网打通）哟，但是要注意内网 IP 别冲突了</li>
+<li>如果是厂商之间、或者是厂商和自建 IDC 之间，那么推荐用 WireGuard 打通即可。</li>
+</ul>
+<h4 id="国内节点之间的（内网）互联"><a href="#国内节点之间的（内网）互联" class="headerlink" title="国内节点之间的（内网）互联"></a>国内节点之间的（内网）互联</h4><p>答案其实跟海外的一样：</p>
+<ul>
+<li>厂商内部，直接用厂商的产品</li>
+<li>跨厂商或跟 IDC 之间，用 WireGuard</li>
+</ul>
+<p>当然，这里也有例外，比如上图所示：北京 office 和 AWS 北京节点之间，就是用 IPSec 而不是 WireGuard 打通的（具体怎么打通，前面有提到的一篇文章中有详细记载）。为什么这样呢？那主要是因为公司给北京办公室配置了设备呀，checkpoint 的防火墙！这货不支持 WireGuard。故而只能在 AWS 北京节点起台 ec2，装个 IPSec 服务，然后两者打通。</p>
+<h3 id="方案的“缺点”"><a href="#方案的“缺点”" class="headerlink" title="方案的“缺点”"></a>方案的“缺点”</h3><p>这个方案就是路由表的维护需要仔细又仔细。其实并不难，主要是复杂，需要细心，维护时尽量对着图来做，配完多做测试。</p>
+<h3 id="补充一下-VPN-接入方案"><a href="#补充一下-VPN-接入方案" class="headerlink" title="补充一下 VPN 接入方案"></a>补充一下 VPN 接入方案</h3><p>前面有提到这个方案也可以用做 VPN 优化的。首先我们看看优化之前我们的 VPN 架构是怎么样的。</p>
+<p>之前，VPN server 都是在海外的公有云节点上，国内连一个是慢，而最重要的是不稳定，非常容易被封。</p>
+<p>而（内网打通）之后，我的 VPN 方案我推荐其主要接入点放在国内同一家厂商据用户最近的接入点（如上图例就是 aws 北京接入点，再准确点就是 IPSec 那台 EC2），然后再在海外每个节点保留一个冗余接入点即可。注意：这些 VPN 接入点的认证都是统一的。</p>
+<p>这样一来从（VPN）主接入点来说，用户从国内（大概率是从北京）连过来，不容易被干扰，大概率不会被封，而同一厂商国内节点到海外节点之间数据链路也会比较稳定通畅，也不容易被干扰、被封。所以，整条链路不一定有多快，但肯定是要稳定的多得多得多。</p>
+<h2 id="方案的局限性"><a href="#方案的局限性" class="headerlink" title="方案的局限性"></a>方案的局限性</h2><h3 id="节点维护的复杂性"><a href="#节点维护的复杂性" class="headerlink" title="节点维护的复杂性"></a>节点维护的复杂性</h3><p>想想如果新加入一个节点，会需要做哪些操作。</p>
+<p>通常，我们会把新的节点和已有的所有节点直连，当然，跨境的节点之间例外。而做 WireGuard 点对点配置，加一个对端点，需要改整个的配置，所以，理论上在一个点上改 WireGuard 配置时，上面的所有 WireGuard 链接都会受影响（因为大致需要重启 WireGuard 服务）。</p>
+<h3 id="路由选择的复杂性"><a href="#路由选择的复杂性" class="headerlink" title="路由选择的复杂性"></a>路由选择的复杂性</h3><p>还有一个，就是路由选择的可能的坑，比如节点 A、B 和 C 之间，两两互通，那么从 A 到 C，路由 A-&gt;C 和 A-&gt;B-&gt;C 都是可以的，而且一般情况下自然是直连也就是 A-&gt;C 更好，所以我们这里的方案也是 A-&gt;C。说了“一般情况”，那么肯定就还有“例外”吧，对的，像国内家庭宽带到海外节点之间，就是典型的例外情况，这种情况下直连远不如走国内的厂商中转一下。那么，像我们这样把这种例外情况下就不做直连，路由也直接走中转不就得了？这也不是绝对的，事情是变化的，也许这一时刻这条路由更优，下一时刻又是另外一条路由更优。:- 对啦，我想说的就是，远期有时间的时候，可以考虑下把路由扔给 OSPF 来管理，这样逼格完全就不一是一个层次了！:)</p>
+<h2 id="最优雅的内网互通方案"><a href="#最优雅的内网互通方案" class="headerlink" title="最优雅的内网互通方案"></a>最优雅的内网互通方案</h2><p>其实其实，说到“内网互联的方案”的我最最理想的情况，还是类似于自建 zerotier 的方案。自己搭建PLANT，然后每个节点找台网关机器接入自己的 zerotier 网络，这就完了，所有节点也就互通了。而且路由当能直通的时候，节点之间是直通的，当节点之间不能互通的时候，可以通过 PLANT 来互通。这才是内网互通的最优雅解决方案。下回有空谢谢这个。不过最好还是得哪个贵司给我个机会让我实践一下。:O</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/IPSec/" rel="tag"># IPSec</a>
+              <a href="/tags/aws/" rel="tag"># aws</a>
+              <a href="/tags/VPC/" rel="tag"># VPC</a>
+              <a href="/tags/%E5%85%AC%E6%9C%89%E4%BA%91/" rel="tag"># 公有云</a>
+              <a href="/tags/checkpoint/" rel="tag"># checkpoint</a>
+              <a href="/tags/VPN/" rel="tag"># VPN</a>
+              <a href="/tags/%E4%B8%AD%E5%B0%8F%E4%BC%81%E4%B8%9A/" rel="tag"># 中小企业</a>
+              <a href="/tags/%E6%96%B9%E6%A1%88/" rel="tag"># 方案</a>
+              <a href="/tags/transit-gateway/" rel="tag"># transit gateway</a>
+              <a href="/tags/WireGuard/" rel="tag"># WireGuard</a>
+              <a href="/tags/OSPF/" rel="tag"># OSPF</a>
+              <a href="/tags/Zerotier/" rel="tag"># Zerotier</a>
+              <a href="/tags/PLANT/" rel="tag"># PLANT</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/07/%E4%B8%BA%E4%BA%86%E5%9C%A8%E5%AE%B6%E7%94%A8%E8%B5%B7%E6%9D%A5%20google%20nest%20mini%20%E7%9A%84%E6%97%81%E8%B7%AF%E7%94%B1%E6%96%B9%E6%A1%88/index.html" rel="prev" title="为了在家用起来 google nest mini 的旁路由方案">
+                  <i class="fa fa-angle-left"></i> 为了在家用起来 google nest mini 的旁路由方案
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/09/Best%20Practices%20for%20VPC%20IP%20Address%20Allocation/index.html" rel="next" title="Best Practices for VPC IP Address Allocation">
+                  Best Practices for VPC IP Address Allocation <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

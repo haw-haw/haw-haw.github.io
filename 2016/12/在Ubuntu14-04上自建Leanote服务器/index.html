@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.0.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next-haha.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next-haha.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next-haha.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ming.theyan.gs","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Why（为什么） 前段时间 Evernote 限制了同时保持登录状态的设备数为 2 最近 WizNote（为知笔记）禁掉了免费用户的同步功能 有道云笔记测试时同步有问题，而且其文件格式相对封闭">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在Ubuntu14.04上自建Leanote服务器">
+<meta property="og:url" content="https://ming.theyan.gs/2016/12/%E5%9C%A8Ubuntu14-04%E4%B8%8A%E8%87%AA%E5%BB%BALeanote%E6%9C%8D%E5%8A%A1%E5%99%A8/index.html">
+<meta property="og:site_name" content="运维烂笔头">
+<meta property="og:description" content="Why（为什么） 前段时间 Evernote 限制了同时保持登录状态的设备数为 2 最近 WizNote（为知笔记）禁掉了免费用户的同步功能 有道云笔记测试时同步有问题，而且其文件格式相对封闭">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-12-10T08:59:20.000Z">
+<meta property="article:modified_time" content="2019-04-04T23:47:07.025Z">
+<meta property="article:author" content="老杨">
+<meta property="article:tag" content="Ubuntu">
+<meta property="article:tag" content="Trusty Tahr">
+<meta property="article:tag" content="Leanote">
+<meta property="article:tag" content="蚂蚁笔记">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ming.theyan.gs/2016/12/%E5%9C%A8Ubuntu14-04%E4%B8%8A%E8%87%AA%E5%BB%BALeanote%E6%9C%8D%E5%8A%A1%E5%99%A8/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ming.theyan.gs/2016/12/%E5%9C%A8Ubuntu14-04%E4%B8%8A%E8%87%AA%E5%BB%BALeanote%E6%9C%8D%E5%8A%A1%E5%99%A8/index.html","path":"2016/12/在Ubuntu14-04上自建Leanote服务器/index.html","title":"在Ubuntu14.04上自建Leanote服务器"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>在Ubuntu14.04上自建Leanote服务器 | 运维烂笔头</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-106574959-2"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-106574959-2","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?fdef9ded31bdb8b2dab08eddebdd5fed"></script>
+
+
+
+
+
+
+<!-- google adsense -->
+<script data-ad-client="ca-pub-1045025618858716" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="运维烂笔头" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">运维烂笔头</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个 SA 老兵的工作日志</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-projects"><a href="/projects" rel="section"><i class="fa fa-code fa-fw"></i>projects</a></li><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Why%EF%BC%88%E4%B8%BA%E4%BB%80%E4%B9%88%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">Why（为什么）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#How-to%EF%BC%88%E6%80%8E%E6%A0%B7%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">How to（怎样）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Prerequisite%EF%BC%88%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">Prerequisite（环境准备）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Leanote"><span class="nav-number">2.2.</span> <span class="nav-text">Leanote</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MongoDB"><span class="nav-number">2.3.</span> <span class="nav-text">MongoDB</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Installation"><span class="nav-number">2.3.1.</span> <span class="nav-text">Installation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Import-data"><span class="nav-number">2.3.2.</span> <span class="nav-text">Import data</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Configuration%EF%BC%88%E9%85%8D%E7%BD%AE%EF%BC%89"><span class="nav-number">2.4.</span> <span class="nav-text">Configuration（配置）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.5.</span> <span class="nav-text">启动服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Test%EF%BC%88%E6%B5%8B%E8%AF%95%EF%BC%89"><span class="nav-number">2.6.</span> <span class="nav-text">Test（测试）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A0%E5%85%A5%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC"><span class="nav-number">2.7.</span> <span class="nav-text">加入启动脚本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%AE%89%E5%85%A8%E8%AE%BE%E7%BD%AE"><span class="nav-number">2.8.</span> <span class="nav-text">基本安全设置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Appendix%EF%BC%88%E9%99%84%E5%BD%95%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">Appendix（附录）</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">老杨</p>
+  <div class="site-description" itemprop="description">好记性比不过烂笔头</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">431</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/haw-haw" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;haw-haw" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blog@theyan.gs" title="E-Mail → mailto:blog@theyan.gs" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/1494877243" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1494877243" rel="noopener me" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/6fool" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;6fool" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="https://haw-haw.github.io/" title="https:&#x2F;&#x2F;haw-haw.github.io" rel="noopener" target="_blank">github 镜像站</a>
+            </li>
+            <li class="links-of-blogroll-item">
+              <a href="https://hawhaw.gitee.io/" title="https:&#x2F;&#x2F;hawhaw.gitee.io" rel="noopener" target="_blank">gitee 镜像站</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ming.theyan.gs/2016/12/%E5%9C%A8Ubuntu14-04%E4%B8%8A%E8%87%AA%E5%BB%BALeanote%E6%9C%8D%E5%8A%A1%E5%99%A8/index.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="老杨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="运维烂笔头">
+      <meta itemprop="description" content="好记性比不过烂笔头">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="在Ubuntu14.04上自建Leanote服务器 | 运维烂笔头">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在Ubuntu14.04上自建Leanote服务器
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-12-10 16:59:20" itemprop="dateCreated datePublished" datetime="2016-12-10T16:59:20+08:00">2016-12-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2019-04-05 07:47:07" itemprop="dateModified" datetime="2019-04-05T07:47:07+08:00">2019-04-05</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="Why（为什么）"><a href="#Why（为什么）" class="headerlink" title="Why（为什么）"></a>Why（为什么）</h1><ol>
+<li>前段时间 Evernote 限制了同时保持登录状态的设备数为 2</li>
+<li>最近 WizNote（为知笔记）禁掉了免费用户的同步功能</li>
+<li>有道云笔记测试时同步有问题，而且其文件格式相对封闭</li>
+</ol>
+<a id="more"></a>
+<p>总而言之，为了避免下一次由于服务商服务协议变化而需要再次迁移数据，我选择了能自建服务器的 Leanote（蚂蚁笔记）。</p>
+<h1 id="How-to（怎样）"><a href="#How-to（怎样）" class="headerlink" title="How to（怎样）"></a>How to（怎样）</h1><p>我们采用的是二进制安装的方式</p>
+<h2 id="Prerequisite（环境准备）"><a href="#Prerequisite（环境准备）" class="headerlink" title="Prerequisite（环境准备）"></a>Prerequisite（环境准备）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">apt-get \</span><br><span class="line">	-y install \</span><br><span class="line">		screen \</span><br><span class="line">		wget \</span><br><span class="line">		tar \</span><br><span class="line">		gzip;</span><br></pre></td></tr></table></figure>
+<h2 id="Leanote"><a href="#Leanote" class="headerlink" title="Leanote"></a>Leanote</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /opt;</span><br><span class="line">wget </span><br><span class="line">	-O leanote-linux-amd64-v2.1.bin.tar.gz \</span><br><span class="line">	https://sourceforge.net/projects/leanote-bin/files/2.1/leanote-linux-amd64-v2.1.bin.tar.gz/download;</span><br><span class="line">tar xzvf leanote-linux-amd64-v2.1.bin.tar.gz;</span><br></pre></td></tr></table></figure>
+<h2 id="MongoDB"><a href="#MongoDB" class="headerlink" title="MongoDB"></a>MongoDB</h2><h3 id="Installation"><a href="#Installation" class="headerlink" title="Installation"></a>Installation</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /opt;</span><br><span class="line">wget \</span><br><span class="line">	https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu1404-3.4.0.tgz;</span><br><span class="line">tar xzvf \</span><br><span class="line">	mongodb-linux-x86_64-ubuntu1404-3.4.0.tgz;</span><br><span class="line">ln -s \</span><br><span class="line">	mongodb-linux-x86_64-ubuntu1404-3.4.0 mongodb;</span><br><span class="line">cat &lt;&lt;EOF &gt;/etc/profile.d/mongodb1.sh</span><br><span class="line"><span class="built_in">export</span> PATH=\<span class="variable">$PATH</span>:/opt/mongodb/bin</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="built_in">source</span> /etc/profile.d/mongodb.sh;</span><br></pre></td></tr></table></figure>
+<h3 id="Import-data"><a href="#Import-data" class="headerlink" title="Import data"></a>Import data</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /opt;</span><br><span class="line">mkdir mongodb_data;</span><br><span class="line">screen -d \</span><br><span class="line">	-m mongod \</span><br><span class="line">	--dbpath /opt/mongodb_data;</span><br><span class="line">mongorestore \</span><br><span class="line">	-h localhost \</span><br><span class="line">	-d leanote \</span><br><span class="line">	--dir \</span><br><span class="line">		/opt/leanote/mongodb_backup/leanote_install_data/</span><br></pre></td></tr></table></figure>
+<h2 id="Configuration（配置）"><a href="#Configuration（配置）" class="headerlink" title="Configuration（配置）"></a>Configuration（配置）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /opt;</span><br><span class="line">vim leanote/conf/app.conf</span><br><span class="line"><span class="comment"># 将 app.secret 的内容改若干个字符</span></span><br><span class="line"><span class="comment"># （注意：总长度需要一样）</span></span><br><span class="line"><span class="comment"># 将 site.url 改成我的具体情况，</span></span><br><span class="line"><span class="comment"># 比如：“http://note.xxx.com:9000”</span></span><br></pre></td></tr></table></figure>
+<h2 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /opt/leanote/bin/;</span><br><span class="line">screen -d -m bash run.sh;</span><br></pre></td></tr></table></figure>
+<h2 id="Test（测试）"><a href="#Test（测试）" class="headerlink" title="Test（测试）"></a>Test（测试）</h2><ul>
+<li>打开浏览器访问：<a href="http://note.xxx.com:9000" target="_blank" rel="noopener">http://note.xxx.com:9000</a></li>
+<li>用缺省帐号 admin（密码是 abc123）登录（尽快修改缺省密码！）</li>
+</ul>
+<p>能成功登录则证明基本上 Leanote server 部署成功。</p>
+<h2 id="加入启动脚本"><a href="#加入启动脚本" class="headerlink" title="加入启动脚本"></a>加入启动脚本</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> \</span><br><span class="line">	<span class="string">"screen -d -m /opt/mongodb/bin/mongod --dbpath /opt/mongodb_data/"</span> \</span><br><span class="line">	&gt;&gt; /etc/rc.local;</span><br><span class="line"><span class="built_in">echo</span> \</span><br><span class="line">	<span class="string">"cd /opt/leanote/bin/;screen -d -m bash run.sh"</span> \</span><br><span class="line">	&gt;&gt; /etc/rc.local;</span><br></pre></td></tr></table></figure>
+<h2 id="基本安全设置"><a href="#基本安全设置" class="headerlink" title="基本安全设置"></a>基本安全设置</h2><ol>
+<li>修改 admin 的密码</li>
+<li>禁掉 demo 用户</li>
+<li>关掉注册功能</li>
+<li>新建普通用户（用来正常使用，因为 admin 专做维护管理）</li>
+</ol>
+<h1 id="Appendix（附录）"><a href="#Appendix（附录）" class="headerlink" title="Appendix（附录）"></a>Appendix（附录）</h1><ul>
+<li><a href="https://github.com/leanote/leanote/wiki/leanote-binary-installation-on-Mac-and-Linux-(En" target="_blank" rel="noopener">leanote binary installation on Mac and Linux (En)</a>)</li>
+<li><a href="https://docs.mongodb.com/manual/tutorial/install-mongodb-on-linux/" target="_blank" rel="noopener">Install MongoDB Community Edition From Tarball</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechat-reward.png" alt="老杨 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay-reward.png" alt="老杨 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/6fool">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
+
+            <span class="label">Twitter</span>
+          </a>
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Ubuntu/" rel="tag"># Ubuntu</a>
+              <a href="/tags/Trusty-Tahr/" rel="tag"># Trusty Tahr</a>
+              <a href="/tags/Leanote/" rel="tag"># Leanote</a>
+              <a href="/tags/%E8%9A%82%E8%9A%81%E7%AC%94%E8%AE%B0/" rel="tag"># 蚂蚁笔记</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/11/%E4%B8%80%E6%AC%A1%E6%9C%AC%E5%9C%B0%E6%8F%90%E6%9D%83%E7%9A%84%E5%AE%9E%E6%88%98%E6%BC%94%E7%BB%83/index.html" rel="prev" title="一次本地提权的实战演练">
+                  <i class="fa fa-angle-left"></i> 一次本地提权的实战演练
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/12/CentOS6-5%E4%B8%8A%E5%8D%87%E7%BA%A7svn%E5%88%B01-9-5/index.html" rel="next" title="CentOS6.5上升级svn到1.9.5">
+                  CentOS6.5上升级svn到1.9.5 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">老杨</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
